@@ -1448,7 +1448,17 @@ function toIso(value: Date | string | null | undefined) {
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
-      _db = drizzle(process.env.DATABASE_URL);
+      const url = process.env.DATABASE_URL;
+      // Cloud-hosted MySQL (TiDB, PlanetScale, RDS, etc.) requires SSL.
+      // Auto-enable for non-local hosts so users don't need to URL-encode
+      // `?ssl={"rejectUnauthorized":true}` themselves.
+      const isLocal =
+        /^[a-z]+:\/\/[^@]+@(localhost|127\.0\.0\.1)(:|\/|$)/i.test(url);
+      const mysql = await import("mysql2");
+      const pool = isLocal
+        ? mysql.createPool(url)
+        : mysql.createPool({ uri: url, ssl: { rejectUnauthorized: true } });
+      _db = drizzle(pool);
     } catch (error) {
       console.warn("[Database] Failed to connect:", error);
       _db = null;
