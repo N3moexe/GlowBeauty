@@ -165,44 +165,12 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
-    rollupOptions: {
-      output: {
-        manualChunks: (id: string) => {
-          if (!id.includes("node_modules")) return undefined;
-          if (
-            id.includes("/react/") ||
-            id.includes("/react-dom/") ||
-            id.includes("/scheduler/")
-          ) {
-            return "vendor-react";
-          }
-          if (id.includes("framer-motion") || id.includes("/motion-")) {
-            return "vendor-framer";
-          }
-          if (id.includes("@radix-ui")) {
-            return "vendor-radix";
-          }
-          if (id.includes("@tanstack")) {
-            return "vendor-tanstack";
-          }
-          if (id.includes("@trpc") || id.includes("superjson")) {
-            return "vendor-trpc";
-          }
-          // Note: recharts + d3 deliberately NOT split — splitting them
-          // creates a cross-chunk TDZ (`Cannot access 'S' before initialization`)
-          // because of how recharts re-exports d3 internals. Letting Rollup
-          // place them naturally puts recharts in the lazy Admin chunk
-          // (its only consumer), which is what we want anyway.
-          if (id.includes("date-fns")) {
-            return "vendor-date-fns";
-          }
-          if (id.includes("@sentry")) {
-            return "vendor-sentry";
-          }
-          return undefined;
-        },
-      },
-    },
+    // Note: aggressive manualChunks (splitting React, Radix, Framer, tRPC, etc.
+    // into separate chunks) caused production TDZ errors — Radix tried to call
+    // React.forwardRef before React's chunk had bound its exports. Reverting to
+    // Rollup defaults: one vendor chunk; Vite handles route-level splitting via
+    // lazy() in App.tsx (admin pages stay out of the customer bundle).
+    chunkSizeWarningLimit: 1500,
   },
   server: {
     host: true,
