@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-label="SenBonsPlans">
+  <rect width="1200" height="630" fill="#fdf6ee"/>
+
+  <!-- Editorial top rule -->
+  <rect x="80" y="80" width="120" height="2" fill="#1a1410"/>
+  <text x="220" y="90" font-family="Georgia, 'Times New Roman', serif" font-size="18" letter-spacing="6" fill="#1a1410">SKINCARE · BEAUTÉ · SÉNÉGAL</text>
+
+  <!-- Wordmark -->
+  <text x="80" y="290" font-family="Georgia, 'Times New Roman', serif" font-weight="400" font-size="148" fill="#1a1410">SenBons<tspan fill="#c1274f">Plans</tspan></text>
+
+  <!-- Italic subtitle -->
+  <text x="80" y="380" font-family="Georgia, 'Times New Roman', serif" font-style="italic" font-size="42" fill="#1a1410">Routines &amp; best-sellers, livrés au Sénégal.</text>
+
+  <!-- Bottom rule + footer line -->
+  <rect x="80" y="528" width="1040" height="1" fill="#1a1410" opacity="0.25"/>
+  <text x="80" y="572" font-family="Georgia, 'Times New Roman', serif" font-size="22" fill="#1a1410">senbonsplans.com</text>
+  <text x="1120" y="572" text-anchor="end" font-family="Georgia, 'Times New Roman', serif" font-style="italic" font-size="22" fill="#1a1410" opacity="0.7">Une apothicairerie moderne</text>
+
+  <!-- Rose seal — top-right, doesn't clip the wordmark -->
+  <g transform="translate(1060, 130)">
+    <circle r="62" fill="#c1274f"/>
+    <text y="10" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-style="italic" font-size="28" fill="#fdf6ee">Soins</text>
+  </g>
+</svg>

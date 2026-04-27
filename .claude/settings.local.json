@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pkill -f \"tsx.*_core/index.ts\")",
+      "Bash(PORT=3000 NODE_ENV=development nohup npx tsx server/_core/index.ts)",
+      "Bash(echo \"PID=$!\")",
+      "Bash(disown)",
+      "Read(//tmp/**)",
+      "Bash(npx tsc *)",
+      "Bash(npx vitest *)",
+      "Bash(pnpm add *)",
+      "Bash(timeout 15 pnpm dev)",
+      "Bash(pnpm test *)",
+      "Bash(ALLOW_DEV_ADMIN=true pnpm dev)",
+      "Bash(node scripts/storefront-audit.mjs http://localhost:3000)",
+      "Bash(pnpm exec *)",
+      "Bash(echo \"EXIT_TSC=$?\")",
+      "Bash(node -e ' *)"
+    ]
+  }
+}

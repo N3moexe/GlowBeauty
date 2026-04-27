@@ -1,0 +1,504 @@
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap");
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --color-brand-bg: var(--brand-bg);
+  --color-brand-text: var(--brand-text);
+  --color-brand-muted: var(--brand-muted);
+  --color-brand-accent: var(--brand-accent);
+  --color-brand-accent-2: var(--brand-accent-2);
+  --color-brand-border: var(--brand-border);
+
+  --font-sans: "Manrope", "Avenir Next", "Segoe UI", sans-serif;
+  --font-display: "Cormorant Garamond", "Iowan Old Style", serif;
+
+  --color-crimson: oklch(0.68 0.158 36.8);
+  --color-crimson-light: oklch(0.74 0.126 31.3);
+  --color-crimson-dark: oklch(0.58 0.182 29.5);
+  --color-green-accent: oklch(0.66 0.116 146.2);
+  --color-green-accent-light: oklch(0.72 0.092 145.9);
+}
+
+:root {
+  --brand-bg: #fbf4ee;
+  --brand-text: #281b19;
+  --brand-muted: #6c5e58;
+  --brand-accent: #e3744e;
+  --brand-accent-2: #b58dcc;
+  --brand-border: #ddc9bd;
+
+  --primary: #e3744e;
+  --primary-foreground: #fff8f2;
+  --sidebar-primary: #e3744e;
+  --sidebar-primary-foreground: #fff8f2;
+  --chart-1: #e3744e;
+  --chart-2: #b58dcc;
+  --chart-3: #8db07f;
+  --chart-4: #dc9f6f;
+  --chart-5: #5e3b45;
+  --radius: 0.95rem;
+
+  --background: #fbf4ee;
+  --foreground: #281b19;
+  --card: #fffaf7;
+  --card-foreground: #281b19;
+  --popover: #fffaf7;
+  --popover-foreground: #281b19;
+  --secondary: #f4e7dd;
+  --secondary-foreground: #3a2a27;
+  --muted: #f2e8e2;
+  --muted-foreground: #6c5e58;
+  --accent: #f3e9f6;
+  --accent-foreground: #2a1e2f;
+  --destructive: oklch(0.58 0.245 27.3);
+  --destructive-foreground: oklch(0.985 0 0);
+  --border: #ddc9bd;
+  --input: #ddc9bd;
+  --ring: #e3744e;
+  --sidebar: #fffaf7;
+  --sidebar-foreground: #2b201e;
+  --sidebar-accent: #f4ebe4;
+  --sidebar-accent-foreground: #2b201e;
+  --sidebar-border: #ddc9bd;
+  --sidebar-ring: #e3744e;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+
+  --text-display: clamp(2.6rem, 7.8vw, 6rem);
+  --text-h1: clamp(1.95rem, 4.4vw, 3.95rem);
+  --text-h2: clamp(1.55rem, 2.9vw, 2.7rem);
+  --text-h3: clamp(1.18rem, 1.7vw, 1.68rem);
+  --text-body: clamp(0.97rem, 1.1vw, 1.06rem);
+  --text-caption: 0.77rem;
+
+  --motion-fast: 170ms;
+  --motion-base: 250ms;
+  --motion-slow: 420ms;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background font-sans text-foreground antialiased;
+    transition:
+      background-color var(--motion-base) ease,
+      color var(--motion-base) ease;
+  }
+
+  img,
+  video {
+    display: block;
+    max-width: 100%;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.012em;
+    /* Balance short headlines so "Votre peau, la version qu'elle attendait."
+       never orphans a last word on its own line. */
+    text-wrap: balance;
+  }
+
+  p {
+    /* Prettier ragged edges on paragraphs (no awkward orphans). */
+    text-wrap: pretty;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  :where(a, button, input, textarea, select, [tabindex]):focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 2px color-mix(in srgb, var(--background) 72%, transparent),
+      0 0 0 4px color-mix(in srgb, var(--ring) 66%, transparent);
+  }
+
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  [type="button"]:not(:disabled),
+  [type="submit"]:not(:disabled),
+  [type="reset"]:not(:disabled),
+  a[href],
+  select:not(:disabled),
+  input[type="checkbox"]:not(:disabled),
+  input[type="radio"]:not(:disabled) {
+    @apply cursor-pointer;
+  }
+}
+
+@layer components {
+  .container {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .container {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .container {
+      max-width: 86rem;
+      padding-left: 2.25rem;
+      padding-right: 2.25rem;
+    }
+  }
+
+  .container-wide {
+    width: min(96vw, 1580px);
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .container-narrow {
+    width: min(92vw, 1080px);
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .page-shell {
+    @apply bg-background;
+    background-image:
+      radial-gradient(circle at 0% 0%, color-mix(in srgb, #e98b6e 20%, transparent), transparent 42%),
+      radial-gradient(circle at 100% 0%, color-mix(in srgb, #b58dcc 22%, transparent), transparent 44%);
+  }
+
+  .section-shell {
+    @apply py-14 md:py-20 lg:py-24;
+  }
+
+  .section-shell-lg {
+    @apply py-16 md:py-24 lg:py-28;
+  }
+
+  .section-shell-sm {
+    @apply py-9 md:py-12;
+  }
+
+  .section-kicker {
+    @apply text-[10px] font-semibold uppercase tracking-[0.25em] text-brand-accent-2;
+  }
+
+  .section-title {
+    @apply text-balance text-brand-text;
+    font-family: var(--font-display);
+    font-size: var(--text-h2);
+    font-weight: 600;
+    line-height: 0.96;
+    padding-bottom: 0.7rem;
+    position: relative;
+  }
+
+  .section-title::after {
+    content: "";
+    display: block;
+    width: 3.2rem;
+    height: 1px;
+    margin-top: 0.7rem;
+    background: color-mix(in srgb, var(--brand-accent) 45%, transparent);
+  }
+
+  .section-description {
+    @apply max-w-2xl text-brand-muted;
+    font-size: var(--text-body);
+    line-height: 1.65;
+  }
+
+  .display-title,
+  .type-display {
+    @apply text-balance text-brand-text;
+    font-family: var(--font-display);
+    font-size: var(--text-display);
+    font-weight: 600;
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+  }
+
+  .headline-title,
+  .type-h1 {
+    @apply text-balance text-brand-text;
+    font-family: var(--font-display);
+    font-size: var(--text-h1);
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.014em;
+  }
+
+  .type-h2 {
+    @apply text-brand-text;
+    font-family: var(--font-display);
+    font-size: var(--text-h2);
+    font-weight: 600;
+    line-height: 1;
+  }
+
+  .type-h3 {
+    @apply text-brand-text;
+    font-family: var(--font-display);
+    font-size: var(--text-h3);
+    font-weight: 600;
+    line-height: 1.08;
+  }
+
+  .type-body {
+    @apply text-brand-muted;
+    font-size: var(--text-body);
+    line-height: 1.64;
+    letter-spacing: 0.005em;
+  }
+
+  .type-caption {
+    @apply text-brand-muted;
+    font-size: var(--text-caption);
+    line-height: 1.5;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .ui-stack-1 {
+    @apply space-y-2;
+  }
+
+  .ui-stack-2 {
+    @apply space-y-4;
+  }
+
+  .ui-stack-3 {
+    @apply space-y-8;
+  }
+
+  .section-frame {
+    @apply rounded-[1.65rem] border border-brand-border/75 bg-card/88 shadow-[0_20px_40px_-32px_rgba(69,44,40,0.52)] backdrop-blur-sm transition-[box-shadow,border-color,background-color,transform] duration-300 motion-reduce:transition-none;
+  }
+
+  .surface-card {
+    @apply rounded-[1.3rem] border border-brand-border/75 bg-card shadow-[0_14px_30px_-24px_rgba(63,42,38,0.42)] transition-[box-shadow,border-color,background-color,transform] duration-300 motion-reduce:transition-none;
+  }
+
+  .surface-card-strong {
+    @apply rounded-[1.3rem] border border-brand-border/75 bg-card shadow-[0_22px_48px_-34px_rgba(63,42,38,0.56)] transition-[box-shadow,border-color,background-color,transform] duration-300 motion-reduce:transition-none;
+  }
+
+  .premium-card {
+    @apply rounded-[1.4rem] border border-brand-border/70 bg-white/84 shadow-[0_24px_54px_-36px_rgba(53,33,30,0.56)] backdrop-blur-sm;
+  }
+
+  .premium-card-soft {
+    @apply rounded-[1.4rem] border border-brand-border/70 bg-[linear-gradient(160deg,#fff8f4_0%,#f6ece6_100%)] shadow-[0_16px_34px_-28px_rgba(53,33,30,0.42)];
+  }
+
+  .noise-overlay {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.23'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 180px 180px;
+    mix-blend-mode: soft-light;
+    opacity: 0.2;
+  }
+
+  .link-chip {
+    /* Min height 44px on mobile for WCAG AA touch target compliance. */
+    @apply inline-flex min-h-[44px] items-center rounded-full border border-brand-border/80 bg-white/78 px-4 py-2.5 text-sm font-semibold text-brand-text transition-[color,border-color,background-color] duration-200 hover:border-brand-accent/35 hover:bg-white hover:text-brand-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/55 focus-visible:ring-offset-2 focus-visible:ring-offset-background md:min-h-[38px] md:py-2;
+  }
+
+  .fade-divider {
+    @apply border-t border-brand-border/70;
+  }
+
+  .motion-reveal {
+    animation: reveal-up 420ms ease-out both;
+  }
+
+  .focus-ring-brand {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+  }
+
+  .motion-smooth {
+    transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes hero-blob-drift-a {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(22px, -18px, 0) scale(1.06);
+  }
+}
+
+@keyframes hero-blob-drift-b {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-20px, 16px, 0) scale(1.08);
+  }
+}
+
+.hero-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  pointer-events: none;
+  will-change: transform;
+}
+
+.hero-blob-a {
+  top: -12%;
+  left: -8%;
+  width: 42%;
+  height: 64%;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--brand-accent) 55%, transparent) 0%,
+    transparent 70%
+  );
+  opacity: 0.45;
+  animation: hero-blob-drift-a 28s ease-in-out infinite;
+}
+
+.hero-blob-b {
+  top: 6%;
+  right: -10%;
+  width: 38%;
+  height: 58%;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, #f2c4a0 78%, transparent) 0%,
+    transparent 70%
+  );
+  opacity: 0.5;
+  animation: hero-blob-drift-b 32s ease-in-out infinite;
+}
+
+.footer-link-underline {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.footer-link-underline::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 360ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.footer-link-underline:hover::after,
+.footer-link-underline:focus-visible::after {
+  transform: scaleX(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .motion-reveal {
+    animation: none;
+  }
+
+  .hero-blob {
+    animation: none;
+  }
+
+  .footer-link-underline::after {
+    transition: none;
+  }
+}
+
+/* Mobile perf: backdrop-filter forces a full-screen GPU blur pass per frame.
+   On mid-range Android the sticky Navbar alone (always visible while scrolling)
+   tanked fps. Disabled below 640px; solid background colors already coexist on
+   the same elements, so the visual fallback is acceptable. */
+@media (max-width: 640px) {
+  *,
+  *::before,
+  *::after {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+

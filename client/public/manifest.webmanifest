@@ -1,0 +1,15 @@
+{
+  "name": "SenBonsPlans",
+  "short_name": "SenBonsPlans",
+  "description": "Boutique skincare et beauté au Sénégal",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#fdf6ee",
+  "theme_color": "#c1274f",
+  "lang": "fr",
+  "icons": [
+    { "src": "/icon.svg", "type": "image/svg+xml", "sizes": "any", "purpose": "any" },
+    { "src": "/apple-touch-icon.png", "type": "image/png", "sizes": "180x180", "purpose": "any" }
+  ]
+}
