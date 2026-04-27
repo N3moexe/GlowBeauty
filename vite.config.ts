@@ -188,12 +188,11 @@ export default defineConfig({
           if (id.includes("@trpc") || id.includes("superjson")) {
             return "vendor-trpc";
           }
-          if (id.includes("recharts") || id.includes("/d3-")) {
-            return "vendor-charts";
-          }
-          if (id.includes("lucide-react")) {
-            return "vendor-icons";
-          }
+          // Note: recharts + d3 deliberately NOT split — splitting them
+          // creates a cross-chunk TDZ (`Cannot access 'S' before initialization`)
+          // because of how recharts re-exports d3 internals. Letting Rollup
+          // place them naturally puts recharts in the lazy Admin chunk
+          // (its only consumer), which is what we want anyway.
           if (id.includes("date-fns")) {
             return "vendor-date-fns";
           }
