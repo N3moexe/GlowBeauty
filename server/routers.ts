@@ -1,4 +1,6 @@
-import { COOKIE_NAME } from "@shared/const";
+import { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
+import { sdk } from "./_core/sdk";
+import { ENV } from "./_core/env";
 import {
   productBenefitsSchema,
   productDescriptionBulletsSchema,
@@ -293,6 +295,28 @@ export const appRouter = router({
           maxAge: 24 * 60 * 60 * 1000,
         });
 
+        // Bridge to the JWT auth system that useAuth() reads, so admin pages
+        // render after password login (no Manus OAuth needed). Skipped if 2FA
+        // is required — the JWT cookie is issued in verifyTwoFactor instead.
+        if (!adminCred.twoFactorEnabled) {
+          try {
+            const user = await db.getUserById(adminCred.userId);
+            if (user) {
+              const jwt = await sdk.signSession({
+                openId: user.openId,
+                appId: ENV.appId || "admin-login",
+                name: user.name || user.email || input.username,
+              });
+              ctx.res.cookie(COOKIE_NAME, jwt, {
+                ...cookieOptions,
+                maxAge: ONE_YEAR_MS,
+              });
+            }
+          } catch (error) {
+            console.warn("[Auth] Failed to issue JWT bridge cookie:", error);
+          }
+        }
+
         return {
           sessionToken: adminCred.twoFactorEnabled ? sessionToken : undefined,
           requiresTwoFactor: adminCred.twoFactorEnabled,
@@ -348,6 +372,31 @@ export const appRouter = router({
           });
 
         await adminSecurity.verifySessionTwoFactor(sessionToken);
+
+        // Bridge to JWT auth so admin pages render (same as adminAuth.login).
+        try {
+          const cred = await adminSecurity.getAdminCredentialById(
+            session.adminCredentialId
+          );
+          if (cred) {
+            const user = await db.getUserById(cred.userId);
+            if (user) {
+              const jwt = await sdk.signSession({
+                openId: user.openId,
+                appId: ENV.appId || "admin-login",
+                name: user.name || user.email || cred.username,
+              });
+              const cookieOptions = getSessionCookieOptions(ctx.req);
+              ctx.res.cookie(COOKIE_NAME, jwt, {
+                ...cookieOptions,
+                maxAge: ONE_YEAR_MS,
+              });
+            }
+          }
+        } catch (error) {
+          console.warn("[Auth] Failed to issue JWT bridge cookie (2FA):", error);
+        }
+
         return { success: true };
       }),
 
