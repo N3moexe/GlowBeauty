@@ -125,6 +125,22 @@ async function startServer() {
       "Permissions-Policy",
       "camera=(), microphone=(), geolocation=()"
     );
+    // CSP in report-only mode — observe violations before enforcing.
+    // Switch header name to Content-Security-Policy to enforce.
+    res.setHeader(
+      "Content-Security-Policy-Report-Only",
+      [
+        "default-src 'self'",
+        "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://analytics.tiktok.com",
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+        "font-src 'self' https://fonts.gstatic.com",
+        "img-src 'self' data: blob: https:",
+        "connect-src 'self' https://*.ingest.sentry.io",
+        "frame-src 'none'",
+        "object-src 'none'",
+        "base-uri 'self'",
+      ].join("; ")
+    );
     next();
   });
   // Payment webhooks must verify HMAC signatures over the raw body, so they are
