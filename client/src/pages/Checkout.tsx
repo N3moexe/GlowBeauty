@@ -423,6 +423,7 @@ export default function Checkout() {
               | "orange_money"
               | "wave"
               | "free_money",
+            phoneLast4: form.phone.replace(/\D/g, "").slice(-4),
           });
 
           if (result.success) {

@@ -59,4 +59,26 @@ describe("auth.logout", () => {
       path: "/",
     });
   });
+
+  it("admin logout clears both the admin session and JWT bridge cookies", async () => {
+    const { ctx, clearedCookies } = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+
+    const result = await caller.adminAuth.logoutAdmin({});
+
+    expect(result).toEqual({ success: true });
+    expect(clearedCookies.map(call => call.name)).toEqual([
+      "admin_session",
+      COOKIE_NAME,
+    ]);
+    for (const call of clearedCookies) {
+      expect(call.options).toMatchObject({
+        maxAge: -1,
+        secure: true,
+        sameSite: "none",
+        httpOnly: true,
+        path: "/",
+      });
+    }
+  });
 });

@@ -42,13 +42,22 @@ describe("order totalPaid lifecycle (in-memory fallback)", () => {
     expect(order!.paymentReference).toBe("TXN-123");
   });
 
-  it("resets to 0 when payment is marked failed", async () => {
+  it("resets to 0 when a non-completed payment is marked failed", async () => {
     const orderId = await db.createOrder(baseOrder());
-    await db.updatePaymentStatus(orderId, "completed");
     await db.updatePaymentStatus(orderId, "failed");
     const order = await db.getOrderById(orderId);
     expect(order!.totalPaid).toBe(0);
     expect(order!.paymentStatus).toBe("failed");
+  });
+
+  it("does not downgrade a completed payment to failed", async () => {
+    const orderId = await db.createOrder(baseOrder());
+    await db.updatePaymentStatus(orderId, "completed", "TXN-LOCKED");
+    await db.updatePaymentStatus(orderId, "failed", "TXN-LATE");
+    const order = await db.getOrderById(orderId);
+    expect(order!.totalPaid).toBe(25000);
+    expect(order!.paymentStatus).toBe("completed");
+    expect(order!.paymentReference).toBe("TXN-LOCKED");
   });
 
   it("ignores an explicit totalPaid provided by callers", async () => {

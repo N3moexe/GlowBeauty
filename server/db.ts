@@ -1461,6 +1461,9 @@ export async function getDb() {
       _db = drizzle(pool);
     } catch (error) {
       console.warn("[Database] Failed to connect:", error);
+      if (ENV.isProduction) {
+        throw error;
+      }
       _db = null;
     }
   }
@@ -2246,6 +2249,16 @@ export async function updatePaymentStatus(
   if (!db) {
     const order = demoOrders.find(o => o.id === id);
     if (!order) throw new Error("Order not found");
+    if (order.paymentStatus === "completed" && paymentStatus !== "completed") {
+      return;
+    }
+    if (
+      order.paymentStatus === "completed" &&
+      paymentStatus === "completed" &&
+      (!paymentReference || order.paymentReference === paymentReference)
+    ) {
+      return;
+    }
     order.paymentStatus = paymentStatus;
     if (paymentReference) order.paymentReference = paymentReference;
     // Keep totalPaid in sync so revenue/reporting reflects actual confirmed payments.
@@ -2255,6 +2268,28 @@ export async function updatePaymentStatus(
       order.totalPaid = 0;
     }
     order.updatedAt = new Date();
+    return;
+  }
+  const existing = await db
+    .select({
+      paymentStatus: orders.paymentStatus,
+      paymentReference: orders.paymentReference,
+    })
+    .from(orders)
+    .where(eq(orders.id, id))
+    .limit(1);
+  if (!existing[0]) throw new Error("Order not found");
+  if (
+    existing[0].paymentStatus === "completed" &&
+    paymentStatus !== "completed"
+  ) {
+    return;
+  }
+  if (
+    existing[0].paymentStatus === "completed" &&
+    paymentStatus === "completed" &&
+    (!paymentReference || existing[0].paymentReference === paymentReference)
+  ) {
     return;
   }
   const data: any = { paymentStatus };

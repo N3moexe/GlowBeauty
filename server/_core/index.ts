@@ -24,6 +24,10 @@ import { registerPaymentWebhookRoutes } from "../webhook-api-routes";
 import { registerStorefrontCmsRoutes } from "../storefront-cms-routes";
 import { registerSitemapRoutes } from "../sitemap-routes";
 
+const UNSAFE_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
+const DEFAULT_JSON_BODY_LIMIT = process.env.JSON_BODY_LIMIT || "1mb";
+const LARGE_JSON_BODY_LIMIT = process.env.LARGE_JSON_BODY_LIMIT || "16mb";
+
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
     const server = net.createServer();
@@ -41,6 +45,67 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
     }
   }
   throw new Error(`No available port found starting from ${startPort}`);
+}
+
+function getExpectedOrigin(req: express.Request) {
+  const appUrl = process.env.APP_URL?.trim();
+  if (appUrl) {
+    try {
+      return new URL(appUrl).origin;
+    } catch {
+      if (process.env.NODE_ENV === "production") {
+        throw new Error("[CSRF] APP_URL must be a valid URL in production");
+      }
+    }
+  }
+
+  const host = req.get("host");
+  if (!host) return null;
+  const forwardedProto = req.get("x-forwarded-proto")?.split(",")[0]?.trim();
+  const protocol = forwardedProto || req.protocol;
+  return `${protocol}://${host}`;
+}
+
+function enforceBrowserOrigin(
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) {
+  if (!UNSAFE_METHODS.has(req.method)) {
+    next();
+    return;
+  }
+
+  const secFetchSite = req.get("sec-fetch-site");
+  if (
+    secFetchSite &&
+    !["same-origin", "same-site", "none"].includes(secFetchSite)
+  ) {
+    res.status(403).json({ ok: false, error: "Cross-site request rejected" });
+    return;
+  }
+
+  const origin = req.get("origin");
+  if (!origin) {
+    next();
+    return;
+  }
+
+  const expectedOrigin = getExpectedOrigin(req);
+  if (expectedOrigin && origin !== expectedOrigin) {
+    res.status(403).json({ ok: false, error: "Bad request origin" });
+    return;
+  }
+
+  next();
+}
+
+function isLargeJsonBodyRoute(req: express.Request) {
+  const url = req.originalUrl || req.url;
+  return (
+    url.includes("/api/admin/banners/optimize") ||
+    url.includes("imageUpload.uploadProductImage")
+  );
 }
 
 async function startServer() {
@@ -65,13 +130,24 @@ async function startServer() {
   // Payment webhooks must verify HMAC signatures over the raw body, so they are
   // registered before the global JSON parser (each route uses express.raw()).
   registerPaymentWebhookRoutes(app);
-  // Configure body parser with larger size limit for file uploads
-  app.use(express.json({ limit: "50mb" }));
-  app.use(express.urlencoded({ limit: "50mb", extended: true }));
+  app.use(enforceBrowserOrigin);
+  app.use((req, res, next) =>
+    express.json({
+      limit: isLargeJsonBodyRoute(req)
+        ? LARGE_JSON_BODY_LIMIT
+        : DEFAULT_JSON_BODY_LIMIT,
+    })(req, res, next)
+  );
+  app.use(
+    express.urlencoded({ limit: DEFAULT_JSON_BODY_LIMIT, extended: true })
+  );
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
-  // Chat API with streaming and tool calling
-  registerChatRoutes(app);
+  // Disabled by default: the legacy chat route is unbounded and conflicts with
+  // the newer rate-limited chatbot API on /api/chat.
+  if (process.env.ENABLE_LEGACY_CHAT_ROUTE === "true") {
+    registerChatRoutes(app);
+  }
   // REST API routes for admin and storefront features
   registerAnalyticsApiRoutes(app);
   registerBannerApiRoutes(app);

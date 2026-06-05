@@ -131,6 +131,29 @@ async function processWebhook(
           ? payload.reference
           : undefined;
 
+  if (
+    order.paymentStatus === "completed" &&
+    (!paymentReference || order.paymentReference === paymentReference)
+  ) {
+    res.status(200).json({
+      ok: true,
+      duplicate: true,
+      orderNumber: result.orderNumber,
+      paymentStatus: order.paymentStatus,
+    });
+    return;
+  }
+
+  if (order.paymentStatus === "completed" && paymentStatus !== "completed") {
+    res.status(200).json({
+      ok: true,
+      ignored: true,
+      orderNumber: result.orderNumber,
+      paymentStatus: order.paymentStatus,
+    });
+    return;
+  }
+
   await db.updatePaymentStatus(order.id, paymentStatus, paymentReference);
 
   res.status(200).json({

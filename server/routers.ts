@@ -415,6 +415,7 @@ export const appRouter = router({
         }
         const cookieOptions = getSessionCookieOptions(ctx.req);
         ctx.res.clearCookie("admin_session", { ...cookieOptions, maxAge: -1 });
+        ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
         return { success: true };
       }),
 
@@ -1096,6 +1097,7 @@ export const appRouter = router({
         z.object({
           orderNumber: z.string(),
           paymentMethod: z.enum(["orange_money", "wave", "free_money"]),
+          phoneLast4: z.string().regex(/^\d{4}$/),
         })
       )
       .mutation(async ({ input }) => {
@@ -1106,11 +1108,26 @@ export const appRouter = router({
             message: "Commande non trouvée",
           });
         }
+        if (normalizePhoneLast4(order.customerPhone) !== input.phoneLast4) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Commande non trouvÃ©e",
+          });
+        }
         if (order.paymentStatus === "completed") {
           throw new TRPCError({
             code: "BAD_REQUEST",
             message: "Cette commande est déjà payée",
           });
+        }
+
+        if (order.paymentStatus === "processing" && order.paymentReference) {
+          return {
+            success: true,
+            transactionId: order.paymentReference,
+            status: "processing" as const,
+            message: "Paiement deja initialise",
+          };
         }
 
         const result = await mobileMoney.initiatePayment(input.paymentMethod, {
@@ -1132,7 +1149,7 @@ export const appRouter = router({
   }),
 
   email: router({
-    sendOrderConfirmation: publicProcedure
+    sendOrderConfirmation: managerWriteProcedure
       .input(
         z.object({
           orderNumber: z.string(),
@@ -1157,7 +1174,7 @@ export const appRouter = router({
         return { success };
       }),
 
-    sendStatusUpdate: adminProcedure
+    sendStatusUpdate: managerWriteProcedure
       .input(
         z.object({
           orderNumber: z.string(),
@@ -1457,9 +1474,16 @@ export const appRouter = router({
         })
       )
       .mutation(async ({ input }) => {
+        let isVerifiedPurchase = false;
+        if (input.orderId) {
+          const order = await db.getOrderById(input.orderId);
+          isVerifiedPurchase = !!order?.items?.some(
+            (item: any) => Number(item.productId) === input.productId
+          );
+        }
         const review = await db.createProductReview({
           ...input,
-          isVerifiedPurchase: !!input.orderId,
+          isVerifiedPurchase,
           isApproved: false,
         });
         return { success: true, review };

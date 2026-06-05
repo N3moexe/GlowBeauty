@@ -175,11 +175,24 @@ describe("payment webhook routes", () => {
 
     vi.spyOn(db, "getOrderByNumber").mockImplementation(async (orderNumber) => {
       if (orderNumber === "SBP-UNKNOWN") return undefined;
+      if (orderNumber === "SBP-COMPLETED") {
+        return {
+          id: 999,
+          orderNumber,
+          totalAmount: 12345,
+          paymentStatus: "completed",
+          paymentReference: "TX-COMPLETED",
+          customerPhone: "+221770000000",
+          customerName: "Test",
+          status: "pending",
+        } as any;
+      }
       return {
         id: 999,
         orderNumber,
         totalAmount: 12345,
         paymentStatus: "pending",
+        paymentReference: null,
         customerPhone: "+221770000000",
         customerName: "Test",
         status: "pending",
@@ -249,6 +262,36 @@ describe("payment webhook routes", () => {
     expect(res.statusCode).toBe(200);
     expect(res.body.paymentStatus).toBe("failed");
     expect(updatePaymentSpy).toHaveBeenCalledWith(999, "failed", "SBP-W-2");
+  });
+
+  it("treats duplicate completed webhooks as idempotent", async () => {
+    const body = {
+      reference: "SBP-COMPLETED",
+      status: "completed",
+      transactionId: "TX-COMPLETED",
+    };
+    const sig = signBody(body, "wave-secret");
+    const res = await postWebhook(app, "/api/webhooks/wave", body, {
+      "x-wave-signature": sig,
+    });
+    expect(res.statusCode).toBe(200);
+    expect(res.body.duplicate).toBe(true);
+    expect(updatePaymentSpy).not.toHaveBeenCalled();
+  });
+
+  it("does not downgrade a completed payment on a later failed webhook", async () => {
+    const body = {
+      reference: "SBP-COMPLETED",
+      status: "failed",
+      transactionId: "TX-FAILED-LATE",
+    };
+    const sig = signBody(body, "wave-secret");
+    const res = await postWebhook(app, "/api/webhooks/wave", body, {
+      "x-wave-signature": sig,
+    });
+    expect(res.statusCode).toBe(200);
+    expect(res.body.ignored).toBe(true);
+    expect(updatePaymentSpy).not.toHaveBeenCalled();
   });
 
   it("ignores unknown order numbers without retrying providers forever", async () => {

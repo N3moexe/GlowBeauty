@@ -2,8 +2,19 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import { appRouter, __resetOrderRateLimitForTests } from "./routers";
 import type { TrpcContext } from "./_core/context";
 
+const mobileMoneyMock = vi.hoisted(() => ({
+  initiatePayment: vi.fn(),
+}));
+
 beforeEach(() => {
   __resetOrderRateLimitForTests();
+  mobileMoneyMock.initiatePayment.mockReset();
+  mobileMoneyMock.initiatePayment.mockResolvedValue({
+    success: true,
+    transactionId: "MM-TEST-1",
+    status: "processing",
+    message: "Payment initiated",
+  });
 });
 
 // ─── Mock the db module ───
@@ -56,6 +67,12 @@ vi.mock("./db", () => ({
   }),
   updateOrderStatus: vi.fn().mockResolvedValue(undefined),
   updatePaymentStatus: vi.fn().mockResolvedValue(undefined),
+  createProductReview: vi.fn().mockImplementation(async input => ({
+    id: 1,
+    ...input,
+  })),
+  getProductReviews: vi.fn().mockResolvedValue([]),
+  getProductAverageRating: vi.fn().mockResolvedValue(0),
   getOrCreateCustomer: vi.fn().mockResolvedValue({
     id: 1,
     name: "Moussa",
@@ -79,6 +96,8 @@ vi.mock("./db", () => ({
     conversionRate: 6.25, recentViews: [], ordersByStatus: [{ status: "pending", count: 3 }, { status: "delivered", count: 2 }],
   }),
 }));
+
+vi.mock("./mobile-money", () => mobileMoneyMock);
 
 // ─── Context helpers ───
 type AuthenticatedUser = NonNullable<TrpcContext["user"]>;
@@ -373,6 +392,67 @@ describe("order", () => {
 });
 
 // ─── Analytics Tests ───
+describe("payment", () => {
+  it("rejects payment initiation with wrong phone last4", async () => {
+    const caller = appRouter.createCaller(createPublicContext());
+    await expect(
+      caller.payment.initiate({
+        orderNumber: "SBP-TEST-0001",
+        paymentMethod: "wave",
+        phoneLast4: "0000",
+      })
+    ).rejects.toThrow("Commande non trouv");
+    expect(mobileMoneyMock.initiatePayment).not.toHaveBeenCalled();
+  });
+
+  it("initiates payment with matching phone last4", async () => {
+    const caller = appRouter.createCaller(createPublicContext());
+    const result = await caller.payment.initiate({
+      orderNumber: "SBP-TEST-0001",
+      paymentMethod: "wave",
+      phoneLast4: "4567",
+    });
+    expect(result).toMatchObject({
+      success: true,
+      transactionId: "MM-TEST-1",
+      status: "processing",
+    });
+    expect(mobileMoneyMock.initiatePayment).toHaveBeenCalledWith(
+      "wave",
+      expect.objectContaining({
+        orderNumber: "SBP-TEST-0001",
+        customerPhone: "+221771234567",
+      })
+    );
+  });
+});
+
+describe("reviews", () => {
+  it("marks a review verified only when the order contains the product", async () => {
+    const caller = appRouter.createCaller(createPublicContext());
+    const result = await caller.reviews.create({
+      productId: 1,
+      orderId: 1,
+      customerName: "Moussa",
+      rating: 5,
+      title: "Bon produit",
+    });
+    expect(result.review.isVerifiedPurchase).toBe(true);
+  });
+
+  it("does not trust an arbitrary order id for verified purchase", async () => {
+    const caller = appRouter.createCaller(createPublicContext());
+    const result = await caller.reviews.create({
+      productId: 2,
+      orderId: 1,
+      customerName: "Moussa",
+      rating: 5,
+      title: "Bon produit",
+    });
+    expect(result.review.isVerifiedPurchase).toBe(false);
+  });
+});
+
 describe("analytics", () => {
   it("tracks page view (public)", async () => {
     const caller = appRouter.createCaller(createPublicContext());
@@ -422,6 +502,3 @@ describe("auth", () => {
     expect(result?.role).toBe("admin");
   });
 });
-
-
-
