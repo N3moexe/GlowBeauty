@@ -39,3 +39,29 @@ services:
         sync: false
       - key: VITE_SENTRY_DSN
         sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        value: gpt-4o-mini
+      - key: ORANGE_MONEY_API_URL
+        sync: false
+      - key: ORANGE_MONEY_API_KEY
+        sync: false
+      - key: ORANGE_MONEY_WEBHOOK_SECRET
+        sync: false
+      - key: WAVE_API_URL
+        sync: false
+      - key: WAVE_API_KEY
+        sync: false
+      - key: WAVE_WEBHOOK_SECRET
+        sync: false
+      - key: FREE_MONEY_API_URL
+        sync: false
+      - key: FREE_MONEY_API_KEY
+        sync: false
+      - key: FREE_MONEY_WEBHOOK_SECRET
+        sync: false
+      - key: LOCAL_ADMIN_USERNAME
+        sync: false
+      - key: LOCAL_ADMIN_PASSWORD
+        sync: false
