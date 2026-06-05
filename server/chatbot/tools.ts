@@ -89,6 +89,21 @@ export async function getProductTool(productId: number): Promise<ProductToolResu
   };
 }
 
+function extractOrderNumber(input: string) {
+  const match = input.match(/\bSBP-[A-Z0-9-]+\b/i);
+  return match?.[0]?.toUpperCase() || "";
+}
+
+function extractPhoneLast4(input: string) {
+  const digits = input.replace(/\D/g, "");
+  return digits.length >= 4 ? digits.slice(-4) : "";
+}
+
+function maskPhoneLast4(phone: string) {
+  const last4 = extractPhoneLast4(phone);
+  return last4 ? `****${last4}` : "";
+}
+
 export async function getOrderStatusTool(phoneOrOrderId: string): Promise<{
   kind: "order";
   found: boolean;
@@ -104,37 +119,22 @@ export async function getOrderStatusTool(phoneOrOrderId: string): Promise<{
   }>;
 }> {
   const value = phoneOrOrderId.trim();
-  if (!value) {
+  const orderNumber = extractOrderNumber(value);
+  const phoneLast4 = extractPhoneLast4(
+    orderNumber ? value.replace(orderNumber, "") : value
+  );
+  if (!orderNumber || !phoneLast4) {
     return {
       kind: "order",
       found: false,
-      message: "Merci de fournir un numero de commande ou un numero de telephone.",
+      message:
+        "Merci de fournir le numero de commande et les 4 derniers chiffres du telephone utilise a la commande.",
       orders: [],
     };
   }
 
-  const orderByNumber = await db.getOrderByNumber(value);
-  if (orderByNumber) {
-    return {
-      kind: "order",
-      found: true,
-      message: "Commande retrouvee.",
-      orders: [
-        {
-          id: Number((orderByNumber as any).id),
-          orderNumber: String((orderByNumber as any).orderNumber || ""),
-          status: String((orderByNumber as any).status || ""),
-          paymentStatus: String((orderByNumber as any).paymentStatus || ""),
-          totalAmount: Number((orderByNumber as any).totalAmount || 0),
-          customerPhone: String((orderByNumber as any).customerPhone || ""),
-          createdAt: new Date((orderByNumber as any).createdAt || Date.now()).toISOString(),
-        },
-      ],
-    };
-  }
-
-  const byPhone = await store.findOrdersByPhone(value, 5);
-  if (byPhone.length === 0) {
+  const orderByNumber = await db.getOrderByNumber(orderNumber);
+  if (!orderByNumber) {
     return {
       kind: "order",
       found: false,
@@ -144,19 +144,38 @@ export async function getOrderStatusTool(phoneOrOrderId: string): Promise<{
     };
   }
 
+  const expectedLast4 = extractPhoneLast4(
+    String((orderByNumber as any).customerPhone || "")
+  );
+  if (!expectedLast4 || expectedLast4 !== phoneLast4) {
+    return {
+      kind: "order",
+      found: false,
+      message:
+        "Aucune commande trouvee avec ces informations. Verifiez le numero de commande et les 4 derniers chiffres du telephone.",
+      orders: [],
+    };
+  }
+
   return {
     kind: "order",
     found: true,
-    message: "Commandes associees a ce numero.",
-    orders: byPhone.map((item: any) => ({
-      id: Number(item.id),
-      orderNumber: String(item.orderNumber || ""),
-      status: String(item.status || ""),
-      paymentStatus: String(item.paymentStatus || ""),
-      totalAmount: Number(item.totalAmount || 0),
-      customerPhone: String(item.customerPhone || ""),
-      createdAt: new Date(item.createdAt || Date.now()).toISOString(),
-    })),
+    message: "Commande retrouvee.",
+    orders: [
+      {
+        id: Number((orderByNumber as any).id),
+        orderNumber: String((orderByNumber as any).orderNumber || ""),
+        status: String((orderByNumber as any).status || ""),
+        paymentStatus: String((orderByNumber as any).paymentStatus || ""),
+        totalAmount: Number((orderByNumber as any).totalAmount || 0),
+        customerPhone: maskPhoneLast4(
+          String((orderByNumber as any).customerPhone || "")
+        ),
+        createdAt: new Date(
+          (orderByNumber as any).createdAt || Date.now()
+        ).toISOString(),
+      },
+    ],
   };
 }
 

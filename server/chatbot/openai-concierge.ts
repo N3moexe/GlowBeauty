@@ -236,7 +236,7 @@ function buildSystemPrompt(input: {
     "No medical diagnosis. Provide only general skincare guidance.",
     "Never invent product facts, prices, stock, ingredients, delivery rules, or order status.",
     "If product details are required, ask for product name or product ID and say you can check it.",
-    "For order tracking, request BOTH orderId/order number AND phone before any status check.",
+    "For order tracking, request BOTH order number AND the last 4 phone digits before any status check.",
     "If intent is unclear, ask only 2-3 quick questions exactly around: skin type, main concern, budget max CFA + simple vs complete routine preference.",
     "When recommending routines: provide AM and PM, max 3 steps each (Nettoyer / Traiter / Proteger), and mention product category per step.",
     "When possible, include one Option premium and one Option budget.",
@@ -347,12 +347,12 @@ function createToolSpecs() {
       type: "function",
       function: {
         name: "trackOrder",
-        description: "Track order status securely using BOTH order id/number and customer phone.",
+        description: "Track order status securely using BOTH order number and customer phone last 4 digits.",
         parameters: {
           type: "object",
           properties: {
             orderId: { type: "string" },
-            phone: { type: "string" },
+            phone: { type: "string", description: "Last 4 digits of checkout phone, or full phone if user provides it." },
           },
           required: ["orderId", "phone"],
           additionalProperties: false,
@@ -721,24 +721,31 @@ async function getCartTool(sessionId: string) {
   };
 }
 
+function phoneLast4(value: string) {
+  const digits = value.replace(/[^\d]/g, "");
+  return digits.length >= 4 ? digits.slice(-4) : "";
+}
+
+function maskTrackedPhone(value: string) {
+  const last4 = phoneLast4(value);
+  return last4 ? `****${last4}` : "";
+}
+
 async function trackOrderTool(args: { orderId?: string; phone?: string }) {
   const orderId = String(args.orderId || "").trim();
   const phone = String(args.phone || "").trim();
-  const normalizedPhone = phone.replace(/[^\d]/g, "");
+  const providedLast4 = phoneLast4(phone);
 
-  if (!orderId || normalizedPhone.length < 8) {
+  if (!orderId || providedLast4.length !== 4) {
     return {
       found: false,
       message:
-        "Pour securiser le suivi, partagez votre numero de commande ET le numero de telephone utilise a la commande.",
+        "Pour securiser le suivi, partagez votre numero de commande ET les 4 derniers chiffres du telephone utilise a la commande.",
     };
   }
 
   let order: any = null;
-  if (/^\d+$/.test(orderId)) {
-    order = await db.getOrderById(Number(orderId));
-  }
-  if (!order) {
+  if (/^SBP-[A-Z0-9-]+$/i.test(orderId)) {
     order = await db.getOrderByNumber(orderId);
   }
   if (!order) {
@@ -746,7 +753,7 @@ async function trackOrderTool(args: { orderId?: string; phone?: string }) {
   }
 
   const orderPhone = String(order.customerPhone || "").replace(/[^\d]/g, "");
-  if (!orderPhone || !orderPhone.includes(normalizedPhone)) {
+  if (!orderPhone || phoneLast4(orderPhone) !== providedLast4) {
     return {
       found: false,
       message: "Numero de telephone non associe a cette commande.",
@@ -762,7 +769,7 @@ async function trackOrderTool(args: { orderId?: string; phone?: string }) {
         status: String(order.status || ""),
         paymentStatus: String(order.paymentStatus || ""),
         totalAmount: Number(order.totalAmount || 0),
-        customerPhone: String(order.customerPhone || ""),
+        customerPhone: maskTrackedPhone(String(order.customerPhone || "")),
         createdAt: new Date(order.createdAt || Date.now()).toISOString(),
       },
     ],
@@ -1033,8 +1040,8 @@ function buildFallbackResponse(input: ConciergeRunInput, kbAnswer: string | null
       questions: [
         isFr ? "Numero de commande (ex: SBP-1234) ?" : "Order number (e.g. SBP-1234)?",
         isFr
-          ? "Numero de telephone utilise a la commande ?"
-          : "Phone number used at checkout?",
+          ? "4 derniers chiffres du telephone utilise a la commande ?"
+          : "Last 4 digits of the checkout phone?",
       ],
       routineLines: [
         isFr
@@ -1042,8 +1049,8 @@ function buildFallbackResponse(input: ConciergeRunInput, kbAnswer: string | null
           : "I do not share status without these 2 details.",
       ],
       nextAction: isFr
-        ? "Envoyez numero de commande + telephone."
-        : "Send order number + phone.",
+        ? "Envoyez numero de commande + 4 derniers chiffres du telephone."
+        : "Send order number + last 4 phone digits.",
     });
   }
 

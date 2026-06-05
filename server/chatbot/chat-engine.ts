@@ -206,8 +206,8 @@ export async function runChatEngine(
     if (!orderResult.found) {
       response =
         locale.startsWith("fr")
-          ? "Je peux suivre votre commande. Envoyez le numero de commande (ex: SBP-1234) ou votre numero de telephone utilise a la commande."
-          : "I can track your order. Please share your order number or phone used at checkout.";
+          ? "Je peux suivre votre commande. Envoyez le numero de commande (ex: SBP-1234) et les 4 derniers chiffres du telephone utilise a la commande."
+          : "I can track your order. Please share your order number and the last 4 digits of the checkout phone.";
     } else {
       const lines = orderResult.orders.map(order => {
         return `- ${order.orderNumber}: ${formatOrderStatusLabel(order.status)} | Paiement: ${formatPaymentStatusLabel(order.paymentStatus)} | ${new Intl.NumberFormat("fr-FR").format(order.totalAmount)} CFA`;
