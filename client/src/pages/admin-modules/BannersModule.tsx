@@ -298,9 +298,17 @@ export function BannersModule({ canEdit }: BannersModuleProps) {
         },
       ];
 
-      await Promise.all(
+      const settingsResults = await Promise.allSettled(
         settingsPayload.map(entry => settingsSetMutation.mutateAsync(entry))
       );
+      const failedSettings = settingsResults.filter(
+        r => r.status === "rejected"
+      ).length;
+      if (failedSettings > 0) {
+        throw new Error(
+          `${failedSettings} réglage(s) de la page d'accueil n'ont pas pu être enregistrés. Réessayez.`
+        );
+      }
 
       const imageValue = heroForm.backgroundImage.trim();
       const sortOrder = Number(heroForm.sortOrder || "100");

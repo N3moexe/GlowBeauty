@@ -79,7 +79,7 @@ export function SettingsModule({ canAccessSettings }: SettingsModuleProps) {
     }
     setSaving(true);
     try {
-      await Promise.all(
+      const results = await Promise.allSettled(
         [
           { key: "payments.waveEnabled", value: String(form.waveEnabled) },
           { key: "payments.orangeEnabled", value: String(form.orangeEnabled) },
@@ -90,11 +90,20 @@ export function SettingsModule({ canAccessSettings }: SettingsModuleProps) {
           { key: "payments.cardEnabled", value: String(form.cardEnabled) },
         ].map(entry => settingsSetMutation.mutateAsync(entry))
       );
+      // Always re-sync so the form reflects what actually persisted, even on a
+      // partial failure.
       await Promise.all([
         utils.settings.storefront.invalidate(),
         utils.settings.list.invalidate(),
       ]);
-      toast.success("Moyens de paiement mis à jour");
+      const failed = results.filter(r => r.status === "rejected").length;
+      if (failed > 0) {
+        toast.error(
+          `${failed} réglage(s) de paiement n'ont pas pu être enregistrés. Réessayez.`
+        );
+      } else {
+        toast.success("Moyens de paiement mis à jour");
+      }
     } catch (error) {
       toast.error(
         getErrorMessage(error, "Échec de l'enregistrement des paramètres")

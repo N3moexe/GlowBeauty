@@ -46,7 +46,7 @@ type AdminPermissions = {
   readOnly: boolean;
 };
 
-function buildPermissions(role: AdminRole): AdminPermissions {
+export function buildPermissions(role: AdminRole): AdminPermissions {
   const managerModules = ["orders", "products", "categories", "cms"];
   if (role === "ADMIN") {
     return {
@@ -166,10 +166,10 @@ function getRequestIpFromCtx(req: {
   socket?: any;
   ip?: string;
 }) {
-  const forwarded = req.headers["x-forwarded-for"];
-  if (typeof forwarded === "string" && forwarded.trim().length > 0) {
-    return forwarded.split(",")[0]?.trim() || null;
-  }
+  // With `trust proxy: 1` (set in server/_core/index.ts), Express resolves
+  // req.ip to the real client IP from the trusted proxy hop. Reading
+  // X-Forwarded-For[0] directly is client-spoofable and would let an attacker
+  // rotate fake IPs to bypass the order rate limit.
   return req.ip || req.socket?.remoteAddress || null;
 }
 

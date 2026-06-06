@@ -9,6 +9,7 @@ import {
   toDateLabel,
 } from "@/pages/admin-modules/shared/formatters";
 import { normalizePaymentStatus } from "@/pages/admin-modules/shared/utils";
+import { toast } from "sonner";
 import StatusBadge from "@/components/admin/StatusBadge";
 import { MediaWithFallback } from "@/components/ui/media-with-fallback";
 import { Button } from "@/components/ui/button";
@@ -152,11 +153,19 @@ function OrderDetailDialog({
     onSuccess: () => {
       onMutated();
     },
+    onError: error =>
+      toast.error(
+        error.message || "Erreur lors de la mise à jour du statut."
+      ),
   });
   const updatePaymentMut = trpc.order.updatePayment.useMutation({
     onSuccess: () => {
       onMutated();
     },
+    onError: error =>
+      toast.error(
+        error.message || "Erreur lors de la mise à jour du paiement."
+      ),
   });
 
   const order = orderQuery.data as OrderDetail | undefined;

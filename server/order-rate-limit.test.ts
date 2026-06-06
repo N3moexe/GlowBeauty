@@ -34,12 +34,15 @@ vi.mock("./email-service", () => ({
   sendOrderStatusUpdateEmail: vi.fn().mockResolvedValue(true),
 }));
 
-function ctxWithIp(ip: string): TrpcContext {
+// Under `trust proxy: 1`, Express resolves the real client IP to req.ip; the
+// rate limiter keys off req.ip (not the client-spoofable X-Forwarded-For).
+function ctxWithIp(ip: string, forwardedFor?: string): TrpcContext {
   return {
     user: null,
     req: {
       protocol: "https",
-      headers: { "x-forwarded-for": ip },
+      ip,
+      headers: forwardedFor ? { "x-forwarded-for": forwardedFor } : {},
     } as unknown as TrpcContext["req"],
     res: { clearCookie: vi.fn() } as unknown as TrpcContext["res"],
   };
@@ -81,5 +84,22 @@ describe("order.create rate limit", () => {
     await expect(innocent.order.create(baseInput)).resolves.toMatchObject({
       orderNumber: expect.stringMatching(/^SBP-/),
     });
+  });
+
+  it("ignores client-supplied X-Forwarded-For (no spoofing bypass)", async () => {
+    // Same trusted req.ip but rotating spoofed XFF headers must share ONE
+    // bucket — otherwise an attacker could reset the limit at will.
+    for (let i = 0; i < 6; i++) {
+      const caller = appRouter.createCaller(
+        ctxWithIp("203.0.113.50", `10.0.0.${i}`)
+      );
+      await caller.order.create(baseInput);
+    }
+    const spoofed = appRouter.createCaller(
+      ctxWithIp("203.0.113.50", "10.0.0.250")
+    );
+    await expect(spoofed.order.create(baseInput)).rejects.toThrow(
+      /Trop de commandes/
+    );
   });
 });

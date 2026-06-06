@@ -171,9 +171,13 @@ async function persistLegacyMappedSettings(
   if (input.promoLinkHref !== undefined)
     updates.push({ key: "promo.linkHref", value: input.promoLinkHref });
 
-  await Promise.all(
-    updates.map(item => db.setStoreSetting(item.key, item.value))
-  );
+  // Sequential (not Promise.all) so writes apply in a deterministic order and
+  // a mid-batch failure stops cleanly instead of leaving an unpredictable
+  // subset committed across concurrent writes. (Full atomicity would need a DB
+  // transaction wrapping setStoreSetting — tracked as a follow-up.)
+  for (const item of updates) {
+    await db.setStoreSetting(item.key, item.value);
+  }
   return updates.length;
 }
 
