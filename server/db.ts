@@ -866,16 +866,16 @@ const demoCmsPages: Array<{
     slug: "accueil",
     status: "published",
     content: "Contenu de demonstration pour la page d'accueil.",
-    seoTitle: "SenBonsPlans - Accueil",
+    seoTitle: "GlowBeauty - Accueil",
     seoDescription: "Page CMS de demonstration.",
     updatedAt: new Date(),
     createdAt: new Date(),
   },
 ];
 const demoStoreSettings = new Map<string, string>([
-  ["store.name", "SenBonsPlans"],
+  ["store.name", "GlowBeauty"],
   ["store.contact", "+221 78 891 10 10"],
-  ["store.email", "contact@senbonsplans.com"],
+  ["store.email", "contact@glowbeauty.com"],
   ["store.address", "Dakar, Senegal"],
   ["store.currency", "CFA"],
   ["store.deliveryText", "Expedition a Dakar et regions en 24h/72h."],
@@ -901,7 +901,7 @@ const demoStoreSettings = new Map<string, string>([
 const defaultAdminChatbotSettings: AdminChatbotSettings = {
   id: 1,
   greeting:
-    "Bienvenue chez SenBonsPlans. Je suis votre concierge skincare premium.",
+    "Bienvenue chez GlowBeauty. Je suis votre concierge skincare premium.",
   tone: "Luxury skincare",
   whatsappNumber: "+221788911010",
   policies: {
@@ -1050,7 +1050,7 @@ const demoAdminUsers: DemoAdminUserEntry[] = [
   {
     id: 1,
     name: "Admin Local",
-    email: "admin@senbonsplans.local",
+    email: "admin@glowbeauty.local",
     phone: null,
     username: "admin",
     role: "ADMIN",
@@ -1062,7 +1062,7 @@ const demoAdminUsers: DemoAdminUserEntry[] = [
   {
     id: 2,
     name: "Manager Demo",
-    email: "manager@senbonsplans.local",
+    email: "manager@glowbeauty.local",
     phone: null,
     username: "manager",
     role: "MANAGER",
@@ -3830,7 +3830,7 @@ export async function listAuditLogsByCursor(input: {
 // ─── Store Settings ───
 function getDefaultSettingsStore(): SettingsStore {
   return {
-    name: demoStoreSettings.get("store.name") || "SenBonsPlans",
+    name: demoStoreSettings.get("store.name") || "GlowBeauty",
     logoUrl: demoStoreSettings.get("store.logo") || "",
     phone: demoStoreSettings.get("store.contact") || "",
     email: demoStoreSettings.get("store.email") || "",
@@ -4263,11 +4263,11 @@ export type StorefrontSettings = {
 
 export async function getStorefrontSettings(): Promise<StorefrontSettings> {
   const defaults: StorefrontSettings = {
-    storeName: "SenBonsPlans",
+    storeName: "GlowBeauty",
     storeLogo: "",
     storeContact: "+221 78 891 10 10",
     storeCurrency: "CFA",
-    supportEmail: "contact@senbonsplans.com",
+    supportEmail: "contact@glowbeauty.com",
     footerAddress: "Dakar, Senegal",
     deliveryText: "Expedition a Dakar et regions en 24h/72h.",
     paymentMethodsText: "Wave, Orange Money, Free Money, Visa, Mastercard",

@@ -48,7 +48,7 @@ function urlEntry(
 
 export function registerSitemapRoutes(app: Express) {
   app.get("/sitemap.xml", async (_req: Request, res: Response) => {
-    const baseUrl = (process.env.APP_URL || "https://senbonsplans.com").replace(
+    const baseUrl = (process.env.APP_URL || "https://glowbeauty.com").replace(
       /\/+$/,
       ""
     );

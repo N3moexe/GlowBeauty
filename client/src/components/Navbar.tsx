@@ -88,7 +88,7 @@ export default function Navbar() {
   const mobileSearchRef = useRef<HTMLFormElement | null>(null);
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
-  const storeName = settings.storeName || "SenBonsPlans";
+  const storeName = settings.storeName || "GlowBeauty";
   const storeContact = settings.storeContact || "+221 78 891 10 10";
 
   const loginHref = useMemo(() => {
@@ -298,7 +298,7 @@ export default function Navbar() {
               />
             ) : (
               <div className="rounded-lg bg-gradient-to-r from-crimson to-crimson-light px-3 py-1.5 text-xs font-extrabold leading-none text-white shadow-sm md:text-sm">
-                SENBONSPLANS
+                GLOWBEAUTY
               </div>
             )}
             <div className="hidden md:block">

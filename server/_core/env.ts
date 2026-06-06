@@ -6,6 +6,7 @@ if (isProduction) {
   const missing: string[] = [];
   if (!process.env.JWT_SECRET) missing.push("JWT_SECRET");
   if (!process.env.DATABASE_URL) missing.push("DATABASE_URL");
+  if (!process.env.APP_URL) missing.push("APP_URL");
   if (missing.length > 0) {
     throw new Error(
       `[ENV] Missing required production env vars: ${missing.join(", ")}`

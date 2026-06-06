@@ -111,10 +111,6 @@ const managerWriteProcedure = roleProcedure(["ADMIN", "MANAGER"]);
 const adminOnlyProcedure = roleProcedure(["ADMIN"]);
 
 function resolveRequestIp(req: any) {
-  const forwarded = req?.headers?.["x-forwarded-for"];
-  if (typeof forwarded === "string" && forwarded.trim().length > 0) {
-    return forwarded.split(",")[0]?.trim() || null;
-  }
   return req?.ip || req?.socket?.remoteAddress || null;
 }
 
@@ -394,7 +390,10 @@ export const appRouter = router({
             }
           }
         } catch (error) {
-          console.warn("[Auth] Failed to issue JWT bridge cookie (2FA):", error);
+          console.warn(
+            "[Auth] Failed to issue JWT bridge cookie (2FA):",
+            error
+          );
         }
 
         return { success: true };
@@ -1111,7 +1110,7 @@ export const appRouter = router({
         if (normalizePhoneLast4(order.customerPhone) !== input.phoneLast4) {
           throw new TRPCError({
             code: "NOT_FOUND",
-            message: "Commande non trouvÃ©e",
+            message: "Commande non trouvée",
           });
         }
         if (order.paymentStatus === "completed") {
@@ -1135,7 +1134,7 @@ export const appRouter = router({
           amount: order.totalAmount,
           customerPhone: order.customerPhone,
           customerName: order.customerName,
-          description: `Commande SenBonsPlans ${input.orderNumber}`,
+          description: `Commande GlowBeauty ${input.orderNumber}`,
         });
         if (result.success) {
           await db.updatePaymentStatus(

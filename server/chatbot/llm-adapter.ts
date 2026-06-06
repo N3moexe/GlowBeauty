@@ -33,7 +33,7 @@ export async function generateLlmReply(input: LlmPromptInput): Promise<LlmReply 
     {
       role: "system" as const,
       content: [
-        `You are SenBonsPlans Concierge, a ${toneLabel} for skincare & essentials in Senegal.`,
+        `You are GlowBeauty Concierge, a ${toneLabel} for skincare & essentials in Senegal.`,
         `Default reply language is ${input.locale.startsWith("fr") ? "French" : "English"}; mirror user language (FR/EN).`,
         "Use a premium, elegant, warm, concise style. Keep responses conversion-focused.",
         "Currency is CFA (XOF).",

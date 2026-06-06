@@ -46,10 +46,6 @@ function statusForCouponError(code: CouponErrorCode) {
 }
 
 function getRequestIp(req: Request) {
-  const forwarded = req.headers["x-forwarded-for"];
-  if (typeof forwarded === "string" && forwarded.trim().length > 0) {
-    return forwarded.split(",")[0]?.trim() || null;
-  }
   return req.ip || req.socket.remoteAddress || null;
 }
 
@@ -113,7 +109,11 @@ export function registerCouponApiRoutes(app: Express) {
       res.json({ ok: true, data: summary });
     } catch (error: any) {
       if (error instanceof z.ZodError) {
-        sendError(res, 400, error.issues[0]?.message || "Invalid cart sync payload");
+        sendError(
+          res,
+          400,
+          error.issues[0]?.message || "Invalid cart sync payload"
+        );
         return;
       }
       console.error("[Coupon API] cart sync failed:", error);
@@ -123,8 +123,12 @@ export function registerCouponApiRoutes(app: Express) {
 
   app.get("/api/coupons/cart", async (req, res) => {
     try {
-      const query = z.object({ sessionId: z.string().trim().min(8).max(120) }).parse(req.query);
-      const summary = await couponService.getSessionCartSummary(query.sessionId);
+      const query = z
+        .object({ sessionId: z.string().trim().min(8).max(120) })
+        .parse(req.query);
+      const summary = await couponService.getSessionCartSummary(
+        query.sessionId
+      );
       if (!summary) {
         sendCouponError(res, 404, "CART_NOT_FOUND", "Cart session not found.");
         return;
@@ -175,7 +179,11 @@ export function registerCouponApiRoutes(app: Express) {
       });
     } catch (error: any) {
       if (error instanceof z.ZodError) {
-        sendError(res, 400, error.issues[0]?.message || "Invalid coupon apply payload");
+        sendError(
+          res,
+          400,
+          error.issues[0]?.message || "Invalid coupon apply payload"
+        );
         return;
       }
       console.error("[Coupon API] apply failed:", error);
@@ -186,7 +194,9 @@ export function registerCouponApiRoutes(app: Express) {
   app.post("/api/coupons/remove", async (req, res) => {
     try {
       const parsed = removeCouponRequestSchema.parse(req.body || {});
-      const summary = await couponService.removeCouponFromSessionCart(parsed.sessionId);
+      const summary = await couponService.removeCouponFromSessionCart(
+        parsed.sessionId
+      );
       console.info("[Coupons] remove", {
         sessionId: parsed.sessionId,
         removed: Boolean(summary),
@@ -198,7 +208,11 @@ export function registerCouponApiRoutes(app: Express) {
       res.json({ ok: true, data: summary });
     } catch (error: any) {
       if (error instanceof z.ZodError) {
-        sendError(res, 400, error.issues[0]?.message || "Invalid coupon remove payload");
+        sendError(
+          res,
+          400,
+          error.issues[0]?.message || "Invalid coupon remove payload"
+        );
         return;
       }
       console.error("[Coupon API] remove failed:", error);
@@ -241,7 +255,11 @@ export function registerCouponApiRoutes(app: Express) {
       });
     } catch (error: any) {
       if (error instanceof z.ZodError) {
-        sendError(res, 400, error.issues[0]?.message || "Invalid coupon preview payload");
+        sendError(
+          res,
+          400,
+          error.issues[0]?.message || "Invalid coupon preview payload"
+        );
         return;
       }
       console.error("[Coupon API] preview failed:", error);
@@ -257,11 +275,18 @@ export function registerCouponApiRoutes(app: Express) {
         })
         .parse(req.query || {});
       const data = await couponService.listAdminCoupons(query.limit);
-      res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
+      res.setHeader(
+        "Cache-Control",
+        "no-store, no-cache, must-revalidate, max-age=0"
+      );
       res.json({ ok: true, data });
     } catch (error: any) {
       if (error instanceof z.ZodError) {
-        sendError(res, 400, error.issues[0]?.message || "Invalid coupons query");
+        sendError(
+          res,
+          400,
+          error.issues[0]?.message || "Invalid coupons query"
+        );
         return;
       }
       console.error("[Coupon API] admin list failed:", error);
@@ -282,7 +307,11 @@ export function registerCouponApiRoutes(app: Express) {
       res.status(201).json({ ok: true, data });
     } catch (error: any) {
       if (error instanceof z.ZodError) {
-        sendError(res, 400, error.issues[0]?.message || "Invalid coupon payload");
+        sendError(
+          res,
+          400,
+          error.issues[0]?.message || "Invalid coupon payload"
+        );
         return;
       }
       console.error("[Coupon API] admin create failed:", error);
@@ -298,7 +327,9 @@ export function registerCouponApiRoutes(app: Express) {
         return;
       }
       const payload = updateCouponSchema.parse(req.body || {});
-      const before = await couponService.listAdminCoupons(500).then((rows) => rows.find((row) => row.id === id) || null);
+      const before = await couponService
+        .listAdminCoupons(500)
+        .then(rows => rows.find(row => row.id === id) || null);
       const data = await couponService.updateAdminCoupon(id, payload);
       await writeAudit(req as AdminRequest, {
         action: "coupon.update",
@@ -310,7 +341,11 @@ export function registerCouponApiRoutes(app: Express) {
       res.json({ ok: true, data });
     } catch (error: any) {
       if (error instanceof z.ZodError) {
-        sendError(res, 400, error.issues[0]?.message || "Invalid coupon update payload");
+        sendError(
+          res,
+          400,
+          error.issues[0]?.message || "Invalid coupon update payload"
+        );
         return;
       }
       console.error("[Coupon API] admin update failed:", error);
@@ -325,7 +360,9 @@ export function registerCouponApiRoutes(app: Express) {
         sendError(res, 400, "Invalid coupon id");
         return;
       }
-      const before = await couponService.listAdminCoupons(500).then((rows) => rows.find((row) => row.id === id) || null);
+      const before = await couponService
+        .listAdminCoupons(500)
+        .then(rows => rows.find(row => row.id === id) || null);
       const data = await couponService.deactivateAdminCoupon(id);
       await writeAudit(req as AdminRequest, {
         action: "coupon.deactivate",

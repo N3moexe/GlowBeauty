@@ -182,7 +182,7 @@ export default function Home() {
     []) as ProductEntity[];
   const heroProduct = bestProducts[0] ?? allProducts[0] ?? null;
 
-  const storeName = settings.storeName || "SenBonsPlans";
+  const storeName = settings.storeName || "GlowBeauty";
   const layout: HomepageLayout = layoutQuery.data ?? defaultHomepageLayout();
 
   const defaultConcernCards = useMemo(() => {
@@ -255,7 +255,7 @@ export default function Home() {
     const base =
       typeof window !== "undefined"
         ? window.location.origin
-        : "https://senbonsplans.com";
+        : "https://glowbeauty.com";
     return [
       {
         "@context": "https://schema.org",
@@ -284,7 +284,7 @@ export default function Home() {
   return (
     <div className="page-shell flex min-h-screen flex-col">
       <SeoHead
-        title="SenBonsPlans | Boutique skincare premium au Senegal"
+        title="GlowBeauty | Boutique skincare premium au Senegal"
         description="Routines skincare premium en CFA: hydratation, eclat, SPF et formules cibles avec livraison rapide au Senegal."
         path="/"
         type="website"

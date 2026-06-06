@@ -65,13 +65,13 @@ function seedState(): State {
       title: "Conditions générales de vente",
       body:
         "## Conditions générales de vente\n\n" +
-        "Bienvenue sur SenBonsPlans. Ces conditions encadrent toute commande passée sur notre boutique.\n\n" +
+        "Bienvenue sur GlowBeauty. Ces conditions encadrent toute commande passée sur notre boutique.\n\n" +
         "### 1. Produits\nNos produits sont des soins authentiques, stockés à Dakar.\n\n" +
         "### 2. Prix\nLes prix sont affichés en CFA, toutes taxes comprises.\n\n" +
         "### 3. Livraison\nLivraison à Dakar en 24h, 72h dans le reste du Sénégal.\n\n" +
         "### 4. Retours\nRetour possible sous 14 jours si le produit est non ouvert.\n\n" +
         "### 5. Contact\nPour toute question, contactez-nous via WhatsApp.",
-      metaDescription: "Conditions générales de vente SenBonsPlans.",
+      metaDescription: "Conditions générales de vente GlowBeauty.",
       status: "published",
       createdAt: now,
       updatedAt: now,
@@ -82,11 +82,11 @@ function seedState(): State {
       title: "Politique de confidentialité",
       body:
         "## Politique de confidentialité\n\n" +
-        "SenBonsPlans respecte votre vie privée. Cette politique explique comment nous collectons et utilisons vos données.\n\n" +
+        "GlowBeauty respecte votre vie privée. Cette politique explique comment nous collectons et utilisons vos données.\n\n" +
         "### Données collectées\nNom, téléphone, email, adresse de livraison — uniquement pour traiter vos commandes.\n\n" +
         "### Cookies\nUniquement les cookies essentiels au panier et à la session.\n\n" +
         "### Vos droits\nVous pouvez demander la suppression de vos données à tout moment.",
-      metaDescription: "Politique de confidentialité SenBonsPlans.",
+      metaDescription: "Politique de confidentialité GlowBeauty.",
       status: "published",
       createdAt: now,
       updatedAt: now,
@@ -101,7 +101,7 @@ function seedState(): State {
         "### Délai\n14 jours après réception pour initier un retour.\n\n" +
         "### Conditions\nProduit non ouvert, dans son emballage d'origine.\n\n" +
         "### Processus\nContactez-nous via WhatsApp, nous organisons la collecte à Dakar.",
-      metaDescription: "Politique de retour SenBonsPlans.",
+      metaDescription: "Politique de retour GlowBeauty.",
       status: "published",
       createdAt: now,
       updatedAt: now,
@@ -112,10 +112,10 @@ function seedState(): State {
       title: "À propos",
       body:
         "## Une maison skincare à Dakar\n\n" +
-        "SenBonsPlans, c'est une sélection de soins choisis pour le climat d'Afrique de l'Ouest — humidité, soleil intense, pollution urbaine.\n\n" +
+        "GlowBeauty, c'est une sélection de soins choisis pour le climat d'Afrique de l'Ouest — humidité, soleil intense, pollution urbaine.\n\n" +
         "### Notre promesse\nDes formules éprouvées, des conseils honnêtes, et une livraison rapide.\n\n" +
         "### Notre équipe\nDes passionnés de skincare basés à Dakar, disponibles en français et en wolof.",
-      metaDescription: "À propos de SenBonsPlans, maison skincare à Dakar.",
+      metaDescription: "À propos de GlowBeauty, maison skincare à Dakar.",
       status: "published",
       createdAt: now,
       updatedAt: now,
@@ -127,10 +127,10 @@ function seedState(): State {
       body:
         "## Écrivez-nous\n\nNous répondons dans la journée, 7 jours sur 7.\n\n" +
         "- **WhatsApp** : +221 78 891 10 10\n" +
-        "- **Email** : contact@senbonsplans.com\n" +
+        "- **Email** : contact@glowbeauty.com\n" +
         "- **Adresse** : Dakar, Sénégal\n\n" +
         "Nos conseillères skincare vous répondent en français et en wolof.",
-      metaDescription: "Contact SenBonsPlans — WhatsApp et email.",
+      metaDescription: "Contact GlowBeauty — WhatsApp et email.",
       status: "published",
       createdAt: now,
       updatedAt: now,
@@ -152,17 +152,111 @@ function seedState(): State {
 
 let state: State = seedState();
 
+// ─── Durable persistence (write-through to the store_settings KV table) ───
+//
+// Reads stay synchronous against the in-memory `state`. Admin writes persist a
+// JSON snapshot of each singleton so edits survive restarts and redeploys, then
+// update `state` only after the write succeeds. The DB layer (db.ts) falls back
+// to an in-memory map when no database is configured (demo mode), so these are
+// safe to call unconditionally. Collections (pages, email templates, media)
+// remain in-memory for now.
+
+const CMS_KEYS = {
+  homepageLayout: "cms.homepageLayout",
+  navigation: "cms.navigation",
+  theme: "cms.theme",
+  integrations: "cms.integrations",
+} as const;
+
+async function persistCmsRecord(key: string, value: unknown): Promise<void> {
+  const { setStoreSetting } = await import("./db");
+  await setStoreSetting(key, JSON.stringify(value));
+}
+
+/**
+ * Load persisted CMS singletons from the database into the in-memory state.
+ * Call once at server startup, after the DB connection is available. A missing
+ * or invalid record is ignored so the seeded default stays in place.
+ */
+export async function hydrateStorefrontCmsFromDb(): Promise<void> {
+  const { getStoreSetting } = await import("./db");
+
+  const hydrate = async <T>(
+    key: string,
+    parse: (raw: unknown) => T,
+    apply: (value: T) => void
+  ): Promise<boolean> => {
+    let raw: string | null | undefined;
+    try {
+      raw = await getStoreSetting(key);
+    } catch (error) {
+      console.error(`[CMS] Failed to read "${key}" from DB`, error);
+      return false;
+    }
+    if (!raw) return false;
+    try {
+      apply(parse(JSON.parse(raw)));
+      return true;
+    } catch (error) {
+      console.error(
+        `[CMS] Ignoring invalid stored "${key}", keeping default`,
+        error
+      );
+      return false;
+    }
+  };
+
+  const results = await Promise.all([
+    hydrate(
+      CMS_KEYS.homepageLayout,
+      v => homepageLayoutSchema.parse(v),
+      v => {
+        state.homepageLayout = v;
+      }
+    ),
+    hydrate(
+      CMS_KEYS.navigation,
+      v => navigationSchema.parse(v),
+      v => {
+        state.navigation = v;
+      }
+    ),
+    hydrate(
+      CMS_KEYS.theme,
+      v => themeSchema.parse(v),
+      v => {
+        state.theme = v;
+      }
+    ),
+    hydrate(
+      CMS_KEYS.integrations,
+      v => integrationsSchema.parse(v),
+      v => {
+        state.integrations = v;
+      }
+    ),
+  ]);
+
+  const loaded = results.filter(Boolean).length;
+  if (loaded > 0) {
+    console.info(`[CMS] Hydrated ${loaded} storefront record(s) from DB`);
+  }
+}
+
 // ─── Homepage layout ───
 
 export function getHomepageLayout(): HomepageLayout {
   return state.homepageLayout;
 }
 
-export function setHomepageLayout(next: unknown): HomepageLayout {
+export async function setHomepageLayout(
+  next: unknown
+): Promise<HomepageLayout> {
   const parsed = homepageLayoutSchema.parse({
     ...(next as any),
     updatedAt: new Date().toISOString(),
   });
+  await persistCmsRecord(CMS_KEYS.homepageLayout, parsed);
   state.homepageLayout = parsed;
   return parsed;
 }
@@ -173,11 +267,12 @@ export function getNavigation(): Navigation {
   return state.navigation;
 }
 
-export function setNavigation(next: unknown): Navigation {
+export async function setNavigation(next: unknown): Promise<Navigation> {
   const parsed = navigationSchema.parse({
     ...(next as any),
     updatedAt: new Date().toISOString(),
   });
+  await persistCmsRecord(CMS_KEYS.navigation, parsed);
   state.navigation = parsed;
   return parsed;
 }
@@ -188,11 +283,12 @@ export function getTheme(): ThemeConfig {
   return state.theme;
 }
 
-export function setTheme(next: unknown): ThemeConfig {
+export async function setTheme(next: unknown): Promise<ThemeConfig> {
   const parsed = themeSchema.parse({
     ...(next as any),
     updatedAt: new Date().toISOString(),
   });
+  await persistCmsRecord(CMS_KEYS.theme, parsed);
   state.theme = parsed;
   return parsed;
 }
@@ -203,11 +299,12 @@ export function getIntegrations(): Integrations {
   return state.integrations;
 }
 
-export function setIntegrations(next: unknown): Integrations {
+export async function setIntegrations(next: unknown): Promise<Integrations> {
   const parsed = integrationsSchema.parse({
     ...(next as any),
     updatedAt: new Date().toISOString(),
   });
+  await persistCmsRecord(CMS_KEYS.integrations, parsed);
   state.integrations = parsed;
   return parsed;
 }

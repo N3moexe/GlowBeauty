@@ -24,19 +24,23 @@ type AdminRequest = Request & {
 };
 
 const chatWriteBuckets = new Map<string, { count: number; resetAt: number }>();
-const chatSessionBuckets = new Map<string, { count: number; resetAt: number }>();
+const chatSessionBuckets = new Map<
+  string,
+  { count: number; resetAt: number }
+>();
 const chatSensitiveKeyPattern =
   /(phone|email|address|token|secret|password|order|customer|whatsapp)/i;
 
 function getRequestIp(req: Request) {
-  const forwarded = req.headers["x-forwarded-for"];
-  if (typeof forwarded === "string" && forwarded.trim().length > 0) {
-    return forwarded.split(",")[0]?.trim() || null;
-  }
   return req.ip || req.socket.remoteAddress || null;
 }
 
-function sendError(res: Response, statusCode: number, message: string, details?: unknown) {
+function sendError(
+  res: Response,
+  statusCode: number,
+  message: string,
+  details?: unknown
+) {
   res.status(statusCode).json({
     ok: false,
     error: message,
@@ -138,7 +142,9 @@ function redactSensitiveToolPayload(value: unknown, depth = 0): unknown {
   if (depth > 4) return "[TRUNCATED]";
   if (value == null) return value;
   if (Array.isArray(value)) {
-    return value.slice(0, 30).map((entry) => redactSensitiveToolPayload(entry, depth + 1));
+    return value
+      .slice(0, 30)
+      .map(entry => redactSensitiveToolPayload(entry, depth + 1));
   }
   if (typeof value === "object") {
     const output: Record<string, unknown> = {};
@@ -201,7 +207,11 @@ export function registerChatbotApiRoutes(app: Express) {
     try {
       const parsed = conciergeChatRequestSchema.parse(req.body || {});
       if (!isChatSessionAllowed(parsed.sessionId)) {
-        sendError(res, 429, "Too many chat requests for this session. Please wait a minute.");
+        sendError(
+          res,
+          429,
+          "Too many chat requests for this session. Please wait a minute."
+        );
         return;
       }
 
@@ -259,13 +269,16 @@ export function registerChatbotApiRoutes(app: Express) {
             })),
           settings: {
             greeting: settings.greeting,
-            tone: settings.tone as "Luxury skincare" | "Friendly" | "Professional",
+            tone: settings.tone as
+              | "Luxury skincare"
+              | "Friendly"
+              | "Professional",
             whatsappNumber: settings.whatsappNumber,
             policies: settings.policies,
           },
         },
         {
-          onDelta: (chunk) => {
+          onDelta: chunk => {
             if (isClosed) return;
             streamedContent += chunk;
             writeSseEvent(res, "chunk", { delta: chunk });
@@ -292,9 +305,13 @@ export function registerChatbotApiRoutes(app: Express) {
         });
       }
 
-      const handoffResult = concierge.toolCalls.find(call => call.name === "handoffToWhatsApp");
+      const handoffResult = concierge.toolCalls.find(
+        call => call.name === "handoffToWhatsApp"
+      );
       const handoffPayload =
-        handoffResult && handoffResult.result && typeof handoffResult.result === "object"
+        handoffResult &&
+        handoffResult.result &&
+        typeof handoffResult.result === "object"
           ? (handoffResult.result as Record<string, unknown>)
           : null;
 
@@ -343,7 +360,9 @@ export function registerChatbotApiRoutes(app: Express) {
     try {
       const parsed = createChatThreadSchema.parse(req.body || {});
       const settings = await store.ensureChatSettings();
-      const conciergeSettings = await db.getAdminChatbotSettings().catch(() => null);
+      const conciergeSettings = await db
+        .getAdminChatbotSettings()
+        .catch(() => null);
       if (conciergeSettings) {
         settings.whatsappNumber = conciergeSettings.whatsappNumber;
         settings.welcomeMessage = conciergeSettings.greeting;
@@ -363,7 +382,10 @@ export function registerChatbotApiRoutes(app: Express) {
         messages = [welcome];
       }
 
-      res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
+      res.setHeader(
+        "Cache-Control",
+        "no-store, no-cache, must-revalidate, max-age=0"
+      );
       res.json({
         ok: true,
         data: {
@@ -374,7 +396,11 @@ export function registerChatbotApiRoutes(app: Express) {
       });
     } catch (error: any) {
       if (error instanceof z.ZodError) {
-        sendError(res, 400, error.issues[0]?.message || "Invalid thread payload");
+        sendError(
+          res,
+          400,
+          error.issues[0]?.message || "Invalid thread payload"
+        );
         return;
       }
       console.error("[Chatbot API] create/resume thread failed:", error);
@@ -410,7 +436,11 @@ export function registerChatbotApiRoutes(app: Express) {
 
   app.post("/api/chat/message", async (req: Request, res: Response) => {
     if (!isChatMessageAllowed(req)) {
-      sendError(res, 429, "Too many chat requests. Please try again in a minute.");
+      sendError(
+        res,
+        429,
+        "Too many chat requests. Please try again in a minute."
+      );
       return;
     }
 
@@ -467,7 +497,10 @@ export function registerChatbotApiRoutes(app: Express) {
 
       const history = transcript.messages
         .slice(-12)
-        .map(item => ({ role: item.role as "user" | "assistant", content: item.content }))
+        .map(item => ({
+          role: item.role as "user" | "assistant",
+          content: item.content,
+        }))
         .filter(item => item.role === "user" || item.role === "assistant");
 
       const engineOutput = await runChatEngine(parsed, {
@@ -552,256 +585,336 @@ export function registerChatbotApiRoutes(app: Express) {
     }
   });
 
-  app.get("/api/admin/chatbot/settings", requireAdmin, async (_req: Request, res: Response) => {
-    try {
-      const settings = await store.ensureChatSettings();
-      res.json({ ok: true, data: settings });
-    } catch (error: any) {
-      console.error("[Chatbot API] admin settings read failed:", error);
-      sendError(res, 500, error?.message || "Failed to load chatbot settings");
+  app.get(
+    "/api/admin/chatbot/settings",
+    requireAdmin,
+    async (_req: Request, res: Response) => {
+      try {
+        const settings = await store.ensureChatSettings();
+        res.json({ ok: true, data: settings });
+      } catch (error: any) {
+        console.error("[Chatbot API] admin settings read failed:", error);
+        sendError(
+          res,
+          500,
+          error?.message || "Failed to load chatbot settings"
+        );
+      }
     }
-  });
+  );
 
-  app.put("/api/admin/chatbot/settings", requireAdmin, async (req: Request, res: Response) => {
-    try {
-      const payload = chatSettingsUpdateSchema.parse(req.body || {});
-      const updated = await store.updateChatSettings(payload);
-      await store.logChatEvent({
-        type: "admin_settings_updated",
-        payload: {
-          actorUserId: (req as AdminRequest).adminUser?.id || null,
-        },
-      });
-      res.json({ ok: true, data: updated });
-    } catch (error: any) {
-      if (error instanceof z.ZodError) {
-        sendError(res, 400, error.issues[0]?.message || "Invalid settings payload");
+  app.put(
+    "/api/admin/chatbot/settings",
+    requireAdmin,
+    async (req: Request, res: Response) => {
+      try {
+        const payload = chatSettingsUpdateSchema.parse(req.body || {});
+        const updated = await store.updateChatSettings(payload);
+        await store.logChatEvent({
+          type: "admin_settings_updated",
+          payload: {
+            actorUserId: (req as AdminRequest).adminUser?.id || null,
+          },
+        });
+        res.json({ ok: true, data: updated });
+      } catch (error: any) {
+        if (error instanceof z.ZodError) {
+          sendError(
+            res,
+            400,
+            error.issues[0]?.message || "Invalid settings payload"
+          );
+          return;
+        }
+        console.error("[Chatbot API] admin settings update failed:", error);
+        sendError(
+          res,
+          500,
+          error?.message || "Failed to update chatbot settings"
+        );
+      }
+    }
+  );
+
+  app.get(
+    "/api/admin/chatbot/kb",
+    requireAdmin,
+    async (req: Request, res: Response) => {
+      try {
+        const query = z
+          .object({
+            q: z.string().optional(),
+            tag: z.string().optional(),
+            locale: z.string().optional(),
+            publishedOnly: z
+              .enum(["true", "false"])
+              .optional()
+              .transform(value => value === "true"),
+          })
+          .parse(req.query || {});
+        const articles = await store.listKbArticles({
+          query: query.q,
+          tag: query.tag,
+          locale: query.locale,
+          publishedOnly: query.publishedOnly,
+        });
+        res.json({ ok: true, data: articles });
+      } catch (error: any) {
+        if (error instanceof z.ZodError) {
+          sendError(res, 400, error.issues[0]?.message || "Invalid query");
+          return;
+        }
+        console.error("[Chatbot API] KB list failed:", error);
+        sendError(res, 500, error?.message || "Failed to list KB articles");
+      }
+    }
+  );
+
+  app.post(
+    "/api/admin/chatbot/kb",
+    requireAdmin,
+    async (req: Request, res: Response) => {
+      try {
+        const payload = createChatKbArticleSchema.parse(req.body || {});
+        const created = await store.upsertKbArticle(payload);
+        res.status(201).json({ ok: true, data: created });
+      } catch (error: any) {
+        if (error instanceof z.ZodError) {
+          sendError(res, 400, error.issues[0]?.message || "Invalid KB payload");
+          return;
+        }
+        console.error("[Chatbot API] KB create failed:", error);
+        sendError(res, 500, error?.message || "Failed to create KB article");
+      }
+    }
+  );
+
+  app.put(
+    "/api/admin/chatbot/kb/:id",
+    requireAdmin,
+    async (req: Request, res: Response) => {
+      const id = parseThreadIdParam(req);
+      if (!id) {
+        sendError(res, 400, "Invalid article id");
         return;
       }
-      console.error("[Chatbot API] admin settings update failed:", error);
-      sendError(res, 500, error?.message || "Failed to update chatbot settings");
+      try {
+        const payload = updateChatKbArticleSchema.parse(req.body || {});
+        const updated = await store.upsertKbArticle({ ...payload, id });
+        res.json({ ok: true, data: updated });
+      } catch (error: any) {
+        if (error instanceof z.ZodError) {
+          sendError(res, 400, error.issues[0]?.message || "Invalid KB payload");
+          return;
+        }
+        console.error("[Chatbot API] KB update failed:", error);
+        sendError(res, 500, error?.message || "Failed to update KB article");
+      }
     }
-  });
+  );
 
-  app.get("/api/admin/chatbot/kb", requireAdmin, async (req: Request, res: Response) => {
-    try {
-      const query = z
-        .object({
-          q: z.string().optional(),
-          tag: z.string().optional(),
-          locale: z.string().optional(),
-          publishedOnly: z
-            .enum(["true", "false"])
-            .optional()
-            .transform(value => value === "true"),
-        })
-        .parse(req.query || {});
-      const articles = await store.listKbArticles({
-        query: query.q,
-        tag: query.tag,
-        locale: query.locale,
-        publishedOnly: query.publishedOnly,
-      });
-      res.json({ ok: true, data: articles });
-    } catch (error: any) {
-      if (error instanceof z.ZodError) {
-        sendError(res, 400, error.issues[0]?.message || "Invalid query");
+  app.delete(
+    "/api/admin/chatbot/kb/:id",
+    requireAdmin,
+    async (req: Request, res: Response) => {
+      const id = parseThreadIdParam(req);
+      if (!id) {
+        sendError(res, 400, "Invalid article id");
         return;
       }
-      console.error("[Chatbot API] KB list failed:", error);
-      sendError(res, 500, error?.message || "Failed to list KB articles");
+      try {
+        const deleted = await store.deleteKbArticle(id);
+        res.json({ ok: true, data: { deleted } });
+      } catch (error: any) {
+        console.error("[Chatbot API] KB delete failed:", error);
+        sendError(res, 500, error?.message || "Failed to delete KB article");
+      }
     }
-  });
+  );
 
-  app.post("/api/admin/chatbot/kb", requireAdmin, async (req: Request, res: Response) => {
-    try {
-      const payload = createChatKbArticleSchema.parse(req.body || {});
-      const created = await store.upsertKbArticle(payload);
-      res.status(201).json({ ok: true, data: created });
-    } catch (error: any) {
-      if (error instanceof z.ZodError) {
-        sendError(res, 400, error.issues[0]?.message || "Invalid KB payload");
+  app.get(
+    "/api/admin/chatbot/threads",
+    requireAdmin,
+    async (req: Request, res: Response) => {
+      try {
+        const query = z
+          .object({
+            status: z.enum(["open", "closed"]).optional(),
+            q: z.string().optional(),
+            limit: z.coerce.number().min(1).max(500).optional(),
+            offset: z.coerce.number().min(0).optional(),
+          })
+          .parse(req.query || {});
+        const threads = await store.listThreadSummaries({
+          status: query.status,
+          query: query.q,
+          limit: query.limit,
+          offset: query.offset,
+        });
+        res.json({ ok: true, data: threads });
+      } catch (error: any) {
+        if (error instanceof z.ZodError) {
+          sendError(res, 400, error.issues[0]?.message || "Invalid query");
+          return;
+        }
+        console.error("[Chatbot API] thread list failed:", error);
+        sendError(res, 500, error?.message || "Failed to list chat threads");
+      }
+    }
+  );
+
+  app.get(
+    "/api/admin/chatbot/threads/:id",
+    requireAdmin,
+    async (req: Request, res: Response) => {
+      const id = parseThreadIdParam(req);
+      if (!id) {
+        sendError(res, 400, "Invalid thread id");
         return;
       }
-      console.error("[Chatbot API] KB create failed:", error);
-      sendError(res, 500, error?.message || "Failed to create KB article");
+      try {
+        const transcript = await store.getThreadTranscript(id);
+        if (!transcript.thread) {
+          sendError(res, 404, "Thread not found");
+          return;
+        }
+        res.json({ ok: true, data: transcript });
+      } catch (error: any) {
+        console.error("[Chatbot API] thread detail failed:", error);
+        sendError(
+          res,
+          500,
+          error?.message || "Failed to load thread transcript"
+        );
+      }
     }
-  });
+  );
 
-  app.put("/api/admin/chatbot/kb/:id", requireAdmin, async (req: Request, res: Response) => {
-    const id = parseThreadIdParam(req);
-    if (!id) {
-      sendError(res, 400, "Invalid article id");
-      return;
-    }
-    try {
-      const payload = updateChatKbArticleSchema.parse(req.body || {});
-      const updated = await store.upsertKbArticle({ ...payload, id });
-      res.json({ ok: true, data: updated });
-    } catch (error: any) {
-      if (error instanceof z.ZodError) {
-        sendError(res, 400, error.issues[0]?.message || "Invalid KB payload");
+  app.post(
+    "/api/admin/chatbot/threads/:id/note",
+    requireAdmin,
+    async (req: Request, res: Response) => {
+      const id = parseThreadIdParam(req);
+      if (!id) {
+        sendError(res, 400, "Invalid thread id");
         return;
       }
-      console.error("[Chatbot API] KB update failed:", error);
-      sendError(res, 500, error?.message || "Failed to update KB article");
+      try {
+        const payload = createChatThreadNoteSchema.parse(req.body || {});
+        await store.addThreadInternalNote({
+          threadId: id,
+          note: payload.note,
+          actorUserId: (req as AdminRequest).adminUser?.id ?? null,
+        });
+        res.json({ ok: true, data: { success: true } });
+      } catch (error: any) {
+        if (error instanceof z.ZodError) {
+          sendError(
+            res,
+            400,
+            error.issues[0]?.message || "Invalid note payload"
+          );
+          return;
+        }
+        console.error("[Chatbot API] add note failed:", error);
+        sendError(res, 500, error?.message || "Failed to add internal note");
+      }
     }
-  });
+  );
 
-  app.delete("/api/admin/chatbot/kb/:id", requireAdmin, async (req: Request, res: Response) => {
-    const id = parseThreadIdParam(req);
-    if (!id) {
-      sendError(res, 400, "Invalid article id");
-      return;
-    }
-    try {
-      const deleted = await store.deleteKbArticle(id);
-      res.json({ ok: true, data: { deleted } });
-    } catch (error: any) {
-      console.error("[Chatbot API] KB delete failed:", error);
-      sendError(res, 500, error?.message || "Failed to delete KB article");
-    }
-  });
-
-  app.get("/api/admin/chatbot/threads", requireAdmin, async (req: Request, res: Response) => {
-    try {
-      const query = z
-        .object({
-          status: z.enum(["open", "closed"]).optional(),
-          q: z.string().optional(),
-          limit: z.coerce.number().min(1).max(500).optional(),
-          offset: z.coerce.number().min(0).optional(),
-        })
-        .parse(req.query || {});
-      const threads = await store.listThreadSummaries({
-        status: query.status,
-        query: query.q,
-        limit: query.limit,
-        offset: query.offset,
-      });
-      res.json({ ok: true, data: threads });
-    } catch (error: any) {
-      if (error instanceof z.ZodError) {
-        sendError(res, 400, error.issues[0]?.message || "Invalid query");
+  app.post(
+    "/api/admin/chatbot/threads/:id/close",
+    requireAdmin,
+    async (req: Request, res: Response) => {
+      const id = parseThreadIdParam(req);
+      if (!id) {
+        sendError(res, 400, "Invalid thread id");
         return;
       }
-      console.error("[Chatbot API] thread list failed:", error);
-      sendError(res, 500, error?.message || "Failed to list chat threads");
+      try {
+        const closed = await store.closeThread(id);
+        res.json({ ok: true, data: { closed } });
+      } catch (error: any) {
+        console.error("[Chatbot API] close thread failed:", error);
+        sendError(res, 500, error?.message || "Failed to close thread");
+      }
     }
-  });
+  );
 
-  app.get("/api/admin/chatbot/threads/:id", requireAdmin, async (req: Request, res: Response) => {
-    const id = parseThreadIdParam(req);
-    if (!id) {
-      sendError(res, 400, "Invalid thread id");
-      return;
+  app.get(
+    "/api/admin/chatbot/tickets",
+    requireAdmin,
+    async (req: Request, res: Response) => {
+      try {
+        const query = z
+          .object({
+            status: z.enum(["open", "closed"]).optional(),
+            limit: z.coerce.number().min(1).max(500).optional(),
+          })
+          .parse(req.query || {});
+        const tickets = await store.listTickets({
+          status: query.status,
+          limit: query.limit,
+        });
+        res.json({ ok: true, data: tickets });
+      } catch (error: any) {
+        if (error instanceof z.ZodError) {
+          sendError(res, 400, error.issues[0]?.message || "Invalid query");
+          return;
+        }
+        console.error("[Chatbot API] ticket list failed:", error);
+        sendError(res, 500, error?.message || "Failed to list tickets");
+      }
     }
-    try {
-      const transcript = await store.getThreadTranscript(id);
-      if (!transcript.thread) {
-        sendError(res, 404, "Thread not found");
+  );
+
+  app.patch(
+    "/api/admin/chatbot/tickets/:id",
+    requireAdmin,
+    async (req: Request, res: Response) => {
+      const id = parseThreadIdParam(req);
+      if (!id) {
+        sendError(res, 400, "Invalid ticket id");
         return;
       }
-      res.json({ ok: true, data: transcript });
-    } catch (error: any) {
-      console.error("[Chatbot API] thread detail failed:", error);
-      sendError(res, 500, error?.message || "Failed to load thread transcript");
-    }
-  });
-
-  app.post("/api/admin/chatbot/threads/:id/note", requireAdmin, async (req: Request, res: Response) => {
-    const id = parseThreadIdParam(req);
-    if (!id) {
-      sendError(res, 400, "Invalid thread id");
-      return;
-    }
-    try {
-      const payload = createChatThreadNoteSchema.parse(req.body || {});
-      await store.addThreadInternalNote({
-        threadId: id,
-        note: payload.note,
-        actorUserId: (req as AdminRequest).adminUser?.id ?? null,
-      });
-      res.json({ ok: true, data: { success: true } });
-    } catch (error: any) {
-      if (error instanceof z.ZodError) {
-        sendError(res, 400, error.issues[0]?.message || "Invalid note payload");
-        return;
+      try {
+        const payload = updateChatTicketStatusSchema.parse(req.body || {});
+        const updated = await store.updateTicketStatus(id, payload.status);
+        if (!updated) {
+          sendError(res, 404, "Ticket not found");
+          return;
+        }
+        res.json({ ok: true, data: updated });
+      } catch (error: any) {
+        if (error instanceof z.ZodError) {
+          sendError(
+            res,
+            400,
+            error.issues[0]?.message || "Invalid ticket payload"
+          );
+          return;
+        }
+        console.error("[Chatbot API] ticket update failed:", error);
+        sendError(res, 500, error?.message || "Failed to update ticket");
       }
-      console.error("[Chatbot API] add note failed:", error);
-      sendError(res, 500, error?.message || "Failed to add internal note");
     }
-  });
+  );
 
-  app.post("/api/admin/chatbot/threads/:id/close", requireAdmin, async (req: Request, res: Response) => {
-    const id = parseThreadIdParam(req);
-    if (!id) {
-      sendError(res, 400, "Invalid thread id");
-      return;
-    }
-    try {
-      const closed = await store.closeThread(id);
-      res.json({ ok: true, data: { closed } });
-    } catch (error: any) {
-      console.error("[Chatbot API] close thread failed:", error);
-      sendError(res, 500, error?.message || "Failed to close thread");
-    }
-  });
-
-  app.get("/api/admin/chatbot/tickets", requireAdmin, async (req: Request, res: Response) => {
-    try {
-      const query = z
-        .object({
-          status: z.enum(["open", "closed"]).optional(),
-          limit: z.coerce.number().min(1).max(500).optional(),
-        })
-        .parse(req.query || {});
-      const tickets = await store.listTickets({
-        status: query.status,
-        limit: query.limit,
-      });
-      res.json({ ok: true, data: tickets });
-    } catch (error: any) {
-      if (error instanceof z.ZodError) {
-        sendError(res, 400, error.issues[0]?.message || "Invalid query");
-        return;
+  app.get(
+    "/api/admin/chatbot/analytics",
+    requireAdmin,
+    async (_req: Request, res: Response) => {
+      try {
+        const analytics = await store.getChatAnalytics();
+        res.json({ ok: true, data: analytics });
+      } catch (error: any) {
+        console.error("[Chatbot API] analytics failed:", error);
+        sendError(
+          res,
+          500,
+          error?.message || "Failed to load chatbot analytics"
+        );
       }
-      console.error("[Chatbot API] ticket list failed:", error);
-      sendError(res, 500, error?.message || "Failed to list tickets");
     }
-  });
-
-  app.patch("/api/admin/chatbot/tickets/:id", requireAdmin, async (req: Request, res: Response) => {
-    const id = parseThreadIdParam(req);
-    if (!id) {
-      sendError(res, 400, "Invalid ticket id");
-      return;
-    }
-    try {
-      const payload = updateChatTicketStatusSchema.parse(req.body || {});
-      const updated = await store.updateTicketStatus(id, payload.status);
-      if (!updated) {
-        sendError(res, 404, "Ticket not found");
-        return;
-      }
-      res.json({ ok: true, data: updated });
-    } catch (error: any) {
-      if (error instanceof z.ZodError) {
-        sendError(res, 400, error.issues[0]?.message || "Invalid ticket payload");
-        return;
-      }
-      console.error("[Chatbot API] ticket update failed:", error);
-      sendError(res, 500, error?.message || "Failed to update ticket");
-    }
-  });
-
-  app.get("/api/admin/chatbot/analytics", requireAdmin, async (_req: Request, res: Response) => {
-    try {
-      const analytics = await store.getChatAnalytics();
-      res.json({ ok: true, data: analytics });
-    } catch (error: any) {
-      console.error("[Chatbot API] analytics failed:", error);
-      sendError(res, 500, error?.message || "Failed to load chatbot analytics");
-    }
-  });
+  );
 }

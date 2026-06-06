@@ -3,9 +3,7 @@ import type { AdminModuleKey } from "@/components/admin/SidebarNav";
 export const adminModulePathMap: Record<AdminModuleKey, string> = {
   analytics: "/admin",
   orders: "/admin/orders",
-  // "search" is the historical module key for the Customers directory.
-  // It routes to the standalone /admin/customers page (v1 of task 1.5).
-  search: "/admin/customers",
+  customers: "/admin/customers",
   products: "/admin/products",
   categories: "/admin/categories",
   reviews: "/admin/reviews",
@@ -15,18 +13,25 @@ export const adminModulePathMap: Record<AdminModuleKey, string> = {
   reports: "/admin/reports",
   cms: "/admin/cms",
   settings: "/admin/settings",
+  newsletter: "/admin/newsletter",
+  activity: "/admin/activity",
 };
 
 export const dashboardModuleKeys: AdminModuleKey[] = [
   "analytics",
   "orders",
-  "search",
+  "customers",
   "products",
+  "categories",
   "reviews",
   "inventory",
   "coupons",
   "banners",
   "reports",
+  "cms",
+  "settings",
+  "newsletter",
+  "activity",
 ];
 
 export function getAdminModulePath(module: AdminModuleKey): string {

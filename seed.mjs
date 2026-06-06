@@ -181,7 +181,7 @@ async function seed() {
       {
         openId: "seed-admin-manager",
         name: "Manager Seed",
-        email: "manager.seed@senbonsplans.local",
+        email: "manager.seed@glowbeauty.local",
         role: "user",
         staffRole: "manager",
         isActive: true,
@@ -189,7 +189,7 @@ async function seed() {
       {
         openId: "seed-admin-editor",
         name: "Editor Seed",
-        email: "editor.seed@senbonsplans.local",
+        email: "editor.seed@glowbeauty.local",
         role: "user",
         staffRole: "staff",
         isActive: true,
@@ -197,7 +197,7 @@ async function seed() {
       {
         openId: "seed-admin-disabled",
         name: "Disabled Seed",
-        email: "disabled.seed@senbonsplans.local",
+        email: "disabled.seed@glowbeauty.local",
         role: "user",
         staffRole: "staff",
         isActive: false,
@@ -337,7 +337,7 @@ async function seed() {
       SELECT
         p.id,
         'Aissatou N.',
-        'aissatou.seed@senbonsplans.local',
+        'aissatou.seed@glowbeauty.local',
         5,
         'Glow visible apres 10 jours',
         'Texture legere, aucune irritation et peau plus lumineuse.',
@@ -362,7 +362,7 @@ async function seed() {
       SELECT
         p.id,
         'Marieme S.',
-        'marieme.seed@senbonsplans.local',
+        'marieme.seed@glowbeauty.local',
         4,
         'Routine simple et efficace',
         'Peau hydratee toute la journee, je recommande ce produit.',
@@ -387,7 +387,7 @@ async function seed() {
       SELECT
         p.id,
         'Ibrahima T.',
-        'ibrahima.pending@senbonsplans.local',
+        'ibrahima.pending@glowbeauty.local',
         4,
         'Bon potentiel',
         'Je teste encore la routine, resultat encourageant.',
@@ -395,7 +395,7 @@ async function seed() {
         false
       FROM products p
       WHERE NOT EXISTS (
-        SELECT 1 FROM reviews r WHERE r.customerEmail = 'ibrahima.pending@senbonsplans.local'
+        SELECT 1 FROM reviews r WHERE r.customerEmail = 'ibrahima.pending@glowbeauty.local'
       )
       ORDER BY p.id ASC
       LIMIT 1
@@ -414,7 +414,7 @@ async function seed() {
       SELECT
         p.id,
         'Coumba P.',
-        'coumba.hidden@senbonsplans.local',
+        'coumba.hidden@glowbeauty.local',
         2,
         'Pas adapte a ma peau',
         'J ai eu une reaction et j ai arrete le produit.',
@@ -422,7 +422,7 @@ async function seed() {
         false
       FROM products p
       WHERE NOT EXISTS (
-        SELECT 1 FROM reviews r WHERE r.customerEmail = 'coumba.hidden@senbonsplans.local'
+        SELECT 1 FROM reviews r WHERE r.customerEmail = 'coumba.hidden@glowbeauty.local'
       )
       ORDER BY p.id DESC
       LIMIT 1

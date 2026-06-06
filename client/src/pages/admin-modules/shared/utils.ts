@@ -3,7 +3,7 @@ import type { AdminModuleKey } from "@/components/admin/SidebarNav";
 export const ALL_MODULES: AdminModuleKey[] = [
   "analytics",
   "orders",
-  "search",
+  "customers",
   "products",
   "categories",
   "reviews",
@@ -13,6 +13,8 @@ export const ALL_MODULES: AdminModuleKey[] = [
   "reports",
   "cms",
   "settings",
+  "newsletter",
+  "activity",
 ];
 
 export function parseAdminModule(

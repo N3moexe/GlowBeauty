@@ -8,8 +8,8 @@ export default function Chat() {
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_0%_0%,rgba(182,124,134,0.12),transparent_34%),radial-gradient(circle_at_100%_100%,rgba(160,175,147,0.16),transparent_30%),linear-gradient(180deg,#fcf8f4_0%,#f5eee7_100%)]">
       <SeoHead
-        title="Chat support | SenBonsPlans"
-        description="Assistant support and shopping chat for SenBonsPlans."
+        title="Chat support | GlowBeauty"
+        description="Assistant support and shopping chat for GlowBeauty."
       />
       <Navbar />
       <main className="mx-auto w-full max-w-6xl px-4 pb-8 pt-6 md:px-6">

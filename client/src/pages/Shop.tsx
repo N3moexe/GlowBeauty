@@ -269,23 +269,23 @@ export default function Shop() {
   }, [priceBounds.max, priceBounds.min, priceRange, search, selectedCategorySlug, sortBy]);
 
   const seoTitle = selectedCategory
-    ? `${selectedCategory.name} | Boutique skincare | SenBonsPlans`
+    ? `${selectedCategory.name} | Boutique skincare | GlowBeauty`
     : search.trim()
-      ? `${search.trim()} | Recherche skincare | SenBonsPlans`
-      : "Boutique skincare | SenBonsPlans";
+      ? `${search.trim()} | Recherche skincare | GlowBeauty`
+      : "Boutique skincare | GlowBeauty";
 
   const seoDescription = selectedCategory
-    ? `Explorez la categorie ${selectedCategory.name} avec livraison rapide et paiement securise sur SenBonsPlans.`
+    ? `Explorez la categorie ${selectedCategory.name} avec livraison rapide et paiement securise sur GlowBeauty.`
     : search.trim()
       ? `Resultats pour ${search.trim()}. Comparez les meilleurs produits skincare et beaute disponibles maintenant.`
-      : "Parcourez la boutique SenBonsPlans: soins visage, corps, routines beaute et offres du moment.";
+      : "Parcourez la boutique GlowBeauty: soins visage, corps, routines beaute et offres du moment.";
 
   const shopSeoJsonLd = useMemo(() => {
-    const baseUrl = typeof window !== "undefined" ? window.location.origin : "https://senbonsplans.com";
+    const baseUrl = typeof window !== "undefined" ? window.location.origin : "https://glowbeauty.com";
     return {
       "@context": "https://schema.org",
       "@type": "CollectionPage",
-      name: selectedCategory ? `Categorie ${selectedCategory.name}` : "Boutique SenBonsPlans",
+      name: selectedCategory ? `Categorie ${selectedCategory.name}` : "Boutique GlowBeauty",
       url: `${baseUrl}${canonicalPath}`,
       mainEntity: {
         "@type": "ItemList",

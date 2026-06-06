@@ -1,4 +1,4 @@
-# SenBonsPlans - Project TODO
+# GlowBeauty - Project TODO
 
 ## Phase 1: Infrastructure & Setup
 - [ ] Copy source files from original project to Manus project

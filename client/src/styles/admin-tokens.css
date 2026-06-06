@@ -1,0 +1,31 @@
+/*
+ * Admin Design Tokens — Editorial Apothecary
+ * Single source of truth for all admin chrome.
+ * All admin components read from these; no hardcoded palette values elsewhere.
+ */
+:root {
+  --admin-bg: #fbf4ee;
+  --admin-ink: #2a2622;
+  --admin-muted: #8a7f76;
+  --admin-accent: #e3744e;
+  --admin-accent-hover: #d0623d;
+  --admin-accent-soft: #f4d8c5;
+  --admin-secondary: #b58dcc;
+  --admin-secondary-soft: #ede0f7;
+  --admin-divider: #e8dccf;
+  --admin-surface: #ffffff;
+  --admin-surface-tint: #fcf7f1;
+  --admin-border: #e2d5c6;
+  --admin-shadow: 0 18px 44px -28px rgba(67, 49, 42, 0.18);
+  --admin-shadow-strong: 0 22px 44px -34px rgba(67, 49, 42, 0.52);
+
+  --font-admin-display: "Cormorant Garamond", Georgia, serif;
+  --font-admin-body: "Manrope", system-ui, sans-serif;
+
+  --radius-admin-card: 18px;
+  --radius-admin-pill: 999px;
+  --radius-admin-input: 10px;
+  --radius-admin-btn: 12px;
+
+  --ease-admin-poured: cubic-bezier(0.22, 0.61, 0.36, 1);
+}

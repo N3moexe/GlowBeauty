@@ -382,12 +382,12 @@ export function defaultEmailTemplate(key: EmailTemplateKey): EmailTemplate {
       return {
         key,
         subject:
-          "Confirmation de votre commande {{orderNumber}} — SenBonsPlans",
+          "Confirmation de votre commande {{orderNumber}} — GlowBeauty",
         body:
           "Bonjour {{customerName}},\n\n" +
           "Merci pour votre commande {{orderNumber}}. Nous l'avons bien reçue et elle est en cours de traitement.\n\n" +
           "Total : {{totalAmount}} CFA\nMode de paiement : {{paymentMethod}}\n\n" +
-          "Suivez votre commande à tout moment : {{trackingUrl}}\n\nL'équipe SenBonsPlans.",
+          "Suivez votre commande à tout moment : {{trackingUrl}}\n\nL'équipe GlowBeauty.",
         updatedAt: now,
       };
     case "order_status_update":
@@ -396,13 +396,13 @@ export function defaultEmailTemplate(key: EmailTemplateKey): EmailTemplate {
         subject: "Votre commande {{orderNumber}} — {{statusLabel}}",
         body:
           "Bonjour {{customerName}},\n\nStatut de votre commande {{orderNumber}} : {{statusLabel}}.\n\n" +
-          "Total : {{totalAmount}} CFA\n\nPour toute question, répondez à cet email ou écrivez-nous sur WhatsApp.\n\nL'équipe SenBonsPlans.",
+          "Total : {{totalAmount}} CFA\n\nPour toute question, répondez à cet email ou écrivez-nous sur WhatsApp.\n\nL'équipe GlowBeauty.",
         updatedAt: now,
       };
     case "admin_notification":
       return {
         key,
-        subject: "[SenBonsPlans] Nouvelle commande {{orderNumber}}",
+        subject: "[GlowBeauty] Nouvelle commande {{orderNumber}}",
         body:
           "Nouvelle commande reçue.\n\nN° : {{orderNumber}}\nClient : {{customerName}} ({{customerPhone}})\n" +
           "Total : {{totalAmount}} CFA\nArticles : {{itemCount}}\nMode de paiement : {{paymentMethod}}\n\n" +

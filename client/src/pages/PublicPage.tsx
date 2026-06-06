@@ -124,12 +124,12 @@ export default function PublicPage() {
       <SeoHead
         title={
           pageQuery.data
-            ? `${pageQuery.data.title} | SenBonsPlans`
-            : "Page | SenBonsPlans"
+            ? `${pageQuery.data.title} | GlowBeauty`
+            : "Page | GlowBeauty"
         }
         description={
           pageQuery.data?.metaDescription ||
-          "Information officielle SenBonsPlans."
+          "Information officielle GlowBeauty."
         }
         path={`/page/${slug}`}
         type="article"

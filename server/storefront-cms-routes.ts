@@ -124,8 +124,8 @@ export function registerStorefrontCmsRoutes(app: Express) {
   app.put(
     "/api/admin/storefront/layout",
     adminGuard,
-    asyncHandler((req, res) => {
-      const next = setHomepageLayout(req.body);
+    asyncHandler(async (req, res) => {
+      const next = await setHomepageLayout(req.body);
       sendOk(res, next);
     })
   );
@@ -141,8 +141,8 @@ export function registerStorefrontCmsRoutes(app: Express) {
   app.put(
     "/api/admin/storefront/navigation",
     adminGuard,
-    asyncHandler((req, res) => {
-      const next = setNavigation(req.body);
+    asyncHandler(async (req, res) => {
+      const next = await setNavigation(req.body);
       sendOk(res, next);
     })
   );
@@ -158,8 +158,8 @@ export function registerStorefrontCmsRoutes(app: Express) {
   app.put(
     "/api/admin/storefront/theme",
     adminGuard,
-    asyncHandler((req, res) => {
-      const next = setTheme(req.body);
+    asyncHandler(async (req, res) => {
+      const next = await setTheme(req.body);
       sendOk(res, next);
     })
   );
@@ -175,8 +175,8 @@ export function registerStorefrontCmsRoutes(app: Express) {
   app.put(
     "/api/admin/storefront/integrations",
     adminGuard,
-    asyncHandler((req, res) => {
-      const next = setIntegrations(req.body);
+    asyncHandler(async (req, res) => {
+      const next = await setIntegrations(req.body);
       sendOk(res, next);
     })
   );

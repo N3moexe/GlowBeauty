@@ -30,7 +30,7 @@ function renderNewsletterStatusPage(
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>${title} — SenBonsPlans</title>
+<title>${title} — GlowBeauty</title>
 <style>
   body { font-family: -apple-system, Segoe UI, Arial, sans-serif; background: #faf7f3; color: #2b2b2b; margin: 0; padding: 48px 16px; }
   main { max-width: 520px; margin: 0 auto; background: #fff; border-radius: 12px; padding: 32px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
@@ -69,10 +69,6 @@ function sendError(res: Response, statusCode: number, message: string) {
 }
 
 function getRequestIp(req: Request) {
-  const forwarded = req.headers["x-forwarded-for"];
-  if (typeof forwarded === "string" && forwarded.trim().length > 0) {
-    return forwarded.split(",")[0]?.trim() || null;
-  }
   return req.ip || req.socket.remoteAddress || null;
 }
 

@@ -104,10 +104,10 @@ export default function AdminChatbot() {
   const canAccess = Boolean(permissions?.canAccessSettings);
 
   const [settingsForm, setSettingsForm] = useState<ChatSettingsUpdate>({
-    businessName: "SenBonsPlans",
+    businessName: "GlowBeauty",
     whatsappNumber: "+221788911010",
     welcomeMessage:
-      "Bienvenue chez SenBonsPlans. Je peux vous aider sur les produits, commandes et livraison.",
+      "Bienvenue chez GlowBeauty. Je peux vous aider sur les produits, commandes et livraison.",
     primaryColor: "#8f5f68",
     botTone: "luxury_skincare",
     enabledTools: [...TOOL_OPTIONS],

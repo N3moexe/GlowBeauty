@@ -51,7 +51,7 @@ function resolveDbConfig() {
     port: Number(process.env.DB_PORT || 3306),
     user: process.env.DB_USER || "root",
     password: process.env.DB_PASSWORD || "",
-    database: process.env.DB_NAME || "senbonsplans",
+    database: process.env.DB_NAME || "glowbeauty",
   };
 }
 
@@ -63,7 +63,7 @@ async function main() {
   let connection;
 
   try {
-    console.log("\n=== SenBonsPlans Admin Setup ===\n");
+    console.log("\n=== GlowBeauty Admin Setup ===\n");
 
     const config = resolveDbConfig();
     console.log(
@@ -74,7 +74,7 @@ async function main() {
     console.log("Connected.\n");
 
     const defaultUsername =
-      process.env.LOCAL_ADMIN_USERNAME || "admin@senbonsplans";
+      process.env.LOCAL_ADMIN_USERNAME || "admin@glowbeauty";
     const usernameInput = await ask(
       `Admin username [${defaultUsername}]: `
     );

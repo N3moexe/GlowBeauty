@@ -116,7 +116,7 @@ const defaultPaymentsForm: SettingsPayments = {
 
 const defaultChatbotForm: AdminChatbotSettingsUpdate = {
   greeting:
-    "Bienvenue chez SenBonsPlans. Je suis votre concierge skincare premium.",
+    "Bienvenue chez GlowBeauty. Je suis votre concierge skincare premium.",
   tone: "Luxury skincare",
   whatsappNumber: "+221788911010",
   policies: {

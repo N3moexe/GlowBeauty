@@ -23,6 +23,7 @@ import { registerSettingsApiRoutes } from "../settings-api-routes";
 import { registerPaymentWebhookRoutes } from "../webhook-api-routes";
 import { registerStorefrontCmsRoutes } from "../storefront-cms-routes";
 import { registerSitemapRoutes } from "../sitemap-routes";
+import { hydrateStorefrontCmsFromDb } from "../storefront-cms-store";
 
 const UNSAFE_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 const DEFAULT_JSON_BODY_LIMIT = process.env.JSON_BODY_LIMIT || "1mb";
@@ -110,6 +111,10 @@ function isLargeJsonBodyRoute(req: express.Request) {
 
 async function startServer() {
   const app = express();
+  // Render (and most cloud platforms) sit behind a reverse proxy that sets
+  // X-Forwarded-For. Trust exactly one proxy hop so req.ip reflects the real
+  // client IP instead of the proxy's address.
+  app.set("trust proxy", 1);
   const server = createServer(app);
   // Defense-in-depth security headers. nginx/Caddy in front may also set these;
   // duplicating at the app layer protects against proxy misconfig.
@@ -125,10 +130,8 @@ async function startServer() {
       "Permissions-Policy",
       "camera=(), microphone=(), geolocation=()"
     );
-    // CSP in report-only mode — observe violations before enforcing.
-    // Switch header name to Content-Security-Policy to enforce.
     res.setHeader(
-      "Content-Security-Policy-Report-Only",
+      "Content-Security-Policy",
       [
         "default-src 'self'",
         "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://analytics.tiktok.com",
@@ -195,6 +198,15 @@ async function startServer() {
   // errors land in telemetry. No-ops when DSN isn't configured.
   if (isSentryEnabled()) {
     Sentry.setupExpressErrorHandler(app);
+  }
+
+  // Load persisted storefront CMS edits (homepage layout, navigation, theme,
+  // integrations) into the in-memory store. Failures fall back to seeded
+  // defaults so a bad record never blocks startup.
+  try {
+    await hydrateStorefrontCmsFromDb();
+  } catch (error) {
+    console.error("[CMS] Hydration failed, using defaults", error);
   }
 
   const preferredPort = parseInt(process.env.PORT || "3000");

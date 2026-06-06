@@ -36,7 +36,7 @@ const cmsHomeHeroUpdateSchema = z
     badgeText: z.string().trim().max(120).optional(),
     isActive: z.boolean().optional(),
   })
-  .refine((payload) => Object.keys(payload).length > 0, {
+  .refine(payload => Object.keys(payload).length > 0, {
     message: "At least one field is required",
   });
 
@@ -60,7 +60,7 @@ const cmsResultsSectionUpdateSchema = z
     stat3Desc: z.string().trim().min(1).max(1500).optional(),
     footerNote: z.string().trim().min(1).max(2500).optional(),
   })
-  .refine((payload) => Object.keys(payload).length > 0, {
+  .refine(payload => Object.keys(payload).length > 0, {
     message: "At least one field is required",
   });
 
@@ -76,7 +76,7 @@ const cmsEditorialHeroUpdateSchema = z
     overlayOpacity: z.coerce.number().int().min(0).max(90).optional(),
     cardPosition: z.enum(["left", "center", "right"]).optional(),
   })
-  .refine((payload) => Object.keys(payload).length > 0, {
+  .refine(payload => Object.keys(payload).length > 0, {
     message: "At least one field is required",
   });
 
@@ -110,14 +110,18 @@ const publishSchema = z.object({
 const optimizeImageSchema = z.object({
   desktopImageData: z.string().min(1),
   mobileImageData: z.string().min(1),
-  desktop: z.object({
-    width: z.coerce.number().int().min(400).max(4000),
-    height: z.coerce.number().int().min(300).max(4000),
-  }).default({ width: 1920, height: 800 }),
-  mobile: z.object({
-    width: z.coerce.number().int().min(400).max(3000),
-    height: z.coerce.number().int().min(400).max(4000),
-  }).default({ width: 1080, height: 1350 }),
+  desktop: z
+    .object({
+      width: z.coerce.number().int().min(400).max(4000),
+      height: z.coerce.number().int().min(300).max(4000),
+    })
+    .default({ width: 1920, height: 800 }),
+  mobile: z
+    .object({
+      width: z.coerce.number().int().min(400).max(3000),
+      height: z.coerce.number().int().min(400).max(4000),
+    })
+    .default({ width: 1080, height: 1350 }),
   quality: z.coerce.number().int().min(50).max(95).default(80),
 });
 
@@ -158,9 +162,10 @@ async function optimizeAndStore(
     .toBuffer();
 
   const fileName = `${Date.now()}-${variant}-${crypto.randomBytes(4).toString("hex")}.webp`;
-  const uploadsDir = process.env.NODE_ENV === "production"
-    ? path.join(process.cwd(), "dist", "public", "uploads", "banners")
-    : path.join(process.cwd(), "client", "public", "uploads", "banners");
+  const uploadsDir =
+    process.env.NODE_ENV === "production"
+      ? path.join(process.cwd(), "dist", "public", "uploads", "banners")
+      : path.join(process.cwd(), "client", "public", "uploads", "banners");
 
   await fs.mkdir(uploadsDir, { recursive: true });
   await fs.writeFile(path.join(uploadsDir, fileName), optimized);
@@ -206,7 +211,11 @@ async function handleAdminCmsImageUpload(req: Request, res: Response) {
     const fileEntry = formData.get("file") ?? formData.get("image");
 
     if (!isFileEntry(fileEntry)) {
-      sendCmsError(res, 400, "Image file is required in form-data (field: file)");
+      sendCmsError(
+        res,
+        400,
+        "Image file is required in form-data (field: file)"
+      );
       return;
     }
 
@@ -233,7 +242,11 @@ async function handleAdminCmsImageUpload(req: Request, res: Response) {
     }
     const signatureCheck = verifyImageMime(fileBuffer, mimeType);
     if (!signatureCheck.valid) {
-      sendCmsError(res, 400, "File content does not match declared image format");
+      sendCmsError(
+        res,
+        400,
+        "File content does not match declared image format"
+      );
       return;
     }
 
@@ -287,13 +300,25 @@ async function setHomeHeroExtras(payload: {
 }) {
   const updates: Array<Promise<void>> = [];
   if (payload.secondaryCtaText !== undefined) {
-    updates.push(db.setStoreSetting(HERO_SETTINGS_KEYS.secondaryCtaText, payload.secondaryCtaText));
+    updates.push(
+      db.setStoreSetting(
+        HERO_SETTINGS_KEYS.secondaryCtaText,
+        payload.secondaryCtaText
+      )
+    );
   }
   if (payload.secondaryCtaLink !== undefined) {
-    updates.push(db.setStoreSetting(HERO_SETTINGS_KEYS.secondaryCtaLink, payload.secondaryCtaLink));
+    updates.push(
+      db.setStoreSetting(
+        HERO_SETTINGS_KEYS.secondaryCtaLink,
+        payload.secondaryCtaLink
+      )
+    );
   }
   if (payload.badgeText !== undefined) {
-    updates.push(db.setStoreSetting(HERO_SETTINGS_KEYS.badgeText, payload.badgeText));
+    updates.push(
+      db.setStoreSetting(HERO_SETTINGS_KEYS.badgeText, payload.badgeText)
+    );
   }
   if (updates.length > 0) {
     await Promise.all(updates);
@@ -304,11 +329,13 @@ function pickPrimaryHeroBanner(
   banners: bannerDb.HomepageHeroBanner[]
 ): bannerDb.HomepageHeroBanner | null {
   if (banners.length === 0) return null;
-  return banners.find((item) => item.status === "published") || banners[0];
+  return banners.find(item => item.status === "published") || banners[0];
 }
 
 async function ensurePrimaryHeroBanner() {
-  const existing = pickPrimaryHeroBanner(await bannerDb.listHomepageHeroBanners());
+  const existing = pickPrimaryHeroBanner(
+    await bannerDb.listHomepageHeroBanners()
+  );
   if (existing) return existing;
 
   const created = await bannerDb.createHomepageHeroBanner({
@@ -342,7 +369,8 @@ async function mapCmsHeroResponse(banner: bannerDb.HomepageHeroBanner | null) {
     key: "home_hero" as const,
     title: banner.title,
     subtitle: banner.subtitle || "",
-    imageUrl: banner.imageUrl || banner.imageUrlDesktop || banner.imageUrlMobile || "",
+    imageUrl:
+      banner.imageUrl || banner.imageUrlDesktop || banner.imageUrlMobile || "",
     ctaText: banner.buttonText || "",
     ctaLink: banner.buttonLink || "",
     secondaryCtaText: extras.secondaryCtaText,
@@ -370,10 +398,6 @@ async function requireAdmin(req: Request, res: Response, next: NextFunction) {
 }
 
 function resolveRequestIp(req: Request) {
-  const forwarded = req.headers["x-forwarded-for"];
-  if (typeof forwarded === "string" && forwarded.trim().length > 0) {
-    return forwarded.split(",")[0]?.trim() || null;
-  }
   return req.ip || req.socket.remoteAddress || null;
 }
 
@@ -416,7 +440,10 @@ function mapBannerForResponse(banner: bannerDb.HomepageHeroBanner) {
 
 export function registerBannerApiRoutes(app: Express) {
   app.get("/api/cms/editorial-hero", async (_req: Request, res: Response) => {
-    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
+    res.setHeader(
+      "Cache-Control",
+      "no-store, no-cache, must-revalidate, max-age=0"
+    );
 
     try {
       const hero = await db.getCmsEditorialHero();
@@ -428,7 +455,10 @@ export function registerBannerApiRoutes(app: Express) {
   });
 
   app.get("/api/cms/home-hero", async (_req: Request, res: Response) => {
-    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
+    res.setHeader(
+      "Cache-Control",
+      "no-store, no-cache, must-revalidate, max-age=0"
+    );
 
     try {
       let banner = await bannerDb.getPublishedHomepageHeroBanner();
@@ -447,383 +477,485 @@ export function registerBannerApiRoutes(app: Express) {
   });
 
   app.get("/api/cms/results-section", async (_req: Request, res: Response) => {
-    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
+    res.setHeader(
+      "Cache-Control",
+      "no-store, no-cache, must-revalidate, max-age=0"
+    );
 
     try {
       const data = await db.getCmsResultsSection();
       res.json({ ok: true, data });
     } catch (error: any) {
       console.error("[CMS Results API] public read failed:", error);
-      sendCmsError(res, 500, error?.message || "Failed to load results section");
+      sendCmsError(
+        res,
+        500,
+        error?.message || "Failed to load results section"
+      );
     }
   });
 
-  app.get("/api/admin/cms/home-hero", requireAdmin, async (_req: Request, res: Response) => {
-    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
+  app.get(
+    "/api/admin/cms/home-hero",
+    requireAdmin,
+    async (_req: Request, res: Response) => {
+      res.setHeader(
+        "Cache-Control",
+        "no-store, no-cache, must-revalidate, max-age=0"
+      );
 
-    try {
-      const banner = await ensurePrimaryHeroBanner();
-      const hero = await mapCmsHeroResponse(banner);
-      res.json({ ok: true, hero });
-    } catch (error: any) {
-      console.error("[CMS Hero API] admin read failed:", error);
-      sendCmsError(res, 500, error?.message || "Failed to load homepage hero for admin");
-    }
-  });
-
-  app.put("/api/admin/cms/editorial-hero", requireAdmin, async (req: Request, res: Response) => {
-    try {
-      const input = cmsEditorialHeroUpdateSchema.parse(req.body || {});
-      const before = await db.getCmsEditorialHero();
-      const updated = await db.updateCmsEditorialHero({
-        isActive: input.isActive,
-        badgeText: input.badgeText?.trim(),
-        title: input.title?.trim(),
-        subtitle: input.subtitle?.trim(),
-        ctaText: input.ctaText?.trim(),
-        ctaLink: input.ctaLink?.trim(),
-        backgroundImageUrl: input.backgroundImageUrl?.trim(),
-        overlayOpacity: input.overlayOpacity,
-        cardPosition: input.cardPosition,
-      });
-
-      await writeBannerAudit(req, {
-        action: "cms.editorial_hero.update",
-        entityType: "cms_editorial_hero",
-        entityId: updated.id,
-        beforeJson: before,
-        afterJson: updated,
-      });
-
-      res.json({ ok: true, hero: updated });
-    } catch (error: any) {
-      console.error("[CMS Editorial Hero API] admin update failed:", error);
-      sendCmsError(res, 400, error?.message || "Failed to update editorial hero");
-    }
-  });
-
-  app.put("/api/admin/cms/home-hero", requireAdmin, async (req: Request, res: Response) => {
-    try {
-      const input = cmsHomeHeroUpdateSchema.parse(req.body || {});
-      const target = await ensurePrimaryHeroBanner();
-      const beforeHero = await mapCmsHeroResponse(target);
-      const allBanners = await bannerDb.listHomepageHeroBanners();
-      const nextStatus =
-        input.isActive === undefined
-          ? target.status
-          : input.isActive
-            ? "published"
-            : "draft";
-
-      if (nextStatus === "published") {
-        await Promise.all(
-          allBanners
-            .filter((item) => item.id !== target.id && item.status === "published")
-            .map((item) => bannerDb.setHomepageHeroBannerPublishState(item.id, "draft"))
+      try {
+        const banner = await ensurePrimaryHeroBanner();
+        const hero = await mapCmsHeroResponse(banner);
+        res.json({ ok: true, hero });
+      } catch (error: any) {
+        console.error("[CMS Hero API] admin read failed:", error);
+        sendCmsError(
+          res,
+          500,
+          error?.message || "Failed to load homepage hero for admin"
         );
       }
+    }
+  );
 
-      const imageUrl = input.imageUrl?.trim();
-      const updated = await bannerDb.updateHomepageHeroBanner(target.id, {
-        title: input.title?.trim(),
-        subtitle: input.subtitle?.trim(),
-        buttonText: input.ctaText?.trim(),
-        buttonLink: input.ctaLink?.trim(),
-        imageUrl,
-        imageUrlDesktop: imageUrl,
-        imageUrlMobile: imageUrl,
-        status: nextStatus,
-      });
+  app.put(
+    "/api/admin/cms/editorial-hero",
+    requireAdmin,
+    async (req: Request, res: Response) => {
+      try {
+        const input = cmsEditorialHeroUpdateSchema.parse(req.body || {});
+        const before = await db.getCmsEditorialHero();
+        const updated = await db.updateCmsEditorialHero({
+          isActive: input.isActive,
+          badgeText: input.badgeText?.trim(),
+          title: input.title?.trim(),
+          subtitle: input.subtitle?.trim(),
+          ctaText: input.ctaText?.trim(),
+          ctaLink: input.ctaLink?.trim(),
+          backgroundImageUrl: input.backgroundImageUrl?.trim(),
+          overlayOpacity: input.overlayOpacity,
+          cardPosition: input.cardPosition,
+        });
 
-      if (!updated) {
-        sendCmsError(res, 500, "Failed to save homepage hero");
-        return;
+        await writeBannerAudit(req, {
+          action: "cms.editorial_hero.update",
+          entityType: "cms_editorial_hero",
+          entityId: updated.id,
+          beforeJson: before,
+          afterJson: updated,
+        });
+
+        res.json({ ok: true, hero: updated });
+      } catch (error: any) {
+        console.error("[CMS Editorial Hero API] admin update failed:", error);
+        sendCmsError(
+          res,
+          400,
+          error?.message || "Failed to update editorial hero"
+        );
       }
-
-      await setHomeHeroExtras({
-        secondaryCtaText: input.secondaryCtaText?.trim(),
-        secondaryCtaLink: input.secondaryCtaLink?.trim(),
-        badgeText: input.badgeText?.trim(),
-      });
-
-      const hero = await mapCmsHeroResponse(updated);
-      await writeBannerAudit(req, {
-        action: "cms.home_hero.update",
-        entityType: "cms_home_hero",
-        entityId: updated.id,
-        beforeJson: beforeHero,
-        afterJson: hero,
-      });
-      res.json({ ok: true, hero });
-    } catch (error: any) {
-      console.error("[CMS Hero API] admin update failed:", error);
-      sendCmsError(res, 400, error?.message || "Failed to update homepage hero");
     }
-  });
+  );
 
-  app.put("/api/admin/cms/results-section", requireAdmin, async (req: Request, res: Response) => {
-    try {
-      const input = cmsResultsSectionUpdateSchema.parse(req.body || {});
-      const before = await db.getCmsResultsSection();
-      const updated = await db.updateCmsResultsSection({
-        enabled: input.enabled,
-        title: input.title?.trim(),
-        subtitle: input.subtitle?.trim(),
-        beforeLabel: input.beforeLabel?.trim(),
-        afterLabel: input.afterLabel?.trim(),
-        beforeImageUrl:
-          input.beforeImageUrl === undefined
-            ? undefined
-            : input.beforeImageUrl
-              ? input.beforeImageUrl.trim()
-              : null,
-        afterImageUrl:
-          input.afterImageUrl === undefined
-            ? undefined
-            : input.afterImageUrl
-              ? input.afterImageUrl.trim()
-              : null,
-        stat1Value: input.stat1Value?.trim(),
-        stat1Title: input.stat1Title?.trim(),
-        stat1Desc: input.stat1Desc?.trim(),
-        stat2Value: input.stat2Value?.trim(),
-        stat2Title: input.stat2Title?.trim(),
-        stat2Desc: input.stat2Desc?.trim(),
-        stat3Value: input.stat3Value?.trim(),
-        stat3Title: input.stat3Title?.trim(),
-        stat3Desc: input.stat3Desc?.trim(),
-        footerNote: input.footerNote?.trim(),
-      });
+  app.put(
+    "/api/admin/cms/home-hero",
+    requireAdmin,
+    async (req: Request, res: Response) => {
+      try {
+        const input = cmsHomeHeroUpdateSchema.parse(req.body || {});
+        const target = await ensurePrimaryHeroBanner();
+        const beforeHero = await mapCmsHeroResponse(target);
+        const allBanners = await bannerDb.listHomepageHeroBanners();
+        const nextStatus =
+          input.isActive === undefined
+            ? target.status
+            : input.isActive
+              ? "published"
+              : "draft";
 
-      await writeBannerAudit(req, {
-        action: "cms.results_section.update",
-        entityType: "cms_results_section",
-        entityId: updated.id,
-        beforeJson: before,
-        afterJson: updated,
-      });
-      res.json({ ok: true, data: updated });
-    } catch (error: any) {
-      console.error("[CMS Results API] admin update failed:", error);
-      sendCmsError(res, 400, error?.message || "Failed to update results section");
+        if (nextStatus === "published") {
+          await Promise.all(
+            allBanners
+              .filter(
+                item => item.id !== target.id && item.status === "published"
+              )
+              .map(item =>
+                bannerDb.setHomepageHeroBannerPublishState(item.id, "draft")
+              )
+          );
+        }
+
+        const imageUrl = input.imageUrl?.trim();
+        const updated = await bannerDb.updateHomepageHeroBanner(target.id, {
+          title: input.title?.trim(),
+          subtitle: input.subtitle?.trim(),
+          buttonText: input.ctaText?.trim(),
+          buttonLink: input.ctaLink?.trim(),
+          imageUrl,
+          imageUrlDesktop: imageUrl,
+          imageUrlMobile: imageUrl,
+          status: nextStatus,
+        });
+
+        if (!updated) {
+          sendCmsError(res, 500, "Failed to save homepage hero");
+          return;
+        }
+
+        await setHomeHeroExtras({
+          secondaryCtaText: input.secondaryCtaText?.trim(),
+          secondaryCtaLink: input.secondaryCtaLink?.trim(),
+          badgeText: input.badgeText?.trim(),
+        });
+
+        const hero = await mapCmsHeroResponse(updated);
+        await writeBannerAudit(req, {
+          action: "cms.home_hero.update",
+          entityType: "cms_home_hero",
+          entityId: updated.id,
+          beforeJson: beforeHero,
+          afterJson: hero,
+        });
+        res.json({ ok: true, hero });
+      } catch (error: any) {
+        console.error("[CMS Hero API] admin update failed:", error);
+        sendCmsError(
+          res,
+          400,
+          error?.message || "Failed to update homepage hero"
+        );
+      }
     }
-  });
+  );
+
+  app.put(
+    "/api/admin/cms/results-section",
+    requireAdmin,
+    async (req: Request, res: Response) => {
+      try {
+        const input = cmsResultsSectionUpdateSchema.parse(req.body || {});
+        const before = await db.getCmsResultsSection();
+        const updated = await db.updateCmsResultsSection({
+          enabled: input.enabled,
+          title: input.title?.trim(),
+          subtitle: input.subtitle?.trim(),
+          beforeLabel: input.beforeLabel?.trim(),
+          afterLabel: input.afterLabel?.trim(),
+          beforeImageUrl:
+            input.beforeImageUrl === undefined
+              ? undefined
+              : input.beforeImageUrl
+                ? input.beforeImageUrl.trim()
+                : null,
+          afterImageUrl:
+            input.afterImageUrl === undefined
+              ? undefined
+              : input.afterImageUrl
+                ? input.afterImageUrl.trim()
+                : null,
+          stat1Value: input.stat1Value?.trim(),
+          stat1Title: input.stat1Title?.trim(),
+          stat1Desc: input.stat1Desc?.trim(),
+          stat2Value: input.stat2Value?.trim(),
+          stat2Title: input.stat2Title?.trim(),
+          stat2Desc: input.stat2Desc?.trim(),
+          stat3Value: input.stat3Value?.trim(),
+          stat3Title: input.stat3Title?.trim(),
+          stat3Desc: input.stat3Desc?.trim(),
+          footerNote: input.footerNote?.trim(),
+        });
+
+        await writeBannerAudit(req, {
+          action: "cms.results_section.update",
+          entityType: "cms_results_section",
+          entityId: updated.id,
+          beforeJson: before,
+          afterJson: updated,
+        });
+        res.json({ ok: true, data: updated });
+      } catch (error: any) {
+        console.error("[CMS Results API] admin update failed:", error);
+        sendCmsError(
+          res,
+          400,
+          error?.message || "Failed to update results section"
+        );
+      }
+    }
+  );
 
   app.post("/api/admin/upload", requireAdmin, handleAdminCmsImageUpload);
   app.post("/api/admin/uploads/hero", requireAdmin, handleAdminCmsImageUpload);
 
-  app.get("/api/admin/banners", requireAdmin, async (req: Request, res: Response) => {
-    try {
-      const placement = placementSchema.parse(req.query.placement || "homepage_hero");
-      const banners = await bannerDb.listHomepageHeroBanners();
-      console.info("[Banner API] list", {
-        placement,
-        count: banners.length,
-        userId: (req as any).adminUser?.id,
-      });
-      res.json({
-        banners: banners.map(mapBannerForResponse),
-      });
-    } catch (error: any) {
-      console.error("[Banner API] list failed:", error);
-      res.status(400).json({ error: error?.message || "Failed to list banners" });
+  app.get(
+    "/api/admin/banners",
+    requireAdmin,
+    async (req: Request, res: Response) => {
+      try {
+        const placement = placementSchema.parse(
+          req.query.placement || "homepage_hero"
+        );
+        const banners = await bannerDb.listHomepageHeroBanners();
+        console.info("[Banner API] list", {
+          placement,
+          count: banners.length,
+          userId: (req as any).adminUser?.id,
+        });
+        res.json({
+          banners: banners.map(mapBannerForResponse),
+        });
+      } catch (error: any) {
+        console.error("[Banner API] list failed:", error);
+        res
+          .status(400)
+          .json({ error: error?.message || "Failed to list banners" });
+      }
     }
-  });
+  );
 
-  app.post("/api/admin/banners", requireAdmin, async (req: Request, res: Response) => {
-    try {
-      const parsed = createBannerSchema.parse(req.body);
-      const startAt = parseOptionalDate(parsed.startAt);
-      const endAt = parseOptionalDate(parsed.endAt);
-      const created = await bannerDb.createHomepageHeroBanner({
-        placement: parsed.placement,
-        title: parsed.title,
-        subtitle: parsed.subtitle,
-        buttonText: parsed.buttonText,
-        buttonLink: parsed.buttonLink,
-        imageUrl: parsed.imageUrl,
-        imageUrlDesktop: parsed.imageUrlDesktop,
-        imageUrlMobile: parsed.imageUrlMobile,
-        cropMeta: parsed.cropMeta,
-        status: parsed.status,
-        priority: parsed.priority,
-        startAt,
-        endAt,
-      });
+  app.post(
+    "/api/admin/banners",
+    requireAdmin,
+    async (req: Request, res: Response) => {
+      try {
+        const parsed = createBannerSchema.parse(req.body);
+        const startAt = parseOptionalDate(parsed.startAt);
+        const endAt = parseOptionalDate(parsed.endAt);
+        const created = await bannerDb.createHomepageHeroBanner({
+          placement: parsed.placement,
+          title: parsed.title,
+          subtitle: parsed.subtitle,
+          buttonText: parsed.buttonText,
+          buttonLink: parsed.buttonLink,
+          imageUrl: parsed.imageUrl,
+          imageUrlDesktop: parsed.imageUrlDesktop,
+          imageUrlMobile: parsed.imageUrlMobile,
+          cropMeta: parsed.cropMeta,
+          status: parsed.status,
+          priority: parsed.priority,
+          startAt,
+          endAt,
+        });
 
-      if (!created) {
-        res.status(500).json({ error: "Banner was not saved to database" });
-        return;
+        if (!created) {
+          res.status(500).json({ error: "Banner was not saved to database" });
+          return;
+        }
+
+        console.info("[Banner API] created", {
+          id: created.id,
+          status: created.status,
+          userId: (req as any).adminUser?.id,
+        });
+
+        await writeBannerAudit(req, {
+          action: "banner.create",
+          entityType: "banner",
+          entityId: created.id,
+          afterJson: mapBannerForResponse(created),
+        });
+
+        res.status(201).json({ banner: mapBannerForResponse(created) });
+      } catch (error: any) {
+        console.error("[Banner API] create failed:", error);
+        res
+          .status(400)
+          .json({ error: error?.message || "Failed to create banner" });
       }
-
-      console.info("[Banner API] created", {
-        id: created.id,
-        status: created.status,
-        userId: (req as any).adminUser?.id,
-      });
-
-      await writeBannerAudit(req, {
-        action: "banner.create",
-        entityType: "banner",
-        entityId: created.id,
-        afterJson: mapBannerForResponse(created),
-      });
-
-      res.status(201).json({ banner: mapBannerForResponse(created) });
-    } catch (error: any) {
-      console.error("[Banner API] create failed:", error);
-      res.status(400).json({ error: error?.message || "Failed to create banner" });
     }
-  });
+  );
 
-  app.get("/api/admin/banners/:id", requireAdmin, async (req: Request, res: Response) => {
-    try {
-      const id = Number(req.params.id);
-      if (!Number.isFinite(id)) {
-        res.status(400).json({ error: "Invalid banner id" });
-        return;
+  app.get(
+    "/api/admin/banners/:id",
+    requireAdmin,
+    async (req: Request, res: Response) => {
+      try {
+        const id = Number(req.params.id);
+        if (!Number.isFinite(id)) {
+          res.status(400).json({ error: "Invalid banner id" });
+          return;
+        }
+
+        const banner = await bannerDb.getHomepageHeroBannerById(id);
+        if (!banner) {
+          res.status(404).json({ error: "Banner not found" });
+          return;
+        }
+
+        res.json({ banner: mapBannerForResponse(banner) });
+      } catch (error: any) {
+        console.error("[Banner API] detail failed:", error);
+        res
+          .status(400)
+          .json({ error: error?.message || "Failed to load banner" });
       }
-
-      const banner = await bannerDb.getHomepageHeroBannerById(id);
-      if (!banner) {
-        res.status(404).json({ error: "Banner not found" });
-        return;
-      }
-
-      res.json({ banner: mapBannerForResponse(banner) });
-    } catch (error: any) {
-      console.error("[Banner API] detail failed:", error);
-      res.status(400).json({ error: error?.message || "Failed to load banner" });
     }
-  });
+  );
 
-  app.put("/api/admin/banners/:id", requireAdmin, async (req: Request, res: Response) => {
-    try {
-      const id = Number(req.params.id);
-      if (!Number.isFinite(id)) {
-        res.status(400).json({ error: "Invalid banner id" });
-        return;
+  app.put(
+    "/api/admin/banners/:id",
+    requireAdmin,
+    async (req: Request, res: Response) => {
+      try {
+        const id = Number(req.params.id);
+        if (!Number.isFinite(id)) {
+          res.status(400).json({ error: "Invalid banner id" });
+          return;
+        }
+
+        const parsed = updateBannerSchema.parse(req.body);
+        const before = await bannerDb.getHomepageHeroBannerById(id);
+        const updated = await bannerDb.updateHomepageHeroBanner(id, {
+          title: parsed.title,
+          subtitle: parsed.subtitle,
+          buttonText: parsed.buttonText,
+          buttonLink: parsed.buttonLink,
+          imageUrl: parsed.imageUrl,
+          imageUrlDesktop: parsed.imageUrlDesktop,
+          imageUrlMobile: parsed.imageUrlMobile,
+          cropMeta: parsed.cropMeta,
+          status: parsed.status,
+          priority: parsed.priority,
+          startAt:
+            parsed.startAt !== undefined
+              ? parseOptionalDate(parsed.startAt)
+              : undefined,
+          endAt:
+            parsed.endAt !== undefined
+              ? parseOptionalDate(parsed.endAt)
+              : undefined,
+        });
+
+        if (!updated) {
+          res
+            .status(404)
+            .json({ error: "Banner not found or not homepage hero" });
+          return;
+        }
+
+        console.info("[Banner API] updated", {
+          id: updated.id,
+          status: updated.status,
+          userId: (req as any).adminUser?.id,
+        });
+
+        await writeBannerAudit(req, {
+          action: "banner.update",
+          entityType: "banner",
+          entityId: updated.id,
+          beforeJson: before ? mapBannerForResponse(before) : null,
+          afterJson: mapBannerForResponse(updated),
+        });
+
+        res.json({ banner: mapBannerForResponse(updated) });
+      } catch (error: any) {
+        console.error("[Banner API] update failed:", error);
+        res
+          .status(400)
+          .json({ error: error?.message || "Failed to update banner" });
       }
-
-      const parsed = updateBannerSchema.parse(req.body);
-      const before = await bannerDb.getHomepageHeroBannerById(id);
-      const updated = await bannerDb.updateHomepageHeroBanner(id, {
-        title: parsed.title,
-        subtitle: parsed.subtitle,
-        buttonText: parsed.buttonText,
-        buttonLink: parsed.buttonLink,
-        imageUrl: parsed.imageUrl,
-        imageUrlDesktop: parsed.imageUrlDesktop,
-        imageUrlMobile: parsed.imageUrlMobile,
-        cropMeta: parsed.cropMeta,
-        status: parsed.status,
-        priority: parsed.priority,
-        startAt: parsed.startAt !== undefined ? parseOptionalDate(parsed.startAt) : undefined,
-        endAt: parsed.endAt !== undefined ? parseOptionalDate(parsed.endAt) : undefined,
-      });
-
-      if (!updated) {
-        res.status(404).json({ error: "Banner not found or not homepage hero" });
-        return;
-      }
-
-      console.info("[Banner API] updated", {
-        id: updated.id,
-        status: updated.status,
-        userId: (req as any).adminUser?.id,
-      });
-
-      await writeBannerAudit(req, {
-        action: "banner.update",
-        entityType: "banner",
-        entityId: updated.id,
-        beforeJson: before ? mapBannerForResponse(before) : null,
-        afterJson: mapBannerForResponse(updated),
-      });
-
-      res.json({ banner: mapBannerForResponse(updated) });
-    } catch (error: any) {
-      console.error("[Banner API] update failed:", error);
-      res.status(400).json({ error: error?.message || "Failed to update banner" });
     }
-  });
+  );
 
-  app.post("/api/admin/banners/optimize", requireAdmin, async (req: Request, res: Response) => {
-    try {
-      const parsed = optimizeImageSchema.parse(req.body);
-      const [imageUrlDesktop, imageUrlMobile] = await Promise.all([
-        optimizeAndStore(
-          parsed.desktopImageData,
-          parsed.desktop.width,
-          parsed.desktop.height,
-          parsed.quality,
-          "desktop"
-        ),
-        optimizeAndStore(
-          parsed.mobileImageData,
-          parsed.mobile.width,
-          parsed.mobile.height,
-          parsed.quality,
-          "mobile"
-        ),
-      ]);
+  app.post(
+    "/api/admin/banners/optimize",
+    requireAdmin,
+    async (req: Request, res: Response) => {
+      try {
+        const parsed = optimizeImageSchema.parse(req.body);
+        const [imageUrlDesktop, imageUrlMobile] = await Promise.all([
+          optimizeAndStore(
+            parsed.desktopImageData,
+            parsed.desktop.width,
+            parsed.desktop.height,
+            parsed.quality,
+            "desktop"
+          ),
+          optimizeAndStore(
+            parsed.mobileImageData,
+            parsed.mobile.width,
+            parsed.mobile.height,
+            parsed.quality,
+            "mobile"
+          ),
+        ]);
 
-      console.info("[Banner API] optimize success", {
-        userId: (req as any).adminUser?.id,
-        imageUrlDesktop,
-        imageUrlMobile,
-      });
+        console.info("[Banner API] optimize success", {
+          userId: (req as any).adminUser?.id,
+          imageUrlDesktop,
+          imageUrlMobile,
+        });
 
-      res.json({ imageUrlDesktop, imageUrlMobile });
-    } catch (error: any) {
-      console.error("[Banner API] optimize failed:", error);
-      res.status(400).json({ error: error?.message || "Image optimization failed" });
-    }
-  });
-
-  app.post("/api/admin/banners/:id/publish", requireAdmin, async (req: Request, res: Response) => {
-    try {
-      const id = Number(req.params.id);
-      if (!Number.isFinite(id)) {
-        res.status(400).json({ error: "Invalid banner id" });
-        return;
+        res.json({ imageUrlDesktop, imageUrlMobile });
+      } catch (error: any) {
+        console.error("[Banner API] optimize failed:", error);
+        res
+          .status(400)
+          .json({ error: error?.message || "Image optimization failed" });
       }
-
-      const parsed = publishSchema.parse(req.body || {});
-      const before = await bannerDb.getHomepageHeroBannerById(id);
-      const updated = await bannerDb.setHomepageHeroBannerPublishState(id, parsed.status);
-
-      if (!updated) {
-        res.status(404).json({ error: "Banner not found or not homepage hero" });
-        return;
-      }
-
-      console.info("[Banner API] publish toggle", {
-        id: updated.id,
-        status: updated.status,
-        userId: (req as any).adminUser?.id,
-      });
-
-      await writeBannerAudit(req, {
-        action: "banner.publish_toggle",
-        entityType: "banner",
-        entityId: updated.id,
-        beforeJson: before ? mapBannerForResponse(before) : null,
-        afterJson: mapBannerForResponse(updated),
-      });
-
-      res.json({ banner: mapBannerForResponse(updated) });
-    } catch (error: any) {
-      console.error("[Banner API] publish toggle failed:", error);
-      res.status(400).json({ error: error?.message || "Failed to update publish status" });
     }
-  });
+  );
+
+  app.post(
+    "/api/admin/banners/:id/publish",
+    requireAdmin,
+    async (req: Request, res: Response) => {
+      try {
+        const id = Number(req.params.id);
+        if (!Number.isFinite(id)) {
+          res.status(400).json({ error: "Invalid banner id" });
+          return;
+        }
+
+        const parsed = publishSchema.parse(req.body || {});
+        const before = await bannerDb.getHomepageHeroBannerById(id);
+        const updated = await bannerDb.setHomepageHeroBannerPublishState(
+          id,
+          parsed.status
+        );
+
+        if (!updated) {
+          res
+            .status(404)
+            .json({ error: "Banner not found or not homepage hero" });
+          return;
+        }
+
+        console.info("[Banner API] publish toggle", {
+          id: updated.id,
+          status: updated.status,
+          userId: (req as any).adminUser?.id,
+        });
+
+        await writeBannerAudit(req, {
+          action: "banner.publish_toggle",
+          entityType: "banner",
+          entityId: updated.id,
+          beforeJson: before ? mapBannerForResponse(before) : null,
+          afterJson: mapBannerForResponse(updated),
+        });
+
+        res.json({ banner: mapBannerForResponse(updated) });
+      } catch (error: any) {
+        console.error("[Banner API] publish toggle failed:", error);
+        res
+          .status(400)
+          .json({ error: error?.message || "Failed to update publish status" });
+      }
+    }
+  );
 
   app.get("/api/public/banners", async (req: Request, res: Response) => {
-    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
+    res.setHeader(
+      "Cache-Control",
+      "no-store, no-cache, must-revalidate, max-age=0"
+    );
 
     try {
-      const placement = placementSchema.parse(req.query.placement || "homepage_hero");
+      const placement = placementSchema.parse(
+        req.query.placement || "homepage_hero"
+      );
       if (placement !== "homepage_hero") {
         res.json({ banner: null });
         return;
@@ -837,7 +969,9 @@ export function registerBannerApiRoutes(app: Express) {
       res.json({ banner: banner ? mapBannerForResponse(banner) : null });
     } catch (error: any) {
       console.error("[Banner API] public fetch failed:", error);
-      res.status(400).json({ error: error?.message || "Failed to load public banner" });
+      res
+        .status(400)
+        .json({ error: error?.message || "Failed to load public banner" });
     }
   });
 }

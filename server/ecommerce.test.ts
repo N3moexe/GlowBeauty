@@ -112,7 +112,7 @@ function createPublicContext(): TrpcContext {
 
 function createAdminContext(): TrpcContext {
   const user: AuthenticatedUser = {
-    id: 1, openId: "admin-user", email: "admin@senbonsplans.com",
+    id: 1, openId: "admin-user", email: "admin@glowbeauty.com",
     name: "Admin", loginMethod: "manus", role: "admin",
     createdAt: new Date(), updatedAt: new Date(), lastSignedIn: new Date(),
   };

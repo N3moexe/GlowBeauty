@@ -1,4 +1,4 @@
-﻿import { useChatbotSession, type ChatAttachmentInput } from "@/hooks/useChatbotSession";
+import { useChatbotSession, type ChatAttachmentInput } from "@/hooks/useChatbotSession";
 import { useCart } from "@/contexts/CartContext";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -199,7 +199,7 @@ export default function ChatPanel({ mode, onClose }: ChatPanelProps) {
               </AvatarFallback>
             </Avatar>
             <div>
-              <p className="text-sm font-semibold">{settings?.businessName || "SenBonsPlans"}</p>
+              <p className="text-sm font-semibold">{settings?.businessName || "GlowBeauty"}</p>
               <p className="text-[11px] text-white/85">
                 {sending ? "Typing..." : "Assistant skincare et commandes"}
               </p>

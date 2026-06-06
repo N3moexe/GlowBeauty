@@ -37,10 +37,10 @@ const defaultEnabledTools: ChatSettings["enabledTools"] = [
 
 const defaultChatSettings: ChatSettings = {
   id: 1,
-  businessName: "SenBonsPlans",
+  businessName: "GlowBeauty",
   whatsappNumber: "+221788911010",
   welcomeMessage:
-    "Bienvenue chez SenBonsPlans ✨ Je peux vous aider pour vos produits, le suivi de commande et la livraison.",
+    "Bienvenue chez GlowBeauty ✨ Je peux vous aider pour vos produits, le suivi de commande et la livraison.",
   primaryColor: "#8f5f68",
   botTone: "luxury_skincare",
   enabledTools: defaultEnabledTools,
@@ -48,7 +48,7 @@ const defaultChatSettings: ChatSettings = {
   updatedAt: new Date().toISOString(),
 };
 defaultChatSettings.welcomeMessage =
-  "Bienvenue chez SenBonsPlans. Je peux vous aider pour les produits, le suivi de commande et la livraison.";
+  "Bienvenue chez GlowBeauty. Je peux vous aider pour les produits, le suivi de commande et la livraison.";
 
 let demoThreadIdSeq = 1;
 let demoMessageIdSeq = 1;

@@ -73,7 +73,7 @@ describe("Admin Security", () => {
 
     it("creates admin credentials with hashed password", async () => {
       const userId = 1;
-      const username = "admin@senbonsplans";
+      const username = "admin@glowbeauty";
       const password = "SecurePassword123!";
 
       // Mock the database

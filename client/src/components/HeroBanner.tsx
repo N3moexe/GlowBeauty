@@ -263,7 +263,7 @@ export default function HeroBanner() {
         >
           <div className="rounded-3xl border border-white/20 bg-white/10 p-5 shadow-2xl shadow-black/20 backdrop-blur-xl">
             <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/70">
-              Pourquoi choisir SenBonsPlans
+              Pourquoi choisir GlowBeauty
             </p>
             <div className="mt-4 grid gap-3">
               {heroMetrics.map((metric) => (

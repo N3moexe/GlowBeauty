@@ -168,9 +168,9 @@ export default function ProductDetail() {
     if (legacyDescriptionLines.length > 0)
       return legacyDescriptionLines.slice(0, 2).join(" ");
     if (productQuery.data?.name) {
-      return `Decouvrez ${productQuery.data.name} sur SenBonsPlans avec livraison rapide et paiement securise.`;
+      return `Decouvrez ${productQuery.data.name} sur GlowBeauty avec livraison rapide et paiement securise.`;
     }
-    return "Produit skincare et beaute disponible sur SenBonsPlans.";
+    return "Produit skincare et beaute disponible sur GlowBeauty.";
   }, [descriptionBullets, legacyDescriptionLines, productQuery.data?.name]);
 
   const productSeoJsonLd = useMemo(() => {
@@ -178,7 +178,7 @@ export default function ProductDetail() {
     const baseUrl =
       typeof window !== "undefined"
         ? window.location.origin
-        : "https://senbonsplans.com";
+        : "https://glowbeauty.com";
     const image = images.find(Boolean) || productQuery.data.imageUrl || "";
     return {
       "@context": "https://schema.org",
@@ -190,7 +190,7 @@ export default function ProductDetail() {
       url: `${baseUrl}${canonicalPath}`,
       brand: {
         "@type": "Brand",
-        name: "SenBonsPlans",
+        name: "GlowBeauty",
       },
       offers: {
         "@type": "Offer",
@@ -281,7 +281,7 @@ export default function ProductDetail() {
     return (
       <div className="page-shell flex min-h-screen flex-col">
         <SeoHead
-          title="Chargement produit | SenBonsPlans"
+          title="Chargement produit | GlowBeauty"
           description="Chargement de la fiche produit."
           path={canonicalPath}
           robots="noindex, nofollow"
@@ -308,7 +308,7 @@ export default function ProductDetail() {
     return (
       <div className="page-shell flex min-h-screen flex-col">
         <SeoHead
-          title="Produit introuvable | SenBonsPlans"
+          title="Produit introuvable | GlowBeauty"
           description="Le produit demande est indisponible ou introuvable."
           path={canonicalPath}
           robots="noindex, nofollow"
@@ -336,7 +336,7 @@ export default function ProductDetail() {
   return (
     <div className="page-shell flex min-h-screen flex-col">
       <SeoHead
-        title={`${productQuery.data.name} | SenBonsPlans`}
+        title={`${productQuery.data.name} | GlowBeauty`}
         description={productSeoDescription}
         path={canonicalPath}
         type="product"

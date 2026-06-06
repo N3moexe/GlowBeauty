@@ -1,11 +1,11 @@
 import { trpc } from "@/lib/trpc";
 
 const defaults = {
-  storeName: "SenBonsPlans",
+  storeName: "GlowBeauty",
   storeLogo: "",
   storeContact: "+221 78 891 10 10",
   storeCurrency: "CFA",
-  supportEmail: "contact@senbonsplans.com",
+  supportEmail: "contact@glowbeauty.com",
   footerAddress: "Dakar, Senegal",
   deliveryText: "Expedition a Dakar et regions en 24h/72h.",
   paymentMethodsText: "Wave, Orange Money, Free Money, Visa, Mastercard",

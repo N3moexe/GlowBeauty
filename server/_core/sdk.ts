@@ -269,7 +269,7 @@ class SDKServer {
         id: 1,
         openId: "dev-admin",
         name: "Dev Admin",
-        email: "dev@senbonsplans.local",
+        email: "dev@glowbeauty.local",
         role: "admin",
         loginMethod: "dev",
         createdAt: new Date(0),

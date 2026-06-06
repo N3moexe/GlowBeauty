@@ -69,7 +69,7 @@ export default function AdminLogin() {
             <div className="bg-white text-crimson rounded px-1.5 py-0.5 font-extrabold text-xs leading-none">
               <span className="text-green-accent">%</span>BP
             </div>
-            <span className="font-bold">SenBonsPlans</span>
+            <span className="font-bold">GlowBeauty</span>
           </div>
           <CardTitle>Administration</CardTitle>
           <CardDescription className="text-crimson/80">

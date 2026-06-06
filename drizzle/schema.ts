@@ -713,7 +713,7 @@ export type InsertChatIntent = typeof chatIntents.$inferInsert;
 export const chatSettings = mysqlTable("chat_settings", {
   id: int("id").autoincrement().primaryKey(),
   businessName: varchar("businessName", { length: 160 })
-    .default("SenBonsPlans")
+    .default("GlowBeauty")
     .notNull(),
   whatsappNumber: varchar("whatsappNumber", { length: 40 })
     .default("+221788911010")

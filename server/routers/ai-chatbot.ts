@@ -18,7 +18,7 @@ export const aiChatbotRouter = router({
     .mutation(async ({ input }: any) => {
       try {
         // Build conversation context
-        const systemPrompt = `You are a helpful customer support chatbot for SenBonsPlans, an e-commerce platform in Senegal.
+        const systemPrompt = `You are a helpful customer support chatbot for GlowBeauty, an e-commerce platform in Senegal.
 You help customers with:
 - Product information and recommendations
 - Order tracking and status

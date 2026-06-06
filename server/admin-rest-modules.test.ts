@@ -13,7 +13,7 @@ vi.mock("./_core/context", () => ({
         id: 1,
         openId: "qa-admin-user",
         name: "QA Admin",
-        email: "qa-admin@senbonsplans.local",
+        email: "qa-admin@glowbeauty.local",
         loginMethod: "admin",
         role: "admin" as const,
         createdAt: now,
@@ -192,7 +192,7 @@ describe("Admin REST modules", () => {
       method: "POST",
       body: JSON.stringify({
         name: "QA Invite User",
-        email: `qa-invite-${suffix}@senbonsplans.local`,
+        email: `qa-invite-${suffix}@glowbeauty.local`,
         username,
         inviteOnly: true,
         role: "editor",
@@ -243,7 +243,7 @@ describe("Admin REST modules", () => {
       body: JSON.stringify({
         productId: 1,
         customerName: "QA Reviewer",
-        customerEmail: `qa-review-${suffix}@senbonsplans.local`,
+        customerEmail: `qa-review-${suffix}@glowbeauty.local`,
         rating: 5,
         title: "QA review",
         body: "This review is created by tests and should be moderated.",
@@ -464,7 +464,7 @@ describe("Admin REST modules", () => {
 
   it("supports newsletter subscribe/unsubscribe and admin list/export", async () => {
     const suffix = Date.now();
-    const email = `qa-newsletter-${suffix}@senbonsplans.local`;
+    const email = `qa-newsletter-${suffix}@glowbeauty.local`;
 
     const subscribed = await apiRequest<any>("/api/newsletter/subscribe", {
       method: "POST",

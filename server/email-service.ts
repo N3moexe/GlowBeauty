@@ -35,7 +35,7 @@ const emailConfig = {
   from:
     process.env.SMTP_FROM ||
     process.env.SMTP_USER ||
-    "noreply@senbonsplans.com",
+    "noreply@glowbeauty.com",
   replyTo: process.env.SMTP_REPLY_TO || undefined,
 };
 
@@ -218,7 +218,7 @@ export async function sendNewsletterConfirmationEmail(
       );
       return false;
     }
-    const subject = "Confirmez votre inscription — SenBonsPlans";
+    const subject = "Confirmez votre inscription — GlowBeauty";
     const safeUrl = escapeHtml(confirmUrl);
     const html = `
       <!DOCTYPE html>
@@ -226,7 +226,7 @@ export async function sendNewsletterConfirmationEmail(
       <head><meta charset="utf-8" /></head>
       <body style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; padding: 24px;">
         <h1 style="font-size: 20px; margin: 0 0 12px;">Confirmez votre inscription</h1>
-        <p>Merci de vouloir recevoir nos actualités. Pour finaliser votre inscription à la newsletter SenBonsPlans, cliquez sur le bouton ci-dessous.</p>
+        <p>Merci de vouloir recevoir nos actualités. Pour finaliser votre inscription à la newsletter GlowBeauty, cliquez sur le bouton ci-dessous.</p>
         <p style="margin: 24px 0;">
           <a href="${safeUrl}" style="display: inline-block; background: #C2185B; color: #fff; padding: 12px 20px; border-radius: 6px; text-decoration: none; font-weight: bold;">
             Confirmer mon inscription
@@ -460,7 +460,7 @@ export async function sendOrderConfirmationEmail(orderData: {
         <div class="container">
           <div class="header">
             <h1>Commande Confirmée</h1>
-            <p>Merci d'avoir choisi SenBonsPlans!</p>
+            <p>Merci d'avoir choisi GlowBeauty!</p>
           </div>
           
           <div class="content">
@@ -517,7 +517,7 @@ export async function sendOrderConfirmationEmail(orderData: {
           </div>
 
           <div class="footer">
-            <p>© 2026 SenBonsPlans. Tous droits réservés.</p>
+            <p>© 2026 GlowBeauty. Tous droits réservés.</p>
             <p>Livraison rapide à Dakar et partout au Sénégal</p>
           </div>
         </div>
@@ -655,7 +655,7 @@ export async function sendOrderStatusUpdateEmail(orderData: {
           </div>
 
           <div class="footer">
-            <p>© 2026 SenBonsPlans. Tous droits réservés.</p>
+            <p>© 2026 GlowBeauty. Tous droits réservés.</p>
           </div>
         </div>
       </body>
@@ -703,7 +703,7 @@ export async function sendAdminOrderNotification(orderData: {
       return false;
     }
 
-    const adminEmail = process.env.ADMIN_EMAIL || "admin@senbonsplans.com";
+    const adminEmail = process.env.ADMIN_EMAIL || "admin@glowbeauty.com";
 
     // If the admin has customized this template, honor it.
     const customAdmin = resolveCustomEmailContent("admin_notification", {

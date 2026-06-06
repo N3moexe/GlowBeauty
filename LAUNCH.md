@@ -1,4 +1,4 @@
-# SenBonsPlans — Launch checklist
+# GlowBeauty — Launch checklist
 
 Follow this checklist before flipping DNS to production. Items are ordered by
 failure-cost — a miss on step 1 breaks the whole store; a miss on step 6
@@ -32,15 +32,15 @@ Set these on the production host before `pnpm start`:
 
 | Variable | Purpose | Example |
 |---|---|---|
-| `DATABASE_URL` | MySQL connection string | `mysql://user:pass@host:3306/senbonsplans` |
-| `APP_URL` | Public origin — used in confirmation emails + order tracking links | `https://senbonsplans.com` |
+| `DATABASE_URL` | MySQL connection string | `mysql://user:pass@host:3306/glowbeauty` |
+| `APP_URL` | Public origin — used in confirmation emails + order tracking links | `https://glowbeauty.com` |
 | `JWT_SECRET` | Session signing key (32+ random chars) | generate with `openssl rand -hex 32` |
 | `SMTP_HOST` | SMTP host for transactional email | `smtp.yourprovider.com` |
 | `SMTP_PORT` | SMTP port | `587` (STARTTLS) or `465` (TLS) |
-| `SMTP_USER` | SMTP username | `noreply@senbonsplans.com` |
+| `SMTP_USER` | SMTP username | `noreply@glowbeauty.com` |
 | `SMTP_PASSWORD` | SMTP password / app password | (from provider) |
-| `SMTP_FROM` | From address shown to recipients | `SenBonsPlans <noreply@senbonsplans.com>` |
-| `ADMIN_EMAIL` | Recipient of new-order notifications | `orders@senbonsplans.com` |
+| `SMTP_FROM` | From address shown to recipients | `GlowBeauty <noreply@glowbeauty.com>` |
+| `ADMIN_EMAIL` | Recipient of new-order notifications | `orders@glowbeauty.com` |
 | `NODE_ENV` | Must be `production` | `production` |
 
 **Do NOT set** `ALLOW_DEV_ADMIN=true` in production. It is a dev-only bypass.
