@@ -229,7 +229,9 @@ export function SettingsModule({ canAccessSettings }: SettingsModuleProps) {
           <p className="font-medium text-[var(--admin-ink)]">
             Aperçu du paiement
           </p>
-          <p className="mt-1">Moyens actifs : {activeMethodLabels || "Aucun"}</p>
+          <p className="mt-1">
+            Moyens actifs : {activeMethodLabels || "Aucun"}
+          </p>
           <p className="mt-1">
             Texte boutique : {storefrontQuery.data?.paymentMethodsText || "—"}
           </p>

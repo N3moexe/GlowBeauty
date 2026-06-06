@@ -1,7 +1,14 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { type ColumnDef } from "@tanstack/react-table";
-import { Clock, Download, Mail, MailCheck, MailX, RefreshCw } from "lucide-react";
+import {
+  Clock,
+  Download,
+  Mail,
+  MailCheck,
+  MailX,
+  RefreshCw,
+} from "lucide-react";
 import DataTable from "@/components/admin/DataTable";
 import StatusBadge from "@/components/admin/StatusBadge";
 import { StatTile } from "@/components/admin/ui/StatTile";
@@ -118,7 +125,9 @@ export function NewsletterModule() {
         accessorKey: "confirmedAt",
         header: "Confirmé le",
         cell: ({ row }) =>
-          row.original.confirmedAt ? toDateLabel(row.original.confirmedAt) : "—",
+          row.original.confirmedAt
+            ? toDateLabel(row.original.confirmedAt)
+            : "—",
       },
       {
         accessorKey: "createdAt",

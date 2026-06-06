@@ -43,9 +43,12 @@ export function ReportsModule() {
     { threshold: 10 },
     { refetchInterval: 60000 }
   );
-  const salesByCategoryQuery = trpc.reports.salesByCategory.useQuery(undefined, {
-    refetchInterval: 60000,
-  });
+  const salesByCategoryQuery = trpc.reports.salesByCategory.useQuery(
+    undefined,
+    {
+      refetchInterval: 60000,
+    }
+  );
 
   const bestSellers = useMemo(
     () => (bestSellersQuery.data ?? []) as BestSellerRow[],
