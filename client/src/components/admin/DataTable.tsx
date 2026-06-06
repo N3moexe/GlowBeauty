@@ -73,7 +73,7 @@ export default function DataTable<TData>({
   filters,
   savedViews,
   renderBulkActions,
-  emptyTitle = "No data found",
+  emptyTitle = "Aucune donnée",
   emptyDescription,
   emptyCtaLabel,
   onEmptyCtaClick,
@@ -114,7 +114,9 @@ export default function DataTable<TData>({
     enableRowSelection: true,
   });
 
-  const selectedRows = table.getFilteredSelectedRowModel().rows.map(row => row.original);
+  const selectedRows = table
+    .getFilteredSelectedRowModel()
+    .rows.map(row => row.original);
   const clearSelection = () => setRowSelection({});
 
   if (isLoading) {
@@ -142,7 +144,10 @@ export default function DataTable<TData>({
           searchPlaceholder={searchPlaceholder}
           filters={filters}
           savedViews={savedViews}
-          bulkActions={renderBulkActions?.({ rows: selectedRows, clearSelection })}
+          bulkActions={renderBulkActions?.({
+            rows: selectedRows,
+            clearSelection,
+          })}
           getColumnLabel={getColumnLabel}
         />
       </div>
@@ -158,11 +163,14 @@ export default function DataTable<TData>({
 
                 const sorted = header.column.getIsSorted();
                 const canSort = header.column.getCanSort();
-                const sortingIcon = sorted === "asc"
-                  ? <ArrowUp className="h-3.5 w-3.5" />
-                  : sorted === "desc"
-                    ? <ArrowDown className="h-3.5 w-3.5" />
-                    : <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground" />;
+                const sortingIcon =
+                  sorted === "asc" ? (
+                    <ArrowUp className="h-3.5 w-3.5" />
+                  ) : sorted === "desc" ? (
+                    <ArrowDown className="h-3.5 w-3.5" />
+                  ) : (
+                    <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground" />
+                  );
 
                 return (
                   <TableHead key={header.id}>
@@ -175,12 +183,20 @@ export default function DataTable<TData>({
                         onClick={header.column.getToggleSortingHandler()}
                       >
                         <span className="truncate">
-                          {flexRender(header.column.columnDef.header, header.getContext())}
+                          {flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
                         </span>
                         {sortingIcon}
                       </Button>
                     ) : (
-                      <span>{flexRender(header.column.columnDef.header, header.getContext())}</span>
+                      <span>
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                      </span>
                     )}
                   </TableHead>
                 );
@@ -191,8 +207,11 @@ export default function DataTable<TData>({
         <TableBody>
           {table.getRowModel().rows.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center text-muted-foreground">
-                No matching results.
+              <TableCell
+                colSpan={columns.length}
+                className="h-24 text-center text-muted-foreground"
+              >
+                Aucun résultat.
               </TableCell>
             </TableRow>
           ) : (
@@ -217,12 +236,12 @@ export default function DataTable<TData>({
       <div className="flex flex-col gap-2 border-t px-3 py-3 text-xs text-muted-foreground md:flex-row md:items-center md:justify-between md:px-4">
         <div>
           {selectedRows.length > 0
-            ? `${selectedRows.length} selected / ${table.getFilteredRowModel().rows.length} total`
-            : `${table.getFilteredRowModel().rows.length} total rows`}
+            ? `${selectedRows.length} sélectionné(s) / ${table.getFilteredRowModel().rows.length} au total`
+            : `${table.getFilteredRowModel().rows.length} ligne(s) au total`}
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <span>Rows per page</span>
+          <span>Lignes par page</span>
           <Select
             value={String(table.getState().pagination.pageSize)}
             onValueChange={value => table.setPageSize(Number(value))}
@@ -240,7 +259,8 @@ export default function DataTable<TData>({
           </Select>
 
           <span className="min-w-[96px] text-center">
-            Page {table.getState().pagination.pageIndex + 1} / {Math.max(table.getPageCount(), 1)}
+            Page {table.getState().pagination.pageIndex + 1} /{" "}
+            {Math.max(table.getPageCount(), 1)}
           </span>
 
           <Button
@@ -251,7 +271,7 @@ export default function DataTable<TData>({
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
           >
-            Prev
+            Préc.
           </Button>
           <Button
             type="button"
@@ -261,7 +281,7 @@ export default function DataTable<TData>({
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
           >
-            Next
+            Suiv.
           </Button>
         </div>
       </div>

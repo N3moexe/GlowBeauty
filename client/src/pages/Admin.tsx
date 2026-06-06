@@ -1999,57 +1999,58 @@ export default function Admin() {
     { title: string; description: string }
   > = {
     analytics: {
-      title: "Dashboard",
-      description: "Live overview and priorities.",
+      title: "Tableau de bord",
+      description: "Vue d'ensemble en temps réel et priorités.",
     },
     orders: {
-      title: "Orders",
-      description: "Track and update customer orders.",
+      title: "Commandes",
+      description: "Suivez et mettez à jour les commandes clients.",
     },
     customers: {
       title: "Clients",
-      description: "Répertoire clients et historique commandes.",
+      description: "Répertoire clients et historique des commandes.",
     },
     products: {
-      title: "Products",
-      description: "Manage catalog, stock, and merchandising.",
+      title: "Produits",
+      description: "Gérez le catalogue, le stock et la mise en avant.",
     },
     categories: {
-      title: "Categories",
+      title: "Catégories",
       description:
-        "Skincare taxonomy, cleanup presets, and collection structure.",
+        "Taxonomie skincare, préréglages de nettoyage et structure des collections.",
     },
     reviews: {
-      title: "Reviews",
+      title: "Avis",
       description:
-        "Moderate customer reviews and publish trusted social proof.",
+        "Modérez les avis clients et publiez une preuve sociale fiable.",
     },
     inventory: {
-      title: "Inventory",
+      title: "Stock",
       description:
-        "Live stock control, low-stock monitoring, and fast restocking.",
+        "Contrôle du stock en direct, alertes de stock faible et réapprovisionnement rapide.",
     },
     coupons: {
       title: "Promotions",
       description:
-        "Create and control discounts with expiry and activation rules.",
+        "Créez et pilotez les remises avec règles d'expiration et d'activation.",
     },
     banners: {
-      title: "Homepage editor",
-      description: "Edit hero, promotions, and featured categories.",
+      title: "Éditeur d'accueil",
+      description:
+        "Modifiez le hero, les promotions et les catégories mises en avant.",
     },
     reports: {
-      title: "Reports",
-      description: "Best sellers and stock alerts.",
+      title: "Rapports",
+      description: "Meilleures ventes et alertes de stock.",
     },
     cms: {
-      title: "CMS studio",
+      title: "Studio CMS",
       description:
-        "Create, publish, and optimize content pages with SEO health.",
+        "Créez, publiez et optimisez les pages de contenu avec le suivi SEO.",
     },
     settings: {
-      title: "Settings",
-      description: "Store controls and checkout payment method switches.",
+      title: "Paramètres",
+      description: "Réglages de la boutique et moyens de paiement.",
     },
     newsletter: {
       title: "Newsletter",

@@ -1,10 +1,13 @@
 import { useMemo } from "react";
-import { AlertTriangle, Package, TrendingUp } from "lucide-react";
+import { AlertTriangle, Package, RefreshCw, TrendingUp } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { RetryPanel } from "@/pages/admin-modules/shared/RetryPanel";
 import { ShimmerBlock } from "@/pages/admin-modules/shared/ShimmerBlock";
 import { formatCFA } from "@/pages/admin-modules/shared/formatters";
 import { getErrorMessage } from "@/pages/admin-modules/shared/utils";
+import { Surface } from "@/components/admin/ui/Surface";
+import { Heading } from "@/components/admin/ui/Heading";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 type BestSellerRow = {
@@ -31,10 +34,6 @@ type SalesByCategoryRow = {
   totalOrders: number;
 };
 
-const CARD =
-  "rounded-2xl border border-[var(--admin-border,theme(colors.border/60))] bg-white/90 shadow-sm";
-const CARD_PAD = "p-4 md:p-5";
-
 export function ReportsModule() {
   const bestSellersQuery = trpc.reports.bestSellers.useQuery(
     { limit: 10 },
@@ -44,10 +43,9 @@ export function ReportsModule() {
     { threshold: 10 },
     { refetchInterval: 60000 }
   );
-  const salesByCategoryQuery = trpc.reports.salesByCategory.useQuery(
-    undefined,
-    { refetchInterval: 60000 }
-  );
+  const salesByCategoryQuery = trpc.reports.salesByCategory.useQuery(undefined, {
+    refetchInterval: 60000,
+  });
 
   const bestSellers = useMemo(
     () => (bestSellersQuery.data ?? []) as BestSellerRow[],
@@ -65,18 +63,23 @@ export function ReportsModule() {
   const firstError =
     bestSellersQuery.error ?? lowStockQuery.error ?? salesByCategoryQuery.error;
 
+  const refetchAll = () => {
+    void Promise.all([
+      bestSellersQuery.refetch(),
+      lowStockQuery.refetch(),
+      salesByCategoryQuery.refetch(),
+    ]);
+  };
+
   if (firstError) {
     return (
       <RetryPanel
-        title="Reports unavailable"
-        description={getErrorMessage(firstError, "Unable to load reports.")}
-        onRetry={() => {
-          void Promise.all([
-            bestSellersQuery.refetch(),
-            lowStockQuery.refetch(),
-            salesByCategoryQuery.refetch(),
-          ]);
-        }}
+        title="Rapports indisponibles"
+        description={getErrorMessage(
+          firstError,
+          "Impossible de charger les rapports."
+        )}
+        onRetry={refetchAll}
       />
     );
   }
@@ -85,6 +88,10 @@ export function ReportsModule() {
     bestSellersQuery.isLoading ||
     lowStockQuery.isLoading ||
     salesByCategoryQuery.isLoading;
+  const isFetching =
+    bestSellersQuery.isFetching ||
+    lowStockQuery.isFetching ||
+    salesByCategoryQuery.isFetching;
 
   const maxSales =
     salesByCategory.reduce(
@@ -95,11 +102,24 @@ export function ReportsModule() {
   return (
     <section className="space-y-6">
       <div className="grid gap-4 lg:grid-cols-2">
-        {/* Best sellers */}
-        <div className={cn(CARD, CARD_PAD, "space-y-3")}>
+        {/* Meilleures ventes */}
+        <Surface className="space-y-3 p-4 md:p-5">
           <div className="flex items-center gap-2">
-            <TrendingUp className="h-4 w-4 text-[var(--admin-accent,#e3744e)]" />
-            <h3 className="text-sm font-semibold">Best sellers</h3>
+            <TrendingUp className="h-4 w-4 text-[var(--admin-accent)]" />
+            <Heading level={3}>Meilleures ventes</Heading>
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              className="ml-auto h-9 w-9 border-[var(--admin-border)]"
+              title="Rafraîchir"
+              onClick={refetchAll}
+              disabled={isFetching}
+            >
+              <RefreshCw
+                className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`}
+              />
+            </Button>
           </div>
 
           {isLoading ? (
@@ -109,17 +129,17 @@ export function ReportsModule() {
               ))}
             </div>
           ) : bestSellers.length === 0 ? (
-            <p className="py-6 text-center text-sm text-muted-foreground">
-              No sales data yet.
+            <p className="py-6 text-center text-sm text-[var(--admin-muted)]">
+              Aucune donnée de vente.
             </p>
           ) : (
-            <div className="divide-y divide-border/50">
+            <div className="divide-y divide-[var(--admin-divider)]">
               {bestSellers.map((row, index) => (
                 <div
                   key={row.product.id}
                   className="flex items-center gap-3 py-2.5 first:pt-1 last:pb-1"
                 >
-                  <span className="w-5 shrink-0 text-right text-xs font-semibold text-muted-foreground">
+                  <span className="w-5 shrink-0 text-right text-xs font-semibold text-[var(--admin-muted)]">
                     {index + 1}
                   </span>
                   {row.product.imageUrl ? (
@@ -129,39 +149,37 @@ export function ReportsModule() {
                       className="h-8 w-8 shrink-0 rounded-lg object-cover"
                     />
                   ) : (
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--admin-accent-soft,#fdeee7)]">
-                      <Package className="h-4 w-4 text-[var(--admin-accent,#e3744e)]" />
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--admin-accent-soft)]">
+                      <Package className="h-4 w-4 text-[var(--admin-accent)]" />
                     </div>
                   )}
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium">
+                    <p className="truncate text-sm font-medium text-[var(--admin-ink)]">
                       {row.product.name}
                     </p>
-                    <p className="text-xs text-muted-foreground">
-                      {row.totalSold} sold
+                    <p className="text-xs text-[var(--admin-muted)]">
+                      {row.totalSold} vendus
                     </p>
                   </div>
-                  <p className="shrink-0 text-sm font-semibold">
+                  <p className="shrink-0 text-sm font-semibold text-[var(--admin-ink)]">
                     {formatCFA(row.totalRevenue)}
                   </p>
                 </div>
               ))}
             </div>
           )}
-        </div>
+        </Surface>
 
-        {/* Low stock */}
-        <div className={cn(CARD, CARD_PAD, "space-y-3")}>
+        {/* Stock faible */}
+        <Surface className="space-y-3 p-4 md:p-5">
           <div className="flex items-center gap-2">
             <AlertTriangle className="h-4 w-4 text-amber-500" />
-            <h3 className="text-sm font-semibold">
-              Low stock
-              {lowStock.length > 0 ? (
-                <span className="ml-1.5 rounded-full bg-amber-100 px-1.5 py-0.5 text-xs font-medium text-amber-700">
-                  {lowStock.length}
-                </span>
-              ) : null}
-            </h3>
+            <Heading level={3}>Stock faible</Heading>
+            {lowStock.length > 0 ? (
+              <span className="rounded-full bg-amber-100 px-1.5 py-0.5 text-xs font-medium text-amber-700">
+                {lowStock.length}
+              </span>
+            ) : null}
           </div>
 
           {isLoading ? (
@@ -171,11 +189,11 @@ export function ReportsModule() {
               ))}
             </div>
           ) : lowStock.length === 0 ? (
-            <p className="py-6 text-center text-sm text-muted-foreground">
-              All stock levels are sufficient.
+            <p className="py-6 text-center text-sm text-[var(--admin-muted)]">
+              Tous les niveaux de stock sont suffisants.
             </p>
           ) : (
-            <div className="divide-y divide-border/50">
+            <div className="divide-y divide-[var(--admin-divider)]">
               {lowStock.map(product => {
                 const qty = product.stockQuantity ?? 0;
                 return (
@@ -184,7 +202,7 @@ export function ReportsModule() {
                     className="flex items-center gap-3 py-2.5 first:pt-1 last:pb-1"
                   >
                     <AlertTriangle className="h-4 w-4 shrink-0 text-amber-500" />
-                    <p className="min-w-0 flex-1 truncate text-sm">
+                    <p className="min-w-0 flex-1 truncate text-sm text-[var(--admin-ink)]">
                       {product.name}
                     </p>
                     <span
@@ -195,19 +213,21 @@ export function ReportsModule() {
                           : "bg-amber-50 text-amber-600"
                       )}
                     >
-                      {qty === 0 ? "Out of stock" : `${qty} left`}
+                      {qty === 0
+                        ? "Rupture"
+                        : `${qty} restant${qty > 1 ? "s" : ""}`}
                     </span>
                   </div>
                 );
               })}
             </div>
           )}
-        </div>
+        </Surface>
       </div>
 
-      {/* Sales by category */}
-      <div className={cn(CARD, CARD_PAD, "space-y-4")}>
-        <h3 className="text-sm font-semibold">Sales by category</h3>
+      {/* Ventes par catégorie */}
+      <Surface className="space-y-4 p-4 md:p-5">
+        <Heading level={3}>Ventes par catégorie</Heading>
 
         {isLoading ? (
           <div className="space-y-3">
@@ -216,8 +236,8 @@ export function ReportsModule() {
             ))}
           </div>
         ) : salesByCategory.length === 0 ? (
-          <p className="py-6 text-center text-sm text-muted-foreground">
-            No category data yet.
+          <p className="py-6 text-center text-sm text-[var(--admin-muted)]">
+            Aucune donnée par catégorie.
           </p>
         ) : (
           <div className="space-y-3">
@@ -232,18 +252,20 @@ export function ReportsModule() {
                 return (
                   <div key={row.category.id} className="space-y-1">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="font-medium">{row.category.name}</span>
-                      <span className="tabular-nums text-muted-foreground">
+                      <span className="font-medium text-[var(--admin-ink)]">
+                        {row.category.name}
+                      </span>
+                      <span className="tabular-nums text-[var(--admin-muted)]">
                         {formatCFA(sales)}{" "}
                         <span className="text-xs">
-                          ({row.totalOrders} order
+                          ({row.totalOrders} commande
                           {Number(row.totalOrders) !== 1 ? "s" : ""})
                         </span>
                       </span>
                     </div>
-                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-border/40">
+                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--admin-divider)]">
                       <div
-                        className="h-full rounded-full bg-[var(--admin-accent,#e3744e)] transition-all"
+                        className="h-full rounded-full bg-[var(--admin-accent)] transition-all"
                         style={{ width: `${pct}%` }}
                       />
                     </div>
@@ -252,7 +274,7 @@ export function ReportsModule() {
               })}
           </div>
         )}
-      </div>
+      </Surface>
     </section>
   );
 }

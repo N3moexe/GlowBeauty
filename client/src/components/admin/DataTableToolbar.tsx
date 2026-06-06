@@ -35,14 +35,16 @@ export default function DataTableToolbar<TData>({
   table,
   searchValue,
   onSearchValueChange,
-  searchPlaceholder = "Search...",
+  searchPlaceholder = "Rechercher…",
   filters,
   savedViews,
   bulkActions,
   getColumnLabel,
   className,
 }: DataTableToolbarProps<TData>) {
-  const columns = table.getAllLeafColumns().filter(column => column.getCanHide());
+  const columns = table
+    .getAllLeafColumns()
+    .filter(column => column.getCanHide());
 
   return (
     <div className={cn("space-y-3", className)}>
@@ -70,17 +72,19 @@ export default function DataTableToolbar<TData>({
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm" className="gap-2">
                   <Settings2 className="h-4 w-4" />
-                  Columns
+                  Colonnes
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-52">
-                <DropdownMenuLabel>Visible columns</DropdownMenuLabel>
+                <DropdownMenuLabel>Colonnes visibles</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {columns.map(column => (
                   <DropdownMenuCheckboxItem
                     key={column.id}
                     checked={column.getIsVisible()}
-                    onCheckedChange={value => column.toggleVisibility(Boolean(value))}
+                    onCheckedChange={value =>
+                      column.toggleVisibility(Boolean(value))
+                    }
                   >
                     {getColumnLabel?.(column.id) || defaultColumnLabel(column)}
                   </DropdownMenuCheckboxItem>

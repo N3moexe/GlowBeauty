@@ -21,7 +21,7 @@ export function RetryPanel({
         onClick={onRetry}
       >
         <RefreshCw className="mr-2 h-4 w-4" />
-        Retry
+        Réessayer
       </Button>
     </div>
   );

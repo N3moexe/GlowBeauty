@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
-import { Loader2, Save, Settings2 } from "lucide-react";
+import { Loader2, RefreshCw, Save, Settings2 } from "lucide-react";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
 import EmptyState from "@/components/admin/EmptyState";
 import { RetryPanel } from "@/pages/admin-modules/shared/RetryPanel";
 import { getErrorMessage } from "@/pages/admin-modules/shared/utils";
+import { Surface } from "@/components/admin/ui/Surface";
+import { Heading } from "@/components/admin/ui/Heading";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 
@@ -66,13 +68,13 @@ export function SettingsModule({ canAccessSettings }: SettingsModuleProps) {
     paymentSettingsQuery.error || storefrontQuery.error
       ? getErrorMessage(
           paymentSettingsQuery.error || storefrontQuery.error,
-          "Unable to load payment settings."
+          "Impossible de charger les paramètres de paiement."
         )
       : null;
 
   const saveSettings = useCallback(async () => {
     if (!canAccessSettings) {
-      toast.error("Settings access is not allowed");
+      toast.error("Accès aux paramètres non autorisé");
       return;
     }
     setSaving(true);
@@ -92,9 +94,11 @@ export function SettingsModule({ canAccessSettings }: SettingsModuleProps) {
         utils.settings.storefront.invalidate(),
         utils.settings.list.invalidate(),
       ]);
-      toast.success("Payment methods updated");
+      toast.success("Moyens de paiement mis à jour");
     } catch (error) {
-      toast.error(getErrorMessage(error, "Failed to save payment settings"));
+      toast.error(
+        getErrorMessage(error, "Échec de l'enregistrement des paramètres")
+      );
     } finally {
       setSaving(false);
     }
@@ -109,8 +113,8 @@ export function SettingsModule({ canAccessSettings }: SettingsModuleProps) {
   if (!canAccessSettings) {
     return (
       <EmptyState
-        title="Access denied"
-        description="Only admin users can update payment settings."
+        title="Accès refusé"
+        description="Seuls les administrateurs peuvent modifier les paramètres de paiement."
       />
     );
   }
@@ -118,7 +122,7 @@ export function SettingsModule({ canAccessSettings }: SettingsModuleProps) {
   if (errorMessage) {
     return (
       <RetryPanel
-        title="Settings unavailable"
+        title="Paramètres indisponibles"
         description={errorMessage}
         onRetry={() => {
           void Promise.all([
@@ -138,22 +142,22 @@ export function SettingsModule({ canAccessSettings }: SettingsModuleProps) {
     {
       key: "waveEnabled",
       label: "Wave",
-      description: "Mobile checkout with Wave.",
+      description: "Paiement mobile via Wave.",
     },
     {
       key: "orangeEnabled",
       label: "Orange Money",
-      description: "Mobile checkout with Orange.",
+      description: "Paiement mobile via Orange.",
     },
     {
       key: "freeMoneyEnabled",
       label: "Free Money",
-      description: "Mobile checkout with Free Money.",
+      description: "Paiement mobile via Free Money.",
     },
     {
       key: "cardEnabled",
-      label: "Card payment",
-      description: "Visa and Mastercard checkout option.",
+      label: "Paiement par carte",
+      description: "Paiement par Visa et Mastercard.",
     },
   ];
 
@@ -161,29 +165,49 @@ export function SettingsModule({ canAccessSettings }: SettingsModuleProps) {
     form.waveEnabled ? "Wave" : null,
     form.orangeEnabled ? "Orange Money" : null,
     form.freeMoneyEnabled ? "Free Money" : null,
-    form.cardEnabled ? "Card" : null,
+    form.cardEnabled ? "Carte" : null,
   ]
     .filter(Boolean)
     .join(", ");
 
   return (
     <div className="space-y-4">
-      <div className="rounded-xl border border-border/70 bg-white/92 p-4 shadow-sm md:p-5">
+      <Surface className="p-4 md:p-5">
         <div className="mb-4 flex items-center gap-2">
-          <Settings2 className="h-4 w-4 text-muted-foreground" />
-          <h3 className="text-sm font-semibold">Payment methods</h3>
+          <Settings2 className="h-4 w-4 text-[var(--admin-muted)]" />
+          <Heading level={3}>Moyens de paiement</Heading>
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            className="ml-auto h-9 w-9 border-[var(--admin-border)]"
+            title="Rafraîchir"
+            onClick={() => {
+              void Promise.all([
+                paymentSettingsQuery.refetch(),
+                storefrontQuery.refetch(),
+              ]);
+            }}
+            disabled={paymentSettingsQuery.isFetching}
+          >
+            <RefreshCw
+              className={`h-4 w-4 ${paymentSettingsQuery.isFetching ? "animate-spin" : ""}`}
+            />
+          </Button>
         </div>
 
         <div className="grid gap-3 md:grid-cols-2">
           {PAYMENT_METHODS.map(method => (
             <div
               key={method.key}
-              className="rounded-xl border border-border/70 bg-white/80 p-4"
+              className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface-tint)] p-4"
             >
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <p className="font-medium">{method.label}</p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="font-medium text-[var(--admin-ink)]">
+                    {method.label}
+                  </p>
+                  <p className="text-xs text-[var(--admin-muted)]">
                     {method.description}
                   </p>
                 </div>
@@ -201,11 +225,13 @@ export function SettingsModule({ canAccessSettings }: SettingsModuleProps) {
           ))}
         </div>
 
-        <div className="mt-4 rounded-xl border border-border/70 bg-white/80 p-3 text-xs text-muted-foreground">
-          <p className="font-medium text-foreground">Checkout preview</p>
-          <p className="mt-1">Active methods: {activeMethodLabels || "None"}</p>
+        <div className="mt-4 rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface-tint)] p-3 text-xs text-[var(--admin-muted)]">
+          <p className="font-medium text-[var(--admin-ink)]">
+            Aperçu du paiement
+          </p>
+          <p className="mt-1">Moyens actifs : {activeMethodLabels || "Aucun"}</p>
           <p className="mt-1">
-            Storefront text: {storefrontQuery.data?.paymentMethodsText || "-"}
+            Texte boutique : {storefrontQuery.data?.paymentMethodsText || "—"}
           </p>
         </div>
 
@@ -214,16 +240,17 @@ export function SettingsModule({ canAccessSettings }: SettingsModuleProps) {
             type="button"
             onClick={() => void saveSettings()}
             disabled={!canAccessSettings || saving}
+            className="bg-[var(--admin-accent)] text-white hover:bg-[var(--admin-accent-hover)]"
           >
             {saving ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
               <Save className="mr-2 h-4 w-4" />
             )}
-            Save settings
+            Enregistrer
           </Button>
         </div>
-      </div>
+      </Surface>
     </div>
   );
 }
