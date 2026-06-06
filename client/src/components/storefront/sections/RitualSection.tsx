@@ -16,6 +16,7 @@ type RitualStep = {
   title: string;
   description: string;
   icon: LucideIcon;
+  image?: string | null;
 };
 
 type RitualSectionProps = {
@@ -143,6 +144,49 @@ function RitualImageBadge({
   );
 }
 
+function RitualImageLayer({
+  src,
+  alt,
+  scrollYProgress,
+  start,
+  end,
+  isFirst,
+  isLast,
+}: {
+  src: string;
+  alt: string;
+  scrollYProgress: MotionValue<number>;
+  start: number;
+  end: number;
+  isFirst: boolean;
+  isLast: boolean;
+}) {
+  const range: [number, number, number, number] = [
+    Math.max(0, start - 0.02),
+    start + 0.05,
+    end - 0.05,
+    Math.min(1, end + 0.02),
+  ];
+  const opacity = useTransform(scrollYProgress, range, [
+    isFirst ? 1 : 0,
+    1,
+    1,
+    isLast ? 1 : 0,
+  ]);
+  return (
+    <motion.div style={{ opacity }} className="absolute inset-0">
+      <MediaWithFallback
+        src={src}
+        alt={alt}
+        className="h-full w-full object-cover"
+        width={1200}
+        height={1500}
+        sizes="(min-width: 1280px) 45vw, 50vw"
+      />
+    </motion.div>
+  );
+}
+
 function RitualProgressDot({
   scrollYProgress,
   start,
@@ -218,6 +262,15 @@ export default function RitualSection({
                       {step.description}
                     </p>
                   </div>
+                  {step.image ? (
+                    <div className="ml-auto hidden h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-brand-border/60 sm:block">
+                      <MediaWithFallback
+                        src={step.image}
+                        alt=""
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                  ) : null}
                 </li>
               );
             })}
@@ -248,20 +301,26 @@ export default function RitualSection({
         <div className="container relative h-full py-10 md:py-14 lg:py-16">
           <div className="grid h-full items-center gap-8 lg:grid-cols-[1fr_0.95fr] lg:gap-14">
             <div className="relative hidden h-[72vh] overflow-hidden rounded-[2rem] border border-brand-border/70 shadow-[0_38px_80px_-50px_rgba(64,37,36,0.7)] lg:block">
-              {imageUrl ? (
-                <MediaWithFallback
-                  src={imageUrl}
-                  alt={imageAlt}
-                  className="h-full w-full object-cover"
-                  width={1200}
-                  height={1500}
-                  sizes="(min-width: 1280px) 45vw, 50vw"
-                />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center bg-[linear-gradient(160deg,#fff8f4_0%,#f6ece6_100%)]">
-                  <Sparkles className="h-20 w-20 text-brand-accent/35" />
-                </div>
-              )}
+              {/* Base fallback shown beneath the per-step images. */}
+              <div className="absolute inset-0 flex items-center justify-center bg-[linear-gradient(160deg,#fff8f4_0%,#f6ece6_100%)]">
+                <Sparkles className="h-20 w-20 text-brand-accent/35" />
+              </div>
+              {steps.map((step, idx) => {
+                const stepSrc = step.image || imageUrl;
+                if (!stepSrc) return null;
+                return (
+                  <RitualImageLayer
+                    key={`img-${step.id}`}
+                    src={stepSrc}
+                    alt={`${step.kicker} — ${imageAlt}`}
+                    scrollYProgress={scrollYProgress}
+                    start={idx / stepCount}
+                    end={(idx + 1) / stepCount}
+                    isFirst={idx === 0}
+                    isLast={idx === stepCount - 1}
+                  />
+                );
+              })}
               <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(27,16,15,0.04)_0%,rgba(27,16,15,0.36)_100%)]" />
               {steps.map((step, idx) => (
                 <RitualImageBadge

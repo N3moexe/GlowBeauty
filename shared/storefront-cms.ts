@@ -94,6 +94,7 @@ export const ritualStepSchema = z.object({
   kicker: z.string().max(60),
   title: z.string().max(80),
   description: z.string().max(240),
+  image: z.string().max(1024).optional(),
 });
 
 export const ritualSectionSchema = z.object({
@@ -442,8 +443,7 @@ export function defaultEmailTemplate(key: EmailTemplateKey): EmailTemplate {
     case "order_confirmation":
       return {
         key,
-        subject:
-          "Confirmation de votre commande {{orderNumber}} — GlowBeauty",
+        subject: "Confirmation de votre commande {{orderNumber}} — GlowBeauty",
         body:
           "Bonjour {{customerName}},\n\n" +
           "Merci pour votre commande {{orderNumber}}. Nous l'avons bien reçue et elle est en cours de traitement.\n\n" +

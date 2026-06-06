@@ -485,6 +485,7 @@ function renderSection(deps: RenderDeps): React.ReactNode {
                   title: step.title,
                   description: step.description,
                   icon: deps.iconForRitual(step.icon),
+                  image: step.image,
                 }))
               : undefined
           }

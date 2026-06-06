@@ -1075,6 +1075,14 @@ function RitualForm({ section, onChange }: FormProps<RitualSection>) {
                 }
               />
             </div>
+            <div className="md:col-span-4">
+              <ImagePickerField
+                value={step.image ?? ""}
+                onChange={url => updateStep(index, { image: url })}
+                placeholder="Image de l'étape (optionnel)"
+                previewRatio="4/5"
+              />
+            </div>
           </div>
         ))}
         <Button variant="outline" size="sm" onClick={addStep}>
