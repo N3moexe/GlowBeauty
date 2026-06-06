@@ -88,6 +88,27 @@ export const richTextSectionSchema = z.object({
   ctaHref: z.string().max(200).default(""),
 });
 
+export const ritualStepSchema = z.object({
+  id: z.string(),
+  icon: z.enum(["sun", "moon", "sparkles", "star", "heart", "clock"]),
+  kicker: z.string().max(60),
+  title: z.string().max(80),
+  description: z.string().max(240),
+});
+
+export const ritualSectionSchema = z.object({
+  type: z.literal("ritual"),
+  id: z.string(),
+  enabled: z.boolean().default(true),
+  kicker: z.string().max(60).default("Le rituel"),
+  title: z.string().max(160).default(""),
+  subtitle: z.string().max(240).default(""),
+  imageUrl: z.string().max(1024).default(""),
+  ctaLabel: z.string().max(60).default(""),
+  ctaHref: z.string().max(200).default("/boutique?q=routine"),
+  steps: z.array(ritualStepSchema).max(6).default([]),
+});
+
 export const homepageSectionSchema = z.discriminatedUnion("type", [
   heroSectionSchema,
   trustSectionSchema,
@@ -95,6 +116,7 @@ export const homepageSectionSchema = z.discriminatedUnion("type", [
   productRailSectionSchema,
   newsletterSectionSchema,
   richTextSectionSchema,
+  ritualSectionSchema,
 ]);
 
 export const homepageLayoutSchema = z.object({
@@ -108,6 +130,7 @@ export type ConcernsSection = z.infer<typeof concernsSectionSchema>;
 export type ProductRailSection = z.infer<typeof productRailSectionSchema>;
 export type NewsletterSection = z.infer<typeof newsletterSectionSchema>;
 export type RichTextSection = z.infer<typeof richTextSectionSchema>;
+export type RitualSection = z.infer<typeof ritualSectionSchema>;
 export type HomepageSection = z.infer<typeof homepageSectionSchema>;
 export type HomepageSectionType = HomepageSection["type"];
 export type HomepageLayout = z.infer<typeof homepageLayoutSchema>;
@@ -299,6 +322,44 @@ export function defaultHomepageLayout(): HomepageLayout {
         title: "−10 % sur votre première commande",
         subtitle:
           "Inscrivez-vous et recevez votre code par email. Plus nos sélections skincare du samedi. Pas de spam, promis.",
+      },
+      {
+        type: "ritual",
+        id: "ritual-1",
+        enabled: true,
+        kicker: "Le rituel",
+        title: "Trois temps. Une peau qui répond.",
+        subtitle:
+          "Matin, soir, semaine. Chaque geste a sa place dans la routine.",
+        imageUrl: "",
+        ctaLabel: "Construire ma routine",
+        ctaHref: "/boutique?q=routine",
+        steps: [
+          {
+            id: "ritual-matin",
+            icon: "sun",
+            kicker: "01 — Matin",
+            title: "Éveiller la peau.",
+            description:
+              "Nettoyer en douceur, hydrater, protéger. Sérum vitamine C et SPF — la peau démarre prête.",
+          },
+          {
+            id: "ritual-soir",
+            icon: "moon",
+            kicker: "02 — Soir",
+            title: "Réparer en profondeur.",
+            description:
+              "Démaquillage attentif, actif ciblé, soin de nuit. La peau récupère pendant que vous dormez.",
+          },
+          {
+            id: "ritual-hebdo",
+            icon: "sparkles",
+            kicker: "03 — Une fois par semaine",
+            title: "Le rituel signature.",
+            description:
+              "Masque exfoliant, soin booster. Le moment qui transforme la routine en rendez-vous.",
+          },
+        ],
       },
     ],
   };

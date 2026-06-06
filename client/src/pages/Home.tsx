@@ -3,10 +3,14 @@ import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import {
   ArrowRight,
+  Clock,
   Droplets,
   FlaskConical,
+  Heart,
+  Moon,
   ShieldCheck,
   Sparkles,
+  Star,
   Sun,
   Truck,
   type LucideIcon,
@@ -28,6 +32,7 @@ import type {
   NewsletterSection,
   ProductRailSection,
   RichTextSection,
+  RitualSection as RitualSectionConfig,
   TrustSection,
 } from "@shared/storefront-cms";
 import { defaultHomepageLayout } from "@shared/storefront-cms";
@@ -258,6 +263,24 @@ export default function Home() {
     }
   };
 
+  const iconForRitual = (icon: string): LucideIcon => {
+    switch (icon) {
+      case "moon":
+        return Moon;
+      case "star":
+        return Star;
+      case "heart":
+        return Heart;
+      case "clock":
+        return Clock;
+      case "sparkles":
+        return Sparkles;
+      case "sun":
+      default:
+        return Sun;
+    }
+  };
+
   const seo = useMemo(() => {
     const base =
       typeof window !== "undefined"
@@ -340,13 +363,12 @@ export default function Home() {
               heroProduct,
               defaultConcernCards,
               iconForTrust,
+              iconForRitual,
               pickProductsForRail,
               bestQueryLoading: bestQuery.isLoading && productsQuery.isLoading,
               LazyEmailSubscription,
             })
           )}
-
-        <RitualSection imageUrl={heroProduct?.imageUrl} />
 
         {recentlyViewed.length > 0 ? (
           <ProductRail
@@ -388,6 +410,7 @@ type RenderDeps = {
     icon: LucideIcon;
   }>;
   iconForTrust: (icon: string) => LucideIcon;
+  iconForRitual: (icon: string) => LucideIcon;
   pickProductsForRail: (
     source: ProductRailSection["source"],
     limit: number
@@ -439,6 +462,35 @@ function renderSection(deps: RenderDeps): React.ReactNode {
           }}
         />
       );
+
+    case "ritual": {
+      const ritual = section as RitualSectionConfig;
+      return (
+        <RitualSection
+          key={section.id}
+          kicker={ritual.kicker || "Le rituel"}
+          title={ritual.title || "Trois temps. Une peau qui répond."}
+          subtitle={
+            ritual.subtitle ||
+            "Matin, soir, semaine. Chaque geste a sa place dans la routine."
+          }
+          imageUrl={ritual.imageUrl || deps.heroProduct?.imageUrl || undefined}
+          ctaLabel={ritual.ctaLabel || "Construire ma routine"}
+          ctaHref={ritual.ctaHref || "/boutique?q=routine"}
+          steps={
+            ritual.steps.length > 0
+              ? ritual.steps.map(step => ({
+                  id: step.id,
+                  kicker: step.kicker,
+                  title: step.title,
+                  description: step.description,
+                  icon: deps.iconForRitual(step.icon),
+                }))
+              : undefined
+          }
+        />
+      );
+    }
 
     case "trust": {
       const trust = section as TrustSection;

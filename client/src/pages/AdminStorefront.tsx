@@ -32,6 +32,7 @@ import type {
   NewsletterSection,
   ProductRailSection,
   RichTextSection,
+  RitualSection,
   TrustSection,
 } from "@shared/storefront-cms";
 import { toast } from "sonner";
@@ -116,6 +117,42 @@ function newSection(type: HomepageSectionType): HomepageSection {
         ctaLabel: "",
         ctaHref: "",
       };
+    case "ritual":
+      return {
+        type: "ritual",
+        id,
+        enabled: true,
+        kicker: "Le rituel",
+        title: "Trois temps. Une peau qui répond.",
+        subtitle:
+          "Matin, soir, semaine. Chaque geste a sa place dans la routine.",
+        imageUrl: "",
+        ctaLabel: "Construire ma routine",
+        ctaHref: "/boutique?q=routine",
+        steps: [
+          {
+            id: `step-${Math.random().toString(36).slice(2, 6)}`,
+            icon: "sun",
+            kicker: "01 — Matin",
+            title: "Éveiller la peau.",
+            description: "Nettoyer, hydrater, protéger.",
+          },
+          {
+            id: `step-${Math.random().toString(36).slice(2, 6)}`,
+            icon: "moon",
+            kicker: "02 — Soir",
+            title: "Réparer en profondeur.",
+            description: "Démaquiller, traiter, nourrir.",
+          },
+          {
+            id: `step-${Math.random().toString(36).slice(2, 6)}`,
+            icon: "sparkles",
+            kicker: "03 — Une fois par semaine",
+            title: "Le rituel signature.",
+            description: "Masque et soin booster.",
+          },
+        ],
+      };
   }
 }
 
@@ -126,6 +163,7 @@ const SECTION_TYPES: { value: HomepageSectionType; label: string }[] = [
   { value: "product_rail", label: "Carrousel de produits" },
   { value: "newsletter", label: "Newsletter" },
   { value: "rich_text", label: "Texte éditorial" },
+  { value: "ritual", label: "Rituel (3 temps)" },
 ];
 
 export default function AdminStorefront() {
@@ -480,6 +518,9 @@ function SectionCard({
       ) : null}
       {section.type === "rich_text" ? (
         <RichTextForm section={section} onChange={onChange} />
+      ) : null}
+      {section.type === "ritual" ? (
+        <RitualForm section={section} onChange={onChange} />
       ) : null}
     </div>
   );
@@ -902,6 +943,144 @@ function RichTextForm({ section, onChange }: FormProps<RichTextSection>) {
           onChange={e => onChange({ ctaLabel: e.target.value })}
         />
       </Field>
+    </div>
+  );
+}
+
+function RitualForm({ section, onChange }: FormProps<RitualSection>) {
+  const addStep = () =>
+    onChange({
+      steps: [
+        ...section.steps,
+        {
+          id: `step-${Math.random().toString(36).slice(2, 6)}`,
+          icon: "sparkles",
+          kicker: "",
+          title: "",
+          description: "",
+        },
+      ],
+    });
+  const updateStep = (
+    index: number,
+    patch: Partial<RitualSection["steps"][number]>
+  ) => {
+    const steps = [...section.steps];
+    steps[index] = { ...steps[index], ...patch };
+    onChange({ steps });
+  };
+  const removeStep = (index: number) => {
+    const steps = [...section.steps];
+    steps.splice(index, 1);
+    onChange({ steps });
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="grid gap-3 md:grid-cols-2">
+        <Field label="Kicker">
+          <Input
+            value={section.kicker}
+            onChange={e => onChange({ kicker: e.target.value })}
+          />
+        </Field>
+        <Field label="Titre">
+          <Input
+            value={section.title}
+            onChange={e => onChange({ title: e.target.value })}
+          />
+        </Field>
+        <div className="md:col-span-2">
+          <Field label="Sous-titre">
+            <Textarea
+              value={section.subtitle}
+              rows={2}
+              onChange={e => onChange({ subtitle: e.target.value })}
+            />
+          </Field>
+        </div>
+        <Field label="Image">
+          <ImagePickerField
+            value={section.imageUrl}
+            onChange={url => onChange({ imageUrl: url })}
+            placeholder="https://… (vide = image du best seller)"
+            previewRatio="4/5"
+          />
+        </Field>
+        <div className="grid gap-3">
+          <Field label="Libellé du bouton">
+            <Input
+              value={section.ctaLabel}
+              onChange={e => onChange({ ctaLabel: e.target.value })}
+            />
+          </Field>
+          <Field label="Lien du bouton">
+            <Input
+              value={section.ctaHref}
+              onChange={e => onChange({ ctaHref: e.target.value })}
+            />
+          </Field>
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+          Étapes du rituel
+        </p>
+        {section.steps.map((step, index) => (
+          <div
+            key={step.id}
+            className="grid gap-2 rounded-lg border border-border p-3 md:grid-cols-[130px_1fr_1.4fr_auto]"
+          >
+            <Select
+              value={step.icon}
+              onValueChange={v => updateStep(index, { icon: v as any })}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="sun">Soleil</SelectItem>
+                <SelectItem value="moon">Lune</SelectItem>
+                <SelectItem value="sparkles">Éclat</SelectItem>
+                <SelectItem value="star">Étoile</SelectItem>
+                <SelectItem value="heart">Coeur</SelectItem>
+                <SelectItem value="clock">Horloge</SelectItem>
+              </SelectContent>
+            </Select>
+            <Input
+              value={step.kicker}
+              placeholder="01 — Matin"
+              onChange={e => updateStep(index, { kicker: e.target.value })}
+            />
+            <Input
+              value={step.title}
+              placeholder="Titre"
+              onChange={e => updateStep(index, { title: e.target.value })}
+            />
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => removeStep(index)}
+            >
+              <Trash2 className="h-4 w-4 text-destructive" />
+            </Button>
+            <div className="md:col-span-4">
+              <Textarea
+                value={step.description}
+                rows={2}
+                placeholder="Description"
+                onChange={e =>
+                  updateStep(index, { description: e.target.value })
+                }
+              />
+            </div>
+          </div>
+        ))}
+        <Button variant="outline" size="sm" onClick={addStep}>
+          <Plus className="mr-1.5 h-3.5 w-3.5" /> Ajouter une étape
+        </Button>
+      </div>
     </div>
   );
 }
