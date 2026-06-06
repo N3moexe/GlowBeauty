@@ -306,7 +306,10 @@ export function ReviewsModule({ canManage, canDelete }: ReviewsModuleProps) {
   );
 
   const reviewsErrorMessage = reviewsAdminQuery.error
-    ? getErrorMessage(reviewsAdminQuery.error, "Impossible de charger les avis.")
+    ? getErrorMessage(
+        reviewsAdminQuery.error,
+        "Impossible de charger les avis."
+      )
     : null;
 
   return (

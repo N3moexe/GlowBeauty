@@ -414,9 +414,7 @@ export function CouponsModule({ canManage, canDelete }: CouponsModuleProps) {
               >
                 <RefreshCw
                   className={
-                    couponsQuery.isFetching
-                      ? "h-4 w-4 animate-spin"
-                      : "h-4 w-4"
+                    couponsQuery.isFetching ? "h-4 w-4 animate-spin" : "h-4 w-4"
                   }
                 />
                 <span className="ml-2 hidden sm:inline">Actualiser</span>
@@ -591,7 +589,6 @@ export function CouponsModule({ canManage, canDelete }: CouponsModuleProps) {
               />
               Promotion active
             </label>
-
 
             <div className="flex justify-end gap-2">
               <Button

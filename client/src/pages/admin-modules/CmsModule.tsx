@@ -355,7 +355,9 @@ export function CmsModule({ canManage, canDelete }: CmsModuleProps) {
           <StatusBadge
             status={row.original.status}
             context="order"
-            label={row.original.status === "published" ? "Publiée" : "Brouillon"}
+            label={
+              row.original.status === "published" ? "Publiée" : "Brouillon"
+            }
           />
         ),
       },
@@ -368,11 +370,7 @@ export function CmsModule({ canManage, canDelete }: CmsModuleProps) {
             <div className="space-y-0.5">
               <p className="text-sm font-medium">{score}/100</p>
               <p className="text-xs text-muted-foreground">
-                {score >= 75
-                  ? "Solide"
-                  : score >= 50
-                    ? "Moyen"
-                    : "À améliorer"}
+                {score >= 75 ? "Solide" : score >= 50 ? "Moyen" : "À améliorer"}
               </p>
             </div>
           );
