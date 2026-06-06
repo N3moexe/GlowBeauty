@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { type ColumnDef } from "@tanstack/react-table";
-import { Mail, MapPin, Phone } from "lucide-react";
+import { Mail, MapPin, Phone, RefreshCw } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import DataTable from "@/components/admin/DataTable";
 import { RetryPanel } from "@/pages/admin-modules/shared/RetryPanel";
@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -36,16 +37,26 @@ const PAGE_SIZE = 50;
 
 export function CustomersModule() {
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [page, setPage] = useState(0);
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
+  // Debounce search so we don't hit the API on every keystroke.
+  useEffect(() => {
+    const handle = setTimeout(() => {
+      setDebouncedSearch(search.trim());
+      setPage(0);
+    }, 300);
+    return () => clearTimeout(handle);
+  }, [search]);
+
   const listQuery = trpc.customers.list.useQuery(
     {
-      query: search.trim() || undefined,
+      query: debouncedSearch || undefined,
       limit: PAGE_SIZE,
       offset: page * PAGE_SIZE,
     },
-    { placeholderData: prev => prev, refetchInterval: 30000 }
+    { placeholderData: prev => prev, refetchInterval: 30000, retry: 1 }
   );
 
   const detailQuery = trpc.customers.byId.useQuery(
@@ -65,7 +76,7 @@ export function CustomersModule() {
     () => [
       {
         accessorKey: "name",
-        header: "Customer",
+        header: "Client",
         cell: ({ row }) => (
           <div className="space-y-0.5">
             <p className="font-medium">{row.original.name}</p>
@@ -93,14 +104,14 @@ export function CustomersModule() {
       },
       {
         accessorKey: "totalOrders",
-        header: "Orders",
+        header: "Commandes",
         cell: ({ row }) => (
           <p className="tabular-nums">{row.original.totalOrders}</p>
         ),
       },
       {
         accessorKey: "totalSpent",
-        header: "Total spent",
+        header: "Total dépensé",
         cell: ({ row }) => (
           <p className="tabular-nums font-medium">
             {formatCFA(row.original.totalSpent)}
@@ -109,7 +120,7 @@ export function CustomersModule() {
       },
       {
         id: "lastOrder",
-        header: "Last order",
+        header: "Dernière commande",
         cell: ({ row }) =>
           row.original.lastOrderDate
             ? toDateLabel(row.original.lastOrderDate)
@@ -117,7 +128,7 @@ export function CustomersModule() {
       },
       {
         accessorKey: "createdAt",
-        header: "Member since",
+        header: "Client depuis",
         cell: ({ row }) => toDateLabel(row.original.createdAt),
       },
     ],
@@ -125,7 +136,7 @@ export function CustomersModule() {
   );
 
   const errorMessage = listQuery.error
-    ? getErrorMessage(listQuery.error, "Unable to load customers.")
+    ? getErrorMessage(listQuery.error, "Impossible de charger les clients.")
     : null;
 
   const detail = detailQuery.data as CustomerEntity | null | undefined;
@@ -134,7 +145,7 @@ export function CustomersModule() {
     <section className="space-y-6">
       {errorMessage ? (
         <RetryPanel
-          title="Customers unavailable"
+          title="Clients indisponibles"
           description={errorMessage}
           onRetry={() => {
             void listQuery.refetch();
@@ -142,18 +153,31 @@ export function CustomersModule() {
         />
       ) : (
         <>
+          <div className="flex items-center justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              className="h-9 w-9 border-[var(--admin-border)]"
+              title="Rafraîchir"
+              onClick={() => void listQuery.refetch()}
+              disabled={listQuery.isFetching}
+            >
+              <RefreshCw
+                className={`h-4 w-4 ${listQuery.isFetching ? "animate-spin" : ""}`}
+              />
+            </Button>
+          </div>
+
           <DataTable
             columns={columns}
             data={rows}
             isLoading={listQuery.isLoading}
             searchValue={search}
-            onSearchValueChange={value => {
-              setSearch(value);
-              setPage(0);
-            }}
-            searchPlaceholder="Search name, phone, email..."
-            emptyTitle="No customers yet"
-            emptyDescription="Customers appear here after their first order."
+            onSearchValueChange={setSearch}
+            searchPlaceholder="Rechercher nom, téléphone, e-mail…"
+            emptyTitle="Aucun client"
+            emptyDescription="Les clients apparaissent ici après leur première commande."
             onRowClick={row => setSelectedId(row.id)}
             getRowId={row => String(row.id)}
           />
@@ -167,10 +191,10 @@ export function CustomersModule() {
                 onClick={() => setPage(p => Math.max(0, p - 1))}
                 disabled={page === 0}
               >
-                Previous
+                Précédent
               </Button>
-              <span className="text-muted-foreground">
-                Page {page + 1} of {totalPages}
+              <span className="text-[var(--admin-muted)]">
+                Page {page + 1} / {totalPages}
               </span>
               <Button
                 type="button"
@@ -179,7 +203,7 @@ export function CustomersModule() {
                 onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
                 disabled={page >= totalPages - 1}
               >
-                Next
+                Suivant
               </Button>
             </div>
           ) : null}
@@ -192,13 +216,16 @@ export function CustomersModule() {
           if (!open) setSelectedId(null);
         }}
       >
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className="border-[var(--admin-border)] bg-[var(--admin-surface)] sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="[font-family:var(--font-admin-display)]">
               {detailQuery.isLoading
-                ? "Loading…"
-                : (detail?.name ?? "Customer")}
+                ? "Chargement…"
+                : (detail?.name ?? "Client")}
             </DialogTitle>
+            <DialogDescription>
+              Historique d'achat et coordonnées du client.
+            </DialogDescription>
           </DialogHeader>
 
           {detailQuery.isLoading ? (
@@ -211,33 +238,37 @@ export function CustomersModule() {
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-xs text-muted-foreground">Total orders</p>
+                  <p className="text-xs text-[var(--admin-muted)]">
+                    Commandes totales
+                  </p>
                   <p className="text-xl font-semibold tabular-nums">
                     {detail.totalOrders}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Total spent</p>
+                  <p className="text-xs text-[var(--admin-muted)]">
+                    Total dépensé
+                  </p>
                   <p className="text-xl font-semibold tabular-nums">
                     {formatCFA(detail.totalSpent)}
                   </p>
                 </div>
               </div>
 
-              <div className="space-y-2 rounded-xl border border-border/60 p-4">
+              <div className="space-y-2 rounded-xl border border-[var(--admin-border)] p-4">
                 <div className="flex items-center gap-2 text-sm">
-                  <Phone className="h-3.5 w-3.5 text-muted-foreground" />
+                  <Phone className="h-3.5 w-3.5 text-[var(--admin-muted)]" />
                   <span>{detail.phone}</span>
                 </div>
                 {detail.email ? (
                   <div className="flex items-center gap-2 text-sm">
-                    <Mail className="h-3.5 w-3.5 text-muted-foreground" />
+                    <Mail className="h-3.5 w-3.5 text-[var(--admin-muted)]" />
                     <span>{detail.email}</span>
                   </div>
                 ) : null}
                 {(detail.address ?? detail.city) ? (
                   <div className="flex items-start gap-2 text-sm">
-                    <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                    <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--admin-muted)]" />
                     <span>
                       {[detail.address, detail.city].filter(Boolean).join(", ")}
                     </span>
@@ -248,12 +279,16 @@ export function CustomersModule() {
               <div className="grid grid-cols-2 gap-2 text-sm">
                 {detail.lastOrderDate ? (
                   <div>
-                    <p className="text-xs text-muted-foreground">Last order</p>
+                    <p className="text-xs text-[var(--admin-muted)]">
+                      Dernière commande
+                    </p>
                     <p>{toDateLabel(detail.lastOrderDate)}</p>
                   </div>
                 ) : null}
                 <div>
-                  <p className="text-xs text-muted-foreground">Member since</p>
+                  <p className="text-xs text-[var(--admin-muted)]">
+                    Client depuis
+                  </p>
                   <p>{toDateLabel(detail.createdAt)}</p>
                 </div>
               </div>
