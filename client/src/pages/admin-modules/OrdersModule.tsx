@@ -10,6 +10,7 @@ import {
 } from "@/pages/admin-modules/shared/formatters";
 import { normalizePaymentStatus } from "@/pages/admin-modules/shared/utils";
 import StatusBadge from "@/components/admin/StatusBadge";
+import { MediaWithFallback } from "@/components/ui/media-with-fallback";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -107,6 +108,29 @@ type Order = {
   createdAt: string | Date;
 };
 
+type OrderItem = {
+  id: number;
+  productId: number;
+  productName: string;
+  productImage: string | null;
+  quantity: number;
+  unitPrice: number;
+  totalPrice: number;
+};
+
+type OrderDetail = Order & {
+  items?: OrderItem[];
+  customerAddress?: string | null;
+  customerCity?: string | null;
+  subtotalAmount?: number;
+  shippingFee?: number;
+  couponCode?: string | null;
+  discountAmount?: number;
+  totalPaid?: number;
+  paymentReference?: string | null;
+  notes?: string | null;
+};
+
 function OrderDetailDialog({
   orderId,
   canManage,
@@ -135,9 +159,7 @@ function OrderDetailDialog({
     },
   });
 
-  const order = orderQuery.data as
-    | (Order & { items?: unknown[]; notes?: string })
-    | undefined;
+  const order = orderQuery.data as OrderDetail | undefined;
   const [nextStatus, setNextStatus] = useState("");
   const [nextPayStatus, setNextPayStatus] = useState("");
   const [payRef, setPayRef] = useState("");
@@ -207,6 +229,108 @@ function OrderDetailDialog({
                 <p>{toDateLabel(order.createdAt)}</p>
               </div>
             </div>
+
+            {order.customerAddress ? (
+              <p className="text-sm">
+                <span className="text-xs text-[var(--admin-muted)]">
+                  Adresse :{" "}
+                </span>
+                {[order.customerAddress, order.customerCity]
+                  .filter(Boolean)
+                  .join(", ")}
+              </p>
+            ) : null}
+
+            <div className="h-px bg-[var(--admin-divider)]" />
+
+            {order.items && order.items.length > 0 ? (
+              <div className="space-y-2">
+                <p className="text-xs font-semibold uppercase tracking-wide text-[var(--admin-muted)]">
+                  Produits commandés
+                </p>
+                <div className="space-y-2.5">
+                  {order.items.map(item => (
+                    <div key={item.id} className="flex items-center gap-3">
+                      <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-[var(--admin-border)]">
+                        <MediaWithFallback
+                          src={item.productImage}
+                          alt={item.productName}
+                          fit="contain"
+                          className="h-full w-full"
+                        />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-medium text-[var(--admin-ink)]">
+                          {item.productName}
+                        </p>
+                        <p className="text-xs text-[var(--admin-muted)]">
+                          {item.quantity} × {formatCFA(Number(item.unitPrice))}
+                        </p>
+                      </div>
+                      <p className="shrink-0 font-semibold text-[var(--admin-ink)]">
+                        {formatCFA(Number(item.totalPrice))}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-1 space-y-1 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface-tint)] p-3 text-sm">
+                  <div className="flex justify-between text-[var(--admin-muted)]">
+                    <span>Sous-total</span>
+                    <span className="tabular-nums">
+                      {formatCFA(
+                        Number(
+                          order.subtotalAmount ??
+                            order.items.reduce(
+                              (sum, it) => sum + Number(it.totalPrice),
+                              0
+                            )
+                        )
+                      )}
+                    </span>
+                  </div>
+                  {Number(order.shippingFee) > 0 ? (
+                    <div className="flex justify-between text-[var(--admin-muted)]">
+                      <span>Livraison</span>
+                      <span className="tabular-nums">
+                        {formatCFA(Number(order.shippingFee))}
+                      </span>
+                    </div>
+                  ) : null}
+                  {Number(order.discountAmount) > 0 ? (
+                    <div className="flex justify-between text-[var(--admin-accent)]">
+                      <span>
+                        Remise
+                        {order.couponCode ? ` (${order.couponCode})` : ""}
+                      </span>
+                      <span className="tabular-nums">
+                        −{formatCFA(Number(order.discountAmount))}
+                      </span>
+                    </div>
+                  ) : null}
+                  <div className="flex justify-between border-t border-[var(--admin-divider)] pt-1 font-semibold text-[var(--admin-ink)]">
+                    <span>Total</span>
+                    <span className="tabular-nums">
+                      {formatCFA(Number(order.totalAmount))}
+                    </span>
+                  </div>
+                  {Number(order.totalPaid) > 0 ? (
+                    <div className="flex justify-between text-xs text-[var(--admin-muted)]">
+                      <span>Payé</span>
+                      <span className="tabular-nums">
+                        {formatCFA(Number(order.totalPaid))}
+                      </span>
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+            ) : null}
+
+            {order.notes ? (
+              <p className="rounded-lg bg-[var(--admin-surface-tint)] p-3 text-sm italic text-[var(--admin-muted)]">
+                {order.notes}
+              </p>
+            ) : null}
 
             <div className="h-px bg-[var(--admin-divider)]" />
 
