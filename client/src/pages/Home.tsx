@@ -148,10 +148,17 @@ export default function Home() {
     limit: 10,
   });
 
+  // Mirror useStorefrontSettings: refetch on mount/focus and poll so published
+  // layout edits (hero, sections) appear without a hard reload — matching how
+  // store settings already update live.
   const layoutQuery = useQuery({
     queryKey: STOREFRONT_LAYOUT_QUERY_KEY,
     queryFn: fetchStorefrontLayout,
     staleTime: 15_000,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    refetchInterval: 15_000,
+    retry: 1,
   });
 
   const [recentlyViewed, setRecentlyViewed] = useState<RecentlyViewedProduct[]>(
