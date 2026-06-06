@@ -599,6 +599,7 @@ export function registerSettingsApiRoutes(app: Express) {
   app.get(
     "/api/admin/users",
     requireAdmin,
+    requireAdminOnly,
     async (_req: Request, res: Response) => {
       try {
         const users = await db.listAdminUsers(500, 0);

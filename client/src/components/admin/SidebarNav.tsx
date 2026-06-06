@@ -198,7 +198,7 @@ export default function SidebarNav({
             </div>
           ) : (
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--admin-accent)]">
-              SBP
+              GB
             </p>
           )}
 

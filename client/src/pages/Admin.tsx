@@ -637,7 +637,7 @@ export default function Admin() {
     {
       enabled:
         Boolean(permissions) &&
-        ["orders", "analytics", "search"].includes(activeModule),
+        ["orders", "analytics"].includes(activeModule),
       refetchInterval:
         activeModule === "orders" || activeModule === "analytics"
           ? 15000
