@@ -2,15 +2,6 @@ import { useState } from "react";
 import { ImageOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-function toWebpCandidate(src: string) {
-  if (!src) return null;
-  if (src.includes(".webp")) return src;
-  if (/\.(jpg|jpeg|png)(\?.*)?$/i.test(src)) {
-    return src.replace(/\.(jpg|jpeg|png)(\?.*)?$/i, ".webp$2");
-  }
-  return null;
-}
-
 type MediaWithFallbackProps = Omit<React.ComponentProps<"img">, "src"> & {
   src?: string | null;
   wrapperClassName?: string;
@@ -33,7 +24,6 @@ export function MediaWithFallback({
   const [failed, setFailed] = useState(false);
   const resolvedSrc = (src || "").trim();
   const canRenderImage = resolvedSrc.length > 0 && !failed;
-  const webpSource = toWebpCandidate(resolvedSrc);
 
   if (!canRenderImage) {
     return (
@@ -52,7 +42,6 @@ export function MediaWithFallback({
 
   return (
     <picture className={cn("block h-full w-full", wrapperClassName)}>
-      {webpSource ? <source srcSet={webpSource} type="image/webp" /> : null}
       <img
         src={resolvedSrc}
         alt={alt}
