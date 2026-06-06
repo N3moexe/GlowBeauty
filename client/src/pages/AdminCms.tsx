@@ -431,8 +431,7 @@ export default function AdminCms() {
     },
     onError: (error: any) => {
       toast.error(
-        error?.message ||
-          "Échec de l'import de l'image de l'Editorial Results."
+        error?.message || "Échec de l'import de l'image de l'Editorial Results."
       );
     },
   });
@@ -728,7 +727,9 @@ export default function AdminCms() {
         cell: ({ row }) => (
           <StatusBadge
             status={row.original.status}
-            label={row.original.status === "published" ? "Publiée" : "Brouillon"}
+            label={
+              row.original.status === "published" ? "Publiée" : "Brouillon"
+            }
           />
         ),
       },
@@ -1073,7 +1074,9 @@ export default function AdminCms() {
 
             <div className="rounded-xl border bg-card p-4 space-y-3">
               <div>
-                <p className="text-sm font-semibold">Aperçu de l'Editorial Hero</p>
+                <p className="text-sm font-semibold">
+                  Aperçu de l'Editorial Hero
+                </p>
                 <p className="text-xs text-[var(--admin-muted)]">
                   Même composant que la page d'accueil, avec mise à jour
                   instantanée.

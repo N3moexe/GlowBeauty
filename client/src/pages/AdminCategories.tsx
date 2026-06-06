@@ -28,7 +28,11 @@ const maxImageBytes = 5 * 1024 * 1024;
 
 function normalizeCategoriesPayload(payload: unknown): CategoryItem[] {
   if (Array.isArray(payload)) return payload as CategoryItem[];
-  if (payload && typeof payload === "object" && Array.isArray((payload as any).categories)) {
+  if (
+    payload &&
+    typeof payload === "object" &&
+    Array.isArray((payload as any).categories)
+  ) {
     return (payload as any).categories as CategoryItem[];
   }
   return [];
@@ -42,7 +46,11 @@ export default function AdminCategories() {
   const [uploadingId, setUploadingId] = useState<number | null>(null);
   const fileInputRefs = useRef<Record<number, HTMLInputElement | null>>({});
 
-  const { data: permissions, isLoading: permissionsLoading, error: permissionsError } = trpc.rbac.me.useQuery(undefined, {
+  const {
+    data: permissions,
+    isLoading: permissionsLoading,
+    error: permissionsError,
+  } = trpc.rbac.me.useQuery(undefined, {
     enabled: !!user,
     retry: false,
   });
@@ -58,10 +66,14 @@ export default function AdminCategories() {
       const payload = await response.json().catch(() => null);
 
       if (!response.ok) {
-        throw new Error((payload as any)?.error || "Impossible de charger les catégories.");
+        throw new Error(
+          (payload as any)?.error || "Impossible de charger les catégories."
+        );
       }
 
-      const list = normalizeCategoriesPayload(payload).sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+      const list = normalizeCategoriesPayload(payload).sort(
+        (a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0)
+      );
       setCategories(list);
     } catch (error: any) {
       toast.error(error?.message || "Impossible de charger les catégories.");
@@ -88,7 +100,10 @@ export default function AdminCategories() {
     fileInputRefs.current[categoryId]?.click();
   };
 
-  const onFileSelected = async (category: CategoryItem, file: File | undefined) => {
+  const onFileSelected = async (
+    category: CategoryItem,
+    file: File | undefined
+  ) => {
     if (!file) return;
 
     if (!allowedImageTypes.has(file.type)) {
@@ -106,15 +121,20 @@ export default function AdminCategories() {
       const formData = new FormData();
       formData.append("file", file);
 
-      const response = await fetch(`/api/admin/categories/${category.id}/upload`, {
-        method: "POST",
-        body: formData,
-        credentials: "include",
-      });
+      const response = await fetch(
+        `/api/admin/categories/${category.id}/upload`,
+        {
+          method: "POST",
+          body: formData,
+          credentials: "include",
+        }
+      );
 
       const payload = await response.json().catch(() => null);
       if (!response.ok) {
-        throw new Error((payload as any)?.error || "Échec du téléversement de l'image.");
+        throw new Error(
+          (payload as any)?.error || "Échec du téléversement de l'image."
+        );
       }
 
       toast.success(`Image mise à jour pour ${category.name}.`);
@@ -126,7 +146,10 @@ export default function AdminCategories() {
     }
   };
 
-  const categoriesCountLabel = useMemo(() => `${categories.length} catégorie${categories.length > 1 ? "s" : ""}`, [categories.length]);
+  const categoriesCountLabel = useMemo(
+    () => `${categories.length} catégorie${categories.length > 1 ? "s" : ""}`,
+    [categories.length]
+  );
 
   if (loading || permissionsLoading) {
     return (
@@ -141,7 +164,11 @@ export default function AdminCategories() {
     return null;
   }
 
-  if (permissionsError || !permissions || !permissions.allowedModules.includes("categories")) {
+  if (
+    permissionsError ||
+    !permissions ||
+    !permissions.allowedModules.includes("categories")
+  ) {
     return <AdminNotAllowed />;
   }
 
@@ -151,40 +178,70 @@ export default function AdminCategories() {
       onModuleChange={onModuleChange}
       userName={user.name}
       allowedModules={permissions.allowedModules as AdminModuleKey[]}
-      onQuickAction={permissions.readOnly ? undefined : ((action) => {
-        if (action === "add_product" && permissions.allowedModules.includes("products")) setLocation("/admin/products");
-        if (action === "create_coupon" && permissions.allowedModules.includes("coupons")) setLocation("/admin/coupons");
-      })}
+      onQuickAction={
+        permissions.readOnly
+          ? undefined
+          : action => {
+              if (
+                action === "add_product" &&
+                permissions.allowedModules.includes("products")
+              )
+                setLocation("/admin/products");
+              if (
+                action === "create_coupon" &&
+                permissions.allowedModules.includes("coupons")
+              )
+                setLocation("/admin/coupons");
+            }
+      }
     >
       <div className="space-y-4">
         <PageHeader
           title="Catégories"
           description="Importez des visuels pour les cartes univers de la page d'accueil."
           breadcrumbs={[{ label: "Admin" }, { label: "Catégories" }]}
-          actions={(
-            <Button variant="outline" onClick={() => loadCategories()} disabled={loadingCategories}>
-              {loadingCategories ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+          actions={
+            <Button
+              variant="outline"
+              onClick={() => loadCategories()}
+              disabled={loadingCategories}
+            >
+              {loadingCategories ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : null}
               Rafraîchir
             </Button>
-          )}
+          }
         />
 
         <div className="rounded-xl border bg-card p-3 text-xs text-muted-foreground">
-          {categoriesCountLabel} chargée{categories.length > 1 ? "s" : ""}. Formats acceptés : JPG, PNG, WebP (max 5 Mo). Les images sont optimisées automatiquement en WebP (1600x1000) pour un rendu net et uniforme.
+          {categoriesCountLabel} chargée{categories.length > 1 ? "s" : ""}.
+          Formats acceptés : JPG, PNG, WebP (max 5 Mo). Les images sont
+          optimisées automatiquement en WebP (1600x1000) pour un rendu net et
+          uniforme.
         </div>
 
         {loadingCategories ? (
-          <div className="rounded-xl border bg-card p-6 text-sm text-muted-foreground">Chargement des catégories...</div>
+          <div className="rounded-xl border bg-card p-6 text-sm text-muted-foreground">
+            Chargement des catégories...
+          </div>
         ) : categories.length === 0 ? (
-          <EmptyState title="Aucune catégorie" description="Les catégories apparaîtront ici après leur création." />
+          <EmptyState
+            title="Aucune catégorie"
+            description="Les catégories apparaîtront ici après leur création."
+          />
         ) : (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {categories.map((category) => {
-              const previewUrl = category.coverImageUrl || category.imageUrl || null;
+            {categories.map(category => {
+              const previewUrl =
+                category.coverImageUrl || category.imageUrl || null;
               const isUploading = uploadingId === category.id;
 
               return (
-                <article key={category.id} className="rounded-xl border bg-card p-4">
+                <article
+                  key={category.id}
+                  className="rounded-xl border bg-card p-4"
+                >
                   <div className="relative mb-3 aspect-[5/3] overflow-hidden rounded-lg border bg-muted/40">
                     {previewUrl ? (
                       <img
@@ -205,18 +262,22 @@ export default function AdminCategories() {
 
                   <div className="space-y-1">
                     <p className="text-sm font-semibold">{category.name}</p>
-                    <p className="text-xs text-muted-foreground">/{category.slug}</p>
+                    <p className="text-xs text-muted-foreground">
+                      /{category.slug}
+                    </p>
                     <p className="line-clamp-2 text-xs text-muted-foreground">
                       {category.description || "Aucune description"}
                     </p>
                   </div>
 
                   <input
-                    ref={(element) => { fileInputRefs.current[category.id] = element; }}
+                    ref={element => {
+                      fileInputRefs.current[category.id] = element;
+                    }}
                     type="file"
                     accept="image/jpeg,image/png,image/webp"
                     className="hidden"
-                    onChange={(event) => {
+                    onChange={event => {
                       const file = event.target.files?.[0];
                       void onFileSelected(category, file);
                       event.currentTarget.value = "";
@@ -231,8 +292,14 @@ export default function AdminCategories() {
                       disabled={!canUpload || isUploading}
                       onClick={() => onUploadClick(category.id)}
                     >
-                      {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
-                      {isUploading ? "Téléversement..." : "Téléverser une image"}
+                      {isUploading ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <Upload className="mr-2 h-4 w-4" />
+                      )}
+                      {isUploading
+                        ? "Téléversement..."
+                        : "Téléverser une image"}
                     </Button>
                     {previewUrl ? (
                       <a

@@ -7,10 +7,22 @@ import PageHeader from "@/components/admin/PageHeader";
 import AdminNotAllowed from "@/pages/AdminNotAllowed";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -22,7 +34,12 @@ import {
   type CouponApiError,
 } from "@/lib/couponsApi";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { CouponAppliesTo, CouponRecord, CouponType, CreateCouponInput } from "@shared/coupons";
+import type {
+  CouponAppliesTo,
+  CouponRecord,
+  CouponType,
+  CreateCouponInput,
+} from "@shared/coupons";
 import { Loader2, Plus, RefreshCw } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -127,19 +144,27 @@ function mapFormToCreateInput(form: CouponFormState): CreateCouponInput {
     throw new Error("Le sous-total minimum doit être un nombre valide.");
   }
   if (form.type === "PERCENT" && (value < 1 || value > 100)) {
-    throw new Error("Les coupons en pourcentage doivent être compris entre 1 et 100.");
+    throw new Error(
+      "Les coupons en pourcentage doivent être compris entre 1 et 100."
+    );
   }
   if (form.type === "FIXED" && value < 1) {
-    throw new Error("La valeur d'un coupon à montant fixe doit être supérieure à 0.");
+    throw new Error(
+      "La valeur d'un coupon à montant fixe doit être supérieure à 0."
+    );
   }
   if (form.type === "FREE_SHIPPING" && value !== 0) {
     throw new Error("La valeur d'un coupon de livraison gratuite doit être 0.");
   }
   if (form.appliesTo === "CATEGORY" && !form.categoryId.trim()) {
-    throw new Error("Sélectionnez une catégorie pour les coupons de type CATEGORY.");
+    throw new Error(
+      "Sélectionnez une catégorie pour les coupons de type CATEGORY."
+    );
   }
   if (form.appliesTo === "PRODUCT" && !form.productId.trim()) {
-    throw new Error("Sélectionnez un produit pour les coupons de type PRODUCT.");
+    throw new Error(
+      "Sélectionnez un produit pour les coupons de type PRODUCT."
+    );
   }
   const startAt = fromDateTimeInput(form.startAt);
   const endAt = fromDateTimeInput(form.endAt);
@@ -169,7 +194,9 @@ export default function AdminCoupons() {
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
   const [searchValue, setSearchValue] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
+  const [statusFilter, setStatusFilter] = useState<
+    "all" | "active" | "inactive"
+  >("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingCoupon, setEditingCoupon] = useState<CouponRecord | null>(null);
   const [couponForm, setCouponForm] = useState<CouponFormState>(EMPTY_FORM);
@@ -177,13 +204,11 @@ export default function AdminCoupons() {
   const [testCode, setTestCode] = useState("");
   const [testOutput, setTestOutput] = useState<string>("");
 
-  const { data: permissions, isLoading: permissionsLoading } = trpc.rbac.me.useQuery(
-    undefined,
-    {
+  const { data: permissions, isLoading: permissionsLoading } =
+    trpc.rbac.me.useQuery(undefined, {
       enabled: Boolean(user),
       retry: false,
-    }
-  );
+    });
 
   const couponsQuery = useQuery({
     queryKey: ["admin-coupons"],
@@ -221,8 +246,13 @@ export default function AdminCoupons() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: Partial<CreateCouponInput> }) =>
-      updateAdminCoupon(id, payload),
+    mutationFn: ({
+      id,
+      payload,
+    }: {
+      id: string;
+      payload: Partial<CreateCouponInput>;
+    }) => updateAdminCoupon(id, payload),
     onSuccess: async () => {
       toast.success("Coupon mis à jour");
       await refreshCoupons();
@@ -255,7 +285,7 @@ export default function AdminCoupons() {
 
   const filteredCoupons = useMemo(() => {
     const query = searchValue.trim().toLowerCase();
-    return (couponsQuery.data || []).filter((coupon) => {
+    return (couponsQuery.data || []).filter(coupon => {
       if (statusFilter === "active" && !coupon.active) return false;
       if (statusFilter === "inactive" && coupon.active) return false;
       if (!query) return true;
@@ -317,17 +347,17 @@ export default function AdminCoupons() {
       activeModule="coupons"
       userName={user.name}
       allowedModules={permissions.allowedModules as any}
-      onModuleChange={(module) => {
+      onModuleChange={module => {
         setLocation(getAdminModulePath(module));
       }}
-      onQuickAction={(action) => {
+      onQuickAction={action => {
         if (action === "create_coupon") {
           setEditingCoupon(null);
           setCouponForm(EMPTY_FORM);
           setDialogOpen(true);
         }
       }}
-      onSearchSubmit={(query) => setSearchValue(query)}
+      onSearchSubmit={query => setSearchValue(query)}
     >
       <div className="space-y-4">
         <PageHeader
@@ -368,14 +398,15 @@ export default function AdminCoupons() {
         <section className="rounded-xl border bg-card p-4">
           <h3 className="text-base font-semibold">Tester un coupon</h3>
           <p className="mt-1 text-sm text-muted-foreground">
-            Prévisualisez la validation d'un coupon pour un panier de session sans l'enregistrer.
+            Prévisualisez la validation d'un coupon pour un panier de session
+            sans l'enregistrer.
           </p>
           <div className="mt-3 grid gap-3 md:grid-cols-3">
             <div className="space-y-1.5">
               <Label>ID de session</Label>
               <Input
                 value={testSessionId}
-                onChange={(event) => setTestSessionId(event.target.value)}
+                onChange={event => setTestSessionId(event.target.value)}
                 placeholder="session-abc123..."
               />
             </div>
@@ -383,7 +414,9 @@ export default function AdminCoupons() {
               <Label>Code du coupon</Label>
               <Input
                 value={testCode}
-                onChange={(event) => setTestCode(event.target.value.toUpperCase())}
+                onChange={event =>
+                  setTestCode(event.target.value.toUpperCase())
+                }
                 placeholder="SEN10"
               />
             </div>
@@ -391,7 +424,9 @@ export default function AdminCoupons() {
               <Button
                 type="button"
                 className="w-full"
-                disabled={testSessionId.trim().length < 8 || testCode.trim().length < 2}
+                disabled={
+                  testSessionId.trim().length < 8 || testCode.trim().length < 2
+                }
                 onClick={async () => {
                   try {
                     const result = await previewSessionCoupon({
@@ -414,7 +449,9 @@ export default function AdminCoupons() {
             </div>
           </div>
           {testOutput ? (
-            <p className="mt-2 rounded-md border bg-muted/30 px-3 py-2 text-xs">{testOutput}</p>
+            <p className="mt-2 rounded-md border bg-muted/30 px-3 py-2 text-xs">
+              {testOutput}
+            </p>
           ) : null}
         </section>
 
@@ -423,11 +460,14 @@ export default function AdminCoupons() {
             <div className="flex flex-wrap items-center gap-2">
               <Input
                 value={searchValue}
-                onChange={(event) => setSearchValue(event.target.value)}
+                onChange={event => setSearchValue(event.target.value)}
                 placeholder="Rechercher par code, type, portée..."
                 className="h-9 w-[260px]"
               />
-              <Select value={statusFilter} onValueChange={(value: any) => setStatusFilter(value)}>
+              <Select
+                value={statusFilter}
+                onValueChange={(value: any) => setStatusFilter(value)}
+              >
                 <SelectTrigger className="h-9 w-[170px]">
                   <SelectValue />
                 </SelectTrigger>
@@ -458,25 +498,35 @@ export default function AdminCoupons() {
               <tbody>
                 {couponsQuery.isLoading ? (
                   <tr>
-                    <td className="px-2 py-6 text-center text-muted-foreground" colSpan={8}>
+                    <td
+                      className="px-2 py-6 text-center text-muted-foreground"
+                      colSpan={8}
+                    >
                       <Loader2 className="mx-auto h-5 w-5 animate-spin" />
                     </td>
                   </tr>
                 ) : filteredCoupons.length === 0 ? (
                   <tr>
-                    <td className="px-2 py-6 text-center text-muted-foreground" colSpan={8}>
+                    <td
+                      className="px-2 py-6 text-center text-muted-foreground"
+                      colSpan={8}
+                    >
                       Aucun coupon trouvé.
                     </td>
                   </tr>
                 ) : (
-                  filteredCoupons.map((coupon) => (
+                  filteredCoupons.map(coupon => (
                     <tr key={coupon.id} className="border-b align-top">
                       <td className="px-2 py-3">
                         <p className="font-medium">{coupon.code}</p>
                         <p className="mt-1 text-xs text-muted-foreground">
-                          {coupon.startAt ? `Début : ${new Date(coupon.startAt).toLocaleString()}` : "Aucun début"}
+                          {coupon.startAt
+                            ? `Début : ${new Date(coupon.startAt).toLocaleString()}`
+                            : "Aucun début"}
                           {" · "}
-                          {coupon.endAt ? `Fin : ${new Date(coupon.endAt).toLocaleString()}` : "Aucune fin"}
+                          {coupon.endAt
+                            ? `Fin : ${new Date(coupon.endAt).toLocaleString()}`
+                            : "Aucune fin"}
                         </p>
                       </td>
                       <td className="px-2 py-3">
@@ -487,7 +537,10 @@ export default function AdminCoupons() {
                               id: coupon.id,
                               payload: {
                                 type: nextType,
-                                value: nextType === "FREE_SHIPPING" ? 0 : coupon.value,
+                                value:
+                                  nextType === "FREE_SHIPPING"
+                                    ? 0
+                                    : coupon.value,
                               },
                             });
                           }}
@@ -498,46 +551,63 @@ export default function AdminCoupons() {
                           <SelectContent>
                             <SelectItem value="PERCENT">Pourcentage</SelectItem>
                             <SelectItem value="FIXED">Montant fixe</SelectItem>
-                            <SelectItem value="FREE_SHIPPING">Livraison gratuite</SelectItem>
+                            <SelectItem value="FREE_SHIPPING">
+                              Livraison gratuite
+                            </SelectItem>
                           </SelectContent>
                         </Select>
                       </td>
                       <td className="px-2 py-3">
-                        {coupon.type === "PERCENT" ? `${coupon.value}%` : formatCFA(coupon.value)}
+                        {coupon.type === "PERCENT"
+                          ? `${coupon.value}%`
+                          : formatCFA(coupon.value)}
                         {coupon.maxDiscount != null ? (
                           <p className="text-xs text-muted-foreground">
                             Plafond : {formatCFA(coupon.maxDiscount)}
                           </p>
                         ) : null}
                       </td>
-                      <td className="px-2 py-3">{formatCFA(coupon.minSubtotal)}</td>
                       <td className="px-2 py-3">
-                        <p>{COUPON_APPLIES_TO_LABELS[coupon.appliesTo] ?? coupon.appliesTo}</p>
-                        {coupon.appliesTo === "CATEGORY" && coupon.categoryId ? (
-                          <p className="text-xs text-muted-foreground">Catégorie n°{coupon.categoryId}</p>
+                        {formatCFA(coupon.minSubtotal)}
+                      </td>
+                      <td className="px-2 py-3">
+                        <p>
+                          {COUPON_APPLIES_TO_LABELS[coupon.appliesTo] ??
+                            coupon.appliesTo}
+                        </p>
+                        {coupon.appliesTo === "CATEGORY" &&
+                        coupon.categoryId ? (
+                          <p className="text-xs text-muted-foreground">
+                            Catégorie n°{coupon.categoryId}
+                          </p>
                         ) : null}
                         {coupon.appliesTo === "PRODUCT" && coupon.productId ? (
-                          <p className="text-xs text-muted-foreground">Produit n°{coupon.productId}</p>
+                          <p className="text-xs text-muted-foreground">
+                            Produit n°{coupon.productId}
+                          </p>
                         ) : null}
                       </td>
                       <td className="px-2 py-3">
                         <p>{coupon.usageCount}</p>
                         <p className="text-xs text-muted-foreground">
-                          limite {coupon.usageLimit ?? "∞"} / session {coupon.perSessionLimit ?? "∞"}
+                          limite {coupon.usageLimit ?? "∞"} / session{" "}
+                          {coupon.perSessionLimit ?? "∞"}
                         </p>
                       </td>
                       <td className="px-2 py-3">
                         <div className="flex items-center gap-2">
                           <Switch
                             checked={coupon.active}
-                            onCheckedChange={(checked) => {
+                            onCheckedChange={checked => {
                               void updateMutation.mutateAsync({
                                 id: coupon.id,
                                 payload: { active: Boolean(checked) },
                               });
                             }}
                           />
-                          <span className="text-xs">{coupon.active ? "Actif" : "Inactif"}</span>
+                          <span className="text-xs">
+                            {coupon.active ? "Actif" : "Inactif"}
+                          </span>
                         </div>
                       </td>
                       <td className="px-2 py-3">
@@ -587,7 +657,7 @@ export default function AdminCoupons() {
 
       <Dialog
         open={dialogOpen}
-        onOpenChange={(open) => {
+        onOpenChange={open => {
           setDialogOpen(open);
           if (!open) {
             setEditingCoupon(null);
@@ -597,15 +667,18 @@ export default function AdminCoupons() {
       >
         <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-3xl">
           <DialogHeader>
-            <DialogTitle>{editingCoupon ? "Modifier le coupon" : "Créer un coupon"}</DialogTitle>
+            <DialogTitle>
+              {editingCoupon ? "Modifier le coupon" : "Créer un coupon"}
+            </DialogTitle>
             <DialogDescription>
-              Configurez la valeur de la réduction, les règles de portée, les limites et la planification.
+              Configurez la valeur de la réduction, les règles de portée, les
+              limites et la planification.
             </DialogDescription>
           </DialogHeader>
 
           <form
             className="space-y-4"
-            onSubmit={(event) => {
+            onSubmit={event => {
               event.preventDefault();
               void submitCouponForm();
             }}
@@ -615,8 +688,11 @@ export default function AdminCoupons() {
                 <Label>Code</Label>
                 <Input
                   value={couponForm.code}
-                  onChange={(event) =>
-                    setCouponForm((prev) => ({ ...prev, code: event.target.value.toUpperCase() }))
+                  onChange={event =>
+                    setCouponForm(prev => ({
+                      ...prev,
+                      code: event.target.value.toUpperCase(),
+                    }))
                   }
                   placeholder="SEN10"
                 />
@@ -626,7 +702,7 @@ export default function AdminCoupons() {
                 <Select
                   value={couponForm.type}
                   onValueChange={(value: CouponType) =>
-                    setCouponForm((prev) => ({
+                    setCouponForm(prev => ({
                       ...prev,
                       type: value,
                       value: value === "FREE_SHIPPING" ? "0" : prev.value,
@@ -639,7 +715,9 @@ export default function AdminCoupons() {
                   <SelectContent>
                     <SelectItem value="PERCENT">Pourcentage</SelectItem>
                     <SelectItem value="FIXED">Montant fixe</SelectItem>
-                    <SelectItem value="FREE_SHIPPING">Livraison gratuite</SelectItem>
+                    <SelectItem value="FREE_SHIPPING">
+                      Livraison gratuite
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -648,8 +726,11 @@ export default function AdminCoupons() {
                 <div className="flex h-10 items-center rounded-md border px-3">
                   <Switch
                     checked={couponForm.active}
-                    onCheckedChange={(checked) =>
-                      setCouponForm((prev) => ({ ...prev, active: Boolean(checked) }))
+                    onCheckedChange={checked =>
+                      setCouponForm(prev => ({
+                        ...prev,
+                        active: Boolean(checked),
+                      }))
                     }
                   />
                 </div>
@@ -661,7 +742,12 @@ export default function AdminCoupons() {
                 <Label>Valeur</Label>
                 <Input
                   value={couponForm.value}
-                  onChange={(event) => setCouponForm((prev) => ({ ...prev, value: event.target.value }))}
+                  onChange={event =>
+                    setCouponForm(prev => ({
+                      ...prev,
+                      value: event.target.value,
+                    }))
+                  }
                   placeholder={couponForm.type === "PERCENT" ? "10" : "2000"}
                 />
               </div>
@@ -669,8 +755,11 @@ export default function AdminCoupons() {
                 <Label>Sous-total min. (CFA)</Label>
                 <Input
                   value={couponForm.minSubtotal}
-                  onChange={(event) =>
-                    setCouponForm((prev) => ({ ...prev, minSubtotal: event.target.value }))
+                  onChange={event =>
+                    setCouponForm(prev => ({
+                      ...prev,
+                      minSubtotal: event.target.value,
+                    }))
                   }
                 />
               </div>
@@ -678,8 +767,11 @@ export default function AdminCoupons() {
                 <Label>Réduction max. (CFA)</Label>
                 <Input
                   value={couponForm.maxDiscount}
-                  onChange={(event) =>
-                    setCouponForm((prev) => ({ ...prev, maxDiscount: event.target.value }))
+                  onChange={event =>
+                    setCouponForm(prev => ({
+                      ...prev,
+                      maxDiscount: event.target.value,
+                    }))
                   }
                   placeholder="Facultatif"
                 />
@@ -688,8 +780,11 @@ export default function AdminCoupons() {
                 <Label>Limite d'utilisation</Label>
                 <Input
                   value={couponForm.usageLimit}
-                  onChange={(event) =>
-                    setCouponForm((prev) => ({ ...prev, usageLimit: event.target.value }))
+                  onChange={event =>
+                    setCouponForm(prev => ({
+                      ...prev,
+                      usageLimit: event.target.value,
+                    }))
                   }
                   placeholder="Facultatif"
                 />
@@ -701,8 +796,11 @@ export default function AdminCoupons() {
                 <Label>Limite par session</Label>
                 <Input
                   value={couponForm.perSessionLimit}
-                  onChange={(event) =>
-                    setCouponForm((prev) => ({ ...prev, perSessionLimit: event.target.value }))
+                  onChange={event =>
+                    setCouponForm(prev => ({
+                      ...prev,
+                      perSessionLimit: event.target.value,
+                    }))
                   }
                   placeholder="Facultatif"
                 />
@@ -712,8 +810,11 @@ export default function AdminCoupons() {
                 <Input
                   type="datetime-local"
                   value={couponForm.startAt}
-                  onChange={(event) =>
-                    setCouponForm((prev) => ({ ...prev, startAt: event.target.value }))
+                  onChange={event =>
+                    setCouponForm(prev => ({
+                      ...prev,
+                      startAt: event.target.value,
+                    }))
                   }
                 />
               </div>
@@ -722,8 +823,11 @@ export default function AdminCoupons() {
                 <Input
                   type="datetime-local"
                   value={couponForm.endAt}
-                  onChange={(event) =>
-                    setCouponForm((prev) => ({ ...prev, endAt: event.target.value }))
+                  onChange={event =>
+                    setCouponForm(prev => ({
+                      ...prev,
+                      endAt: event.target.value,
+                    }))
                   }
                 />
               </div>
@@ -735,7 +839,7 @@ export default function AdminCoupons() {
                 <Select
                   value={couponForm.appliesTo}
                   onValueChange={(value: CouponAppliesTo) =>
-                    setCouponForm((prev) => ({
+                    setCouponForm(prev => ({
                       ...prev,
                       appliesTo: value,
                       categoryId: value === "CATEGORY" ? prev.categoryId : "",
@@ -758,8 +862,8 @@ export default function AdminCoupons() {
                 <Label>Catégorie</Label>
                 <Select
                   value={couponForm.categoryId || "__none__"}
-                  onValueChange={(value) =>
-                    setCouponForm((prev) => ({
+                  onValueChange={value =>
+                    setCouponForm(prev => ({
                       ...prev,
                       categoryId: value === "__none__" ? "" : value,
                     }))
@@ -771,7 +875,7 @@ export default function AdminCoupons() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="__none__">Aucune</SelectItem>
-                    {(categoriesQuery.data || []).map((category) => (
+                    {(categoriesQuery.data || []).map(category => (
                       <SelectItem key={category.id} value={String(category.id)}>
                         {category.name}
                       </SelectItem>
@@ -784,8 +888,8 @@ export default function AdminCoupons() {
                 <Label>Produit</Label>
                 <Select
                   value={couponForm.productId || "__none__"}
-                  onValueChange={(value) =>
-                    setCouponForm((prev) => ({
+                  onValueChange={value =>
+                    setCouponForm(prev => ({
                       ...prev,
                       productId: value === "__none__" ? "" : value,
                     }))
@@ -797,7 +901,7 @@ export default function AdminCoupons() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="__none__">Aucun</SelectItem>
-                    {(productsQuery.data?.products || []).map((product) => (
+                    {(productsQuery.data?.products || []).map(product => (
                       <SelectItem key={product.id} value={String(product.id)}>
                         {product.name}
                       </SelectItem>
@@ -811,8 +915,8 @@ export default function AdminCoupons() {
               <Label>Note interne (facultatif)</Label>
               <Textarea
                 value={couponForm.note}
-                onChange={(event) =>
-                  setCouponForm((prev) => ({ ...prev, note: event.target.value }))
+                onChange={event =>
+                  setCouponForm(prev => ({ ...prev, note: event.target.value }))
                 }
                 rows={2}
                 placeholder="Contexte facultatif pour votre équipe."

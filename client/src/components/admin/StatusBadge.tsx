@@ -23,31 +23,44 @@ function normalize(status: string) {
   return status.trim().toLowerCase().replace(/\s+/g, "_");
 }
 
-function mapStatus(status: string, context: StatusContext): { label: string; tone: StatusTone } {
+function mapStatus(
+  status: string,
+  context: StatusContext
+): { label: string; tone: StatusTone } {
   const normalized = normalize(status);
 
   if (context === "payment") {
-    if (["paid", "completed"].includes(normalized)) return { label: "Payé", tone: "success" };
-    if (["pending", "processing"].includes(normalized)) return { label: "En attente", tone: "warning" };
-    if (["failed", "cancelled", "canceled"].includes(normalized)) return { label: "Annulé", tone: "danger" };
+    if (["paid", "completed"].includes(normalized))
+      return { label: "Payé", tone: "success" };
+    if (["pending", "processing"].includes(normalized))
+      return { label: "En attente", tone: "warning" };
+    if (["failed", "cancelled", "canceled"].includes(normalized))
+      return { label: "Annulé", tone: "danger" };
   }
 
   if (context === "stock") {
-    if (["in_stock", "in-stock", "active", "instock"].includes(normalized)) return { label: "En stock", tone: "success" };
-    if (["low_stock", "low-stock", "low"].includes(normalized)) return { label: "Stock faible", tone: "warning" };
-    if (["out", "out_of_stock", "out-stock", "rupture"].includes(normalized)) return { label: "Rupture", tone: "danger" };
+    if (["in_stock", "in-stock", "active", "instock"].includes(normalized))
+      return { label: "En stock", tone: "success" };
+    if (["low_stock", "low-stock", "low"].includes(normalized))
+      return { label: "Stock faible", tone: "warning" };
+    if (["out", "out_of_stock", "out-stock", "rupture"].includes(normalized))
+      return { label: "Rupture", tone: "danger" };
   }
 
   if (context === "order") {
-    if (normalized === "pending") return { label: "En attente", tone: "warning" };
-    if (["confirmed", "processing"].includes(normalized)) return { label: "En traitement", tone: "info" };
+    if (normalized === "pending")
+      return { label: "En attente", tone: "warning" };
+    if (["confirmed", "processing"].includes(normalized))
+      return { label: "En traitement", tone: "info" };
     if (normalized === "shipped") return { label: "Expédiée", tone: "info" };
     if (normalized === "delivered") return { label: "Livrée", tone: "success" };
     if (normalized === "cancelled") return { label: "Annulée", tone: "danger" };
   }
 
-  if (["active", "enabled", "published"].includes(normalized)) return { label: status, tone: "success" };
-  if (["inactive", "disabled", "draft"].includes(normalized)) return { label: status, tone: "neutral" };
+  if (["active", "enabled", "published"].includes(normalized))
+    return { label: status, tone: "success" };
+  if (["inactive", "disabled", "draft"].includes(normalized))
+    return { label: status, tone: "neutral" };
 
   return { label: status, tone: "neutral" };
 }
@@ -62,14 +75,9 @@ export default function StatusBadge({
   return (
     <Badge
       variant="outline"
-      className={cn(
-        "font-medium",
-        toneClasses[mapped.tone],
-        className
-      )}
+      className={cn("font-medium", toneClasses[mapped.tone], className)}
     >
       {label || mapped.label}
     </Badge>
   );
 }
-

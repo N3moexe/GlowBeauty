@@ -154,9 +154,7 @@ function OrderDetailDialog({
       onMutated();
     },
     onError: error =>
-      toast.error(
-        error.message || "Erreur lors de la mise à jour du statut."
-      ),
+      toast.error(error.message || "Erreur lors de la mise à jour du statut."),
   });
   const updatePaymentMut = trpc.order.updatePayment.useMutation({
     onSuccess: () => {
