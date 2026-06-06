@@ -54,7 +54,7 @@ function buildPermissions(role: AdminRole): AdminPermissions {
       allowedModules: [
         "analytics",
         "orders",
-        "search",
+        "customers",
         "products",
         "categories",
         "reviews",
@@ -64,6 +64,8 @@ function buildPermissions(role: AdminRole): AdminPermissions {
         "reports",
         "cms",
         "settings",
+        "newsletter",
+        "activity",
       ],
       canWriteOrders: true,
       canWriteProducts: true,
@@ -76,7 +78,15 @@ function buildPermissions(role: AdminRole): AdminPermissions {
   if (role === "MANAGER") {
     return {
       role,
-      allowedModules: [...managerModules],
+      allowedModules: [
+        ...managerModules,
+        "customers",
+        "reviews",
+        "inventory",
+        "coupons",
+        "newsletter",
+        "activity",
+      ],
       canWriteOrders: true,
       canWriteProducts: true,
       canWriteCms: true,
