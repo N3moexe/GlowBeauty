@@ -403,7 +403,8 @@ export default function ProductDetail() {
                 <MediaWithFallback
                   src={selectedImageSrc}
                   alt={productQuery.data.name}
-                  className={`h-full w-full object-cover transition-transform duration-300 ${
+                  fit="contain"
+                  className={`h-full w-full transition-transform duration-300 ${
                     isZoomed
                       ? "scale-[1.65]"
                       : "scale-100 group-hover:scale-[1.03]"

@@ -7,6 +7,11 @@ type MediaWithFallbackProps = Omit<React.ComponentProps<"img">, "src"> & {
   wrapperClassName?: string;
   fallbackClassName?: string;
   fallbackLabel?: string;
+  /**
+   * How the image fills its box. "cover" (default) fills and crops overflow;
+   * "contain" shows the whole image centered on a neutral surface (no crop).
+   */
+  fit?: "cover" | "contain";
 };
 
 export function MediaWithFallback({
@@ -16,6 +21,7 @@ export function MediaWithFallback({
   wrapperClassName,
   fallbackClassName,
   fallbackLabel = "Image indisponible",
+  fit = "cover",
   loading = "lazy",
   decoding = "async",
   onError,
@@ -35,20 +41,32 @@ export function MediaWithFallback({
         )}
       >
         <ImageOff className="h-6 w-6" aria-hidden="true" />
-        <p className="text-[11px] font-semibold uppercase tracking-[0.12em]">{fallbackLabel}</p>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.12em]">
+          {fallbackLabel}
+        </p>
       </div>
     );
   }
 
   return (
-    <picture className={cn("block h-full w-full", wrapperClassName)}>
+    <picture
+      className={cn(
+        "block h-full w-full",
+        fit === "contain" && "bg-brand-muted/10",
+        wrapperClassName
+      )}
+    >
       <img
         src={resolvedSrc}
         alt={alt}
         loading={loading}
         decoding={decoding}
-        className={cn("h-full w-full object-cover", className)}
-        onError={(event) => {
+        className={cn(
+          "h-full w-full",
+          fit === "contain" ? "object-contain" : "object-cover",
+          className
+        )}
+        onError={event => {
           setFailed(true);
           onError?.(event);
         }}
@@ -57,4 +75,3 @@ export function MediaWithFallback({
     </picture>
   );
 }
-

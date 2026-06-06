@@ -107,7 +107,8 @@ export default function ProductCard({ product }: ProductCardProps) {
           <MediaWithFallback
             src={product.imageUrl}
             alt={product.name}
-            className="h-full w-full object-cover transition-transform duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.08]"
+            fit="contain"
+            className="h-full w-full transition-transform duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.08]"
             width={760}
             height={920}
             sizes="(min-width: 1280px) 20vw, (min-width: 1024px) 24vw, (min-width: 640px) 33vw, 50vw"

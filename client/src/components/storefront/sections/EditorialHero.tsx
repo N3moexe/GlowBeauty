@@ -270,7 +270,8 @@ export default function EditorialHero({
                   <MediaWithFallback
                     src={mediaImageUrl}
                     alt={mediaAlt}
-                    className="h-[280px] w-full object-cover sm:h-[460px] lg:h-[600px]"
+                    fit="contain"
+                    className="h-[280px] w-full sm:h-[460px] lg:h-[600px]"
                     width={900}
                     height={1200}
                     loading="eager"
