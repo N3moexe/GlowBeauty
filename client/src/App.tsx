@@ -38,7 +38,6 @@ const AdminEmailTemplates = lazy(() => import("./pages/AdminEmailTemplates"));
 const AdminIntegrations = lazy(() => import("./pages/AdminIntegrations"));
 const AdminOrderDetail = lazy(() => import("./pages/AdminOrderDetail"));
 const AdminMedia = lazy(() => import("./pages/AdminMedia"));
-const AdminCustomers = lazy(() => import("./pages/AdminCustomers"));
 const Chat = lazy(() => import("./pages/Chat"));
 const AIChatbot = lazy(() => import("./components/AIChatbot"));
 const CommandPalette = lazy(
@@ -158,7 +157,8 @@ function Router() {
         <Route path={"/admin/settings/:section"} component={AdminSettings} />
         <Route path={"/admin/settings"} component={AdminSettings} />
         <Route path={"/admin/orders/:id"} component={AdminOrderDetail} />
-        <Route path={"/admin/customers"} component={AdminCustomers} />
+        {/* /admin/customers intentionally falls through to the new CustomersModule
+            via /admin/:module — the module is at feature parity with the old page. */}
         <Route path={"/admin/:module"} component={Admin} />
         <Route path={"/admin"} component={Admin} />
         {/* 404 */}
