@@ -43,11 +43,7 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  adminCardClass,
-  adminCardPadding,
-} from "@/components/admin/PageHeader";
-import { cn } from "@/lib/utils";
+import { Surface } from "@/components/admin/ui/Surface";
 
 type CmsPageEntity = {
   id: number;
@@ -116,7 +112,7 @@ export function CmsModule({ canManage, canDelete }: CmsModuleProps) {
 
   const cmsCreateMutation = trpc.cms.create.useMutation({
     onSuccess: async () => {
-      toast.success("Page created");
+      toast.success("Page créée");
       await utils.cms.list.invalidate();
     },
     onError: error => toast.error(error.message),
@@ -124,7 +120,7 @@ export function CmsModule({ canManage, canDelete }: CmsModuleProps) {
 
   const cmsUpdateMutation = trpc.cms.update.useMutation({
     onSuccess: async () => {
-      toast.success("Page updated");
+      toast.success("Page mise à jour");
       await Promise.all([
         utils.cms.list.invalidate(),
         utils.cms.byId.invalidate(),
@@ -135,7 +131,7 @@ export function CmsModule({ canManage, canDelete }: CmsModuleProps) {
 
   const cmsSetStatusMutation = trpc.cms.setStatus.useMutation({
     onSuccess: async () => {
-      toast.success("Page status updated");
+      toast.success("Statut de la page mis à jour");
       await Promise.all([
         utils.cms.list.invalidate(),
         utils.cms.byId.invalidate(),
@@ -146,7 +142,7 @@ export function CmsModule({ canManage, canDelete }: CmsModuleProps) {
 
   const cmsDeleteMutation = trpc.cms.delete.useMutation({
     onSuccess: async () => {
-      toast.success("Page deleted");
+      toast.success("Page supprimée");
       await Promise.all([
         utils.cms.list.invalidate(),
         utils.cms.byId.invalidate(),
@@ -180,7 +176,7 @@ export function CmsModule({ canManage, canDelete }: CmsModuleProps) {
     cmsPagesQuery.error || cmsByIdQuery.error
       ? getErrorMessage(
           cmsPagesQuery.error || cmsByIdQuery.error,
-          "Unable to load CMS pages."
+          "Impossible de charger les pages CMS."
         )
       : null;
 
@@ -225,19 +221,19 @@ export function CmsModule({ canManage, canDelete }: CmsModuleProps) {
 
   const submitCmsForm = useCallback(async () => {
     if (!canManage) {
-      toast.error("CMS editing is not allowed");
+      toast.error("La modification du CMS n'est pas autorisée");
       return;
     }
     if (!cmsForm.title.trim()) {
-      toast.error("Page title is required");
+      toast.error("Le titre de la page est obligatoire");
       return;
     }
     if (!cmsForm.slug.trim()) {
-      toast.error("Page slug is required");
+      toast.error("Le slug de la page est obligatoire");
       return;
     }
     if (!cmsForm.content.trim()) {
-      toast.error("Page content is required");
+      toast.error("Le contenu de la page est obligatoire");
       return;
     }
 
@@ -248,7 +244,7 @@ export function CmsModule({ canManage, canDelete }: CmsModuleProps) {
         page.id !== cmsEditingId
     );
     if (duplicateSlug) {
-      toast.error("This slug already exists. Choose a unique slug.");
+      toast.error("Ce slug existe déjà. Choisissez un slug unique.");
       return;
     }
 
@@ -285,7 +281,7 @@ export function CmsModule({ canManage, canDelete }: CmsModuleProps) {
   const toggleCmsStatus = useCallback(
     async (page: CmsPageEntity) => {
       if (!canManage) {
-        toast.error("CMS editing is not allowed");
+        toast.error("La modification du CMS n'est pas autorisée");
         return;
       }
       try {
@@ -303,7 +299,7 @@ export function CmsModule({ canManage, canDelete }: CmsModuleProps) {
   const handleDeleteCmsPage = useCallback(async () => {
     if (!cmsPendingDelete) return;
     if (!canDelete) {
-      toast.error("Deletion is not allowed");
+      toast.error("La suppression n'est pas autorisée");
       return;
     }
     try {
@@ -327,7 +323,7 @@ export function CmsModule({ canManage, canDelete }: CmsModuleProps) {
   const exportCmsCsv = useCallback(() => {
     downloadCsv(
       `cms-pages-${new Date().toISOString().slice(0, 10)}.csv`,
-      ["Title", "Slug", "Status", "SEO Score", "Updated"],
+      ["Titre", "Slug", "Statut", "Score SEO", "Mise à jour"],
       cmsRows.map(page => [
         page.title,
         page.slug,
@@ -354,12 +350,12 @@ export function CmsModule({ canManage, canDelete }: CmsModuleProps) {
       },
       {
         accessorKey: "status",
-        header: "Status",
+        header: "Statut",
         cell: ({ row }) => (
           <StatusBadge
             status={row.original.status}
             context="order"
-            label={row.original.status === "published" ? "Published" : "Draft"}
+            label={row.original.status === "published" ? "Publiée" : "Brouillon"}
           />
         ),
       },
@@ -372,7 +368,11 @@ export function CmsModule({ canManage, canDelete }: CmsModuleProps) {
             <div className="space-y-0.5">
               <p className="text-sm font-medium">{score}/100</p>
               <p className="text-xs text-muted-foreground">
-                {score >= 75 ? "Strong" : score >= 50 ? "Medium" : "Needs work"}
+                {score >= 75
+                  ? "Solide"
+                  : score >= 50
+                    ? "Moyen"
+                    : "À améliorer"}
               </p>
             </div>
           );
@@ -380,7 +380,7 @@ export function CmsModule({ canManage, canDelete }: CmsModuleProps) {
       },
       {
         accessorKey: "updatedAt",
-        header: "Updated",
+        header: "Mise à jour",
         cell: ({ row }) => toDateLabel(row.original.updatedAt),
       },
       {
@@ -405,7 +405,7 @@ export function CmsModule({ canManage, canDelete }: CmsModuleProps) {
               }}
             >
               <Eye className="mr-1 h-3.5 w-3.5" />
-              Preview
+              Aperçu
             </Button>
             <Button
               type="button"
@@ -417,7 +417,7 @@ export function CmsModule({ canManage, canDelete }: CmsModuleProps) {
               }}
               disabled={!canManage}
             >
-              Edit
+              Modifier
             </Button>
             <Button
               type="button"
@@ -429,7 +429,7 @@ export function CmsModule({ canManage, canDelete }: CmsModuleProps) {
               }}
               disabled={!canManage || cmsSetStatusMutation.isPending}
             >
-              {row.original.status === "published" ? "Unpublish" : "Publish"}
+              {row.original.status === "published" ? "Dépublier" : "Publier"}
             </Button>
             <Button
               type="button"
@@ -443,7 +443,7 @@ export function CmsModule({ canManage, canDelete }: CmsModuleProps) {
               disabled={!canDelete}
             >
               <Trash2 className="mr-1 h-3.5 w-3.5" />
-              Delete
+              Supprimer
             </Button>
           </div>
         ),
@@ -461,7 +461,7 @@ export function CmsModule({ canManage, canDelete }: CmsModuleProps) {
   if (errorMessage) {
     return (
       <RetryPanel
-        title="CMS unavailable"
+        title="CMS indisponible"
         description={errorMessage}
         onRetry={() => {
           void Promise.all([cmsPagesQuery.refetch(), cmsByIdQuery.refetch()]);
@@ -472,36 +472,32 @@ export function CmsModule({ canManage, canDelete }: CmsModuleProps) {
 
   const STAT_CARDS = [
     {
-      label: "Total pages",
+      label: "Total des pages",
       value: String(cmsRows.length),
       icon: <FileText className="h-4 w-4" />,
-      cardClass: "border-[#ddd1c7] bg-white/90",
       iconClass:
-        "rounded-2xl border border-[#e2d6cc] bg-[#faf5f0] p-2.5 text-[#8f5f68]",
+        "rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-surface-tint)] p-2.5 text-[var(--admin-accent)]",
     },
     {
-      label: "Published",
+      label: "Publiées",
       value: String(publishedCount),
       icon: <Globe className="h-4 w-4" />,
-      cardClass: "border-[#d4e0d2] bg-white/90",
       iconClass:
-        "rounded-2xl border border-[#d4e0d2] bg-[#edf5eb] p-2.5 text-[#567552]",
+        "rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-surface-tint)] p-2.5 text-[var(--admin-accent)]",
     },
     {
-      label: "Drafts",
+      label: "Brouillons",
       value: String(draftCount),
       icon: <FileText className="h-4 w-4" />,
-      cardClass: "border-[#e6d7cf] bg-white/90",
       iconClass:
-        "rounded-2xl border border-[#e4d5cc] bg-[#f8f1eb] p-2.5 text-[#8a6c57]",
+        "rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-surface-tint)] p-2.5 text-[var(--admin-accent)]",
     },
     {
-      label: "Avg SEO score",
+      label: "Score SEO moyen",
       value: `${averageSeoScore}/100`,
       icon: <Sparkles className="h-4 w-4" />,
-      cardClass: "border-[#e2d6cc] bg-white/90",
       iconClass:
-        "rounded-2xl border border-[#eddccf] bg-[#fff7f0] p-2.5 text-[#b37f4f]",
+        "rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-surface-tint)] p-2.5 text-[var(--admin-accent)]",
     },
   ];
 
@@ -509,28 +505,31 @@ export function CmsModule({ canManage, canDelete }: CmsModuleProps) {
     <div className="space-y-4">
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {STAT_CARDS.map(card => (
-          <motion.article
+          <motion.div
             key={card.label}
             whileHover={shouldReduceMotion ? undefined : { y: -2 }}
-            className={cn(adminCardClass, adminCardPadding, card.cardClass)}
           >
-            <div className="flex items-center gap-3">
-              <div className={card.iconClass}>{card.icon}</div>
-              <div>
-                <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                  {card.label}
-                </p>
-                <p className="text-2xl font-semibold">{card.value}</p>
+            <Surface className="p-4 md:p-5">
+              <div className="flex items-center gap-3">
+                <div className={card.iconClass}>{card.icon}</div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                    {card.label}
+                  </p>
+                  <p className="text-2xl font-semibold text-[var(--admin-ink)]">
+                    {card.value}
+                  </p>
+                </div>
               </div>
-            </div>
-          </motion.article>
+            </Surface>
+          </motion.div>
         ))}
       </div>
 
       <div className="flex items-center justify-end gap-2">
         <Button type="button" variant="outline" onClick={exportCmsCsv}>
           <Download className="mr-2 h-4 w-4" />
-          Export CSV
+          Exporter CSV
         </Button>
         <Button
           type="button"
@@ -539,7 +538,7 @@ export function CmsModule({ canManage, canDelete }: CmsModuleProps) {
           className="bg-[var(--admin-accent)] text-white hover:bg-[var(--admin-accent-hover)]"
         >
           <Plus className="mr-2 h-4 w-4" />
-          New page
+          Nouvelle page
         </Button>
       </div>
 
@@ -549,7 +548,7 @@ export function CmsModule({ canManage, canDelete }: CmsModuleProps) {
         isLoading={cmsPagesQuery.isLoading}
         searchValue={cmsSearch}
         onSearchValueChange={setCmsSearch}
-        searchPlaceholder="Search by title, slug, content..."
+        searchPlaceholder="Rechercher par titre, slug, contenu..."
         filters={
           <Select
             value={cmsStatusFilter}
@@ -558,18 +557,18 @@ export function CmsModule({ canManage, canDelete }: CmsModuleProps) {
             }
           >
             <SelectTrigger className="h-9 w-[180px]">
-              <SelectValue placeholder="Filter status" />
+              <SelectValue placeholder="Filtrer par statut" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All statuses</SelectItem>
-              <SelectItem value="published">Published</SelectItem>
-              <SelectItem value="draft">Draft</SelectItem>
+              <SelectItem value="all">Tous les statuts</SelectItem>
+              <SelectItem value="published">Publiées</SelectItem>
+              <SelectItem value="draft">Brouillons</SelectItem>
             </SelectContent>
           </Select>
         }
-        emptyTitle="No CMS pages yet"
-        emptyDescription="Create your first content page to start publishing."
-        emptyCtaLabel={canManage ? "Create page" : undefined}
+        emptyTitle="Aucune page CMS pour le moment"
+        emptyDescription="Créez votre première page de contenu pour commencer à publier."
+        emptyCtaLabel={canManage ? "Créer une page" : undefined}
         onEmptyCtaClick={canManage ? openCreateCmsEditor : undefined}
         onRowClick={openEditCmsEditor}
         getRowId={row => String(row.id)}
@@ -583,13 +582,14 @@ export function CmsModule({ canManage, canDelete }: CmsModuleProps) {
           if (!open) resetCmsEditor();
         }}
       >
-        <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-3xl">
+        <DialogContent className="max-h-[92vh] overflow-y-auto border-[var(--admin-border)] bg-[var(--admin-surface)] sm:max-w-3xl">
           <DialogHeader>
-            <DialogTitle>
-              {cmsEditingId ? "Edit page" : "Create page"}
+            <DialogTitle className="[font-family:var(--font-admin-display)]">
+              {cmsEditingId ? "Modifier la page" : "Créer une page"}
             </DialogTitle>
             <DialogDescription>
-              Manage content, publishing, and SEO metadata for storefront pages.
+              Gérez le contenu, la publication et les métadonnées SEO des pages
+              de la boutique.
             </DialogDescription>
           </DialogHeader>
 
@@ -610,7 +610,7 @@ export function CmsModule({ canManage, canDelete }: CmsModuleProps) {
             >
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label>Title</Label>
+                  <Label>Titre</Label>
                   <Input
                     value={cmsForm.title}
                     onChange={e => {
@@ -621,7 +621,7 @@ export function CmsModule({ canManage, canDelete }: CmsModuleProps) {
                         slug: cmsSlugTouched ? prev.slug : slugify(title),
                       }));
                     }}
-                    placeholder="Home, About us, Shipping policy..."
+                    placeholder="Accueil, À propos, Politique de livraison..."
                   />
                 </div>
                 <div className="space-y-2">
@@ -657,7 +657,7 @@ export function CmsModule({ canManage, canDelete }: CmsModuleProps) {
 
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label>Status</Label>
+                  <Label>Statut</Label>
                   <Select
                     value={cmsForm.status}
                     onValueChange={(value: "draft" | "published") =>
@@ -668,40 +668,40 @@ export function CmsModule({ canManage, canDelete }: CmsModuleProps) {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="draft">Draft</SelectItem>
-                      <SelectItem value="published">Published</SelectItem>
+                      <SelectItem value="draft">Brouillon</SelectItem>
+                      <SelectItem value="published">Publiée</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="rounded-xl border border-[#e5d8ce] bg-[#faf5f0] p-3">
+                <div className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface-tint)] p-3">
                   <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                    SEO health
+                    Santé SEO
                   </p>
-                  <p className="mt-1 text-lg font-semibold">
+                  <p className="mt-1 text-lg font-semibold text-[var(--admin-ink)]">
                     {computeSeoScore(cmsForm)}/100
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Fill SEO title, description, and rich content for stronger
-                    ranking.
+                    Renseignez le titre SEO, la description et un contenu riche
+                    pour un meilleur référencement.
                   </p>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label>Content</Label>
+                <Label>Contenu</Label>
                 <Textarea
                   rows={10}
                   value={cmsForm.content}
                   onChange={e =>
                     setCmsForm(prev => ({ ...prev, content: e.target.value }))
                   }
-                  placeholder="Write your page content..."
+                  placeholder="Rédigez le contenu de votre page..."
                 />
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label>SEO title</Label>
+                  <Label>Titre SEO</Label>
                   <Input
                     value={cmsForm.seoTitle}
                     onChange={e =>
@@ -710,11 +710,11 @@ export function CmsModule({ canManage, canDelete }: CmsModuleProps) {
                         seoTitle: e.target.value,
                       }))
                     }
-                    placeholder="Optimized SEO title"
+                    placeholder="Titre SEO optimisé"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>SEO description</Label>
+                  <Label>Description SEO</Label>
                   <Textarea
                     rows={3}
                     value={cmsForm.seoDescription}
@@ -724,7 +724,7 @@ export function CmsModule({ canManage, canDelete }: CmsModuleProps) {
                         seoDescription: e.target.value,
                       }))
                     }
-                    placeholder="Compelling 140-160 character description"
+                    placeholder="Description percutante de 140 à 160 caractères"
                   />
                 </div>
               </div>
@@ -744,7 +744,7 @@ export function CmsModule({ canManage, canDelete }: CmsModuleProps) {
                     {cmsSetStatusMutation.isPending ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     ) : null}
-                    Toggle publish
+                    Basculer la publication
                   </Button>
                 ) : (
                   <span />
@@ -755,7 +755,7 @@ export function CmsModule({ canManage, canDelete }: CmsModuleProps) {
                     variant="outline"
                     onClick={() => setCmsEditorOpen(false)}
                   >
-                    Cancel
+                    Annuler
                   </Button>
                   <Button
                     type="submit"
@@ -768,7 +768,7 @@ export function CmsModule({ canManage, canDelete }: CmsModuleProps) {
                     cmsUpdateMutation.isPending ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     ) : null}
-                    Save page
+                    Enregistrer la page
                   </Button>
                 </div>
               </div>
@@ -784,11 +784,13 @@ export function CmsModule({ canManage, canDelete }: CmsModuleProps) {
           if (!open) setCmsPendingDelete(null);
         }}
       >
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="border-[var(--admin-border)] bg-[var(--admin-surface)] sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Delete page</DialogTitle>
+            <DialogTitle className="[font-family:var(--font-admin-display)]">
+              Supprimer la page
+            </DialogTitle>
             <DialogDescription>
-              This action will permanently remove {cmsPendingDelete?.title}.
+              Cette action supprimera définitivement {cmsPendingDelete?.title}.
             </DialogDescription>
           </DialogHeader>
           <div className="mt-5 flex justify-end gap-2">
@@ -797,7 +799,7 @@ export function CmsModule({ canManage, canDelete }: CmsModuleProps) {
               variant="outline"
               onClick={() => setCmsPendingDelete(null)}
             >
-              Cancel
+              Annuler
             </Button>
             <Button
               type="button"
@@ -808,7 +810,7 @@ export function CmsModule({ canManage, canDelete }: CmsModuleProps) {
               {cmsDeleteMutation.isPending ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : null}
-              Delete
+              Supprimer
             </Button>
           </div>
         </DialogContent>

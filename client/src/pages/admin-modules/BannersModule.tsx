@@ -6,11 +6,9 @@ import EmptyState from "@/components/admin/EmptyState";
 import { ShimmerBlock } from "@/pages/admin-modules/shared/ShimmerBlock";
 import { RetryPanel } from "@/pages/admin-modules/shared/RetryPanel";
 import { getErrorMessage } from "@/pages/admin-modules/shared/utils";
-import {
-  adminCardClass,
-  adminCardPadding,
-  adminSpacingScale,
-} from "@/components/admin/PageHeader";
+import { adminSpacingScale } from "@/components/admin/PageHeader";
+import { Surface } from "@/components/admin/ui/Surface";
+import { Heading } from "@/components/admin/ui/Heading";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -63,7 +61,7 @@ const EMPTY_HERO: HeroForm = {
   title: "",
   subtitle: "",
   backgroundImage: "",
-  buttonText: "Discover",
+  buttonText: "Découvrir",
   buttonLink: "/boutique",
   isActive: true,
   sortOrder: "100",
@@ -71,10 +69,10 @@ const EMPTY_HERO: HeroForm = {
 
 const EMPTY_PROMO: PromoForm = {
   active: true,
-  kicker: "Promo of the week",
-  title: "Up to -40%",
-  subtitle: "Launch high-converting offers with one click.",
-  linkLabel: "View promotions",
+  kicker: "Promo de la semaine",
+  title: "Jusqu'à -40%",
+  subtitle: "Lancez des offres performantes en un clic.",
+  linkLabel: "Voir les promotions",
   linkHref: "/boutique",
 };
 
@@ -156,7 +154,7 @@ export function BannersModule({ canEdit }: BannersModuleProps) {
       title: heroBanner?.title || "",
       subtitle: heroBanner?.description || "",
       backgroundImage: heroBanner?.imageUrl || "",
-      buttonText: heroBanner?.buttonText || "Discover",
+      buttonText: heroBanner?.buttonText || "Découvrir",
       buttonLink: heroBanner?.buttonLink || "/boutique",
       isActive: heroBanner?.isActive ?? true,
       sortOrder: String(heroBanner?.sortOrder ?? 100),
@@ -234,7 +232,7 @@ export function BannersModule({ canEdit }: BannersModuleProps) {
             homepageSettingsQuery.error ||
             heroBannersQuery.error ||
             categoriesQuery.error,
-          "Unable to load homepage editor data."
+          "Impossible de charger les données de l'éditeur de la page d'accueil."
         )
       : null;
 
@@ -263,7 +261,7 @@ export function BannersModule({ canEdit }: BannersModuleProps) {
 
   const saveHomepageContent = useCallback(async () => {
     if (!canEdit) {
-      toast.error("Homepage editing is not allowed");
+      toast.error("La modification de la page d'accueil n'est pas autorisée");
       return;
     }
     setSaving(true);
@@ -315,7 +313,7 @@ export function BannersModule({ canEdit }: BannersModuleProps) {
         !imageValue.startsWith("data:image/")
       ) {
         throw new Error(
-          "Hero image must be an http(s) URL or data:image string"
+          "L'image hero doit être une URL http(s) ou une chaîne data:image"
         );
       }
 
@@ -366,12 +364,12 @@ export function BannersModule({ canEdit }: BannersModuleProps) {
         utils.banners.getAll.invalidate(),
         utils.category.list.invalidate(),
       ]);
-      toast.success("Homepage updated");
+      toast.success("Page d'accueil mise à jour");
     } catch (error: unknown) {
       const msg =
         error instanceof Error
           ? error.message
-          : "Failed to save homepage changes";
+          : "Échec de l'enregistrement des modifications de la page d'accueil";
       toast.error(msg);
     } finally {
       setSaving(false);
@@ -396,8 +394,8 @@ export function BannersModule({ canEdit }: BannersModuleProps) {
   if (!canEdit) {
     return (
       <EmptyState
-        title="Access denied"
-        description="You do not have permissions to edit homepage content."
+        title="Accès refusé"
+        description="Vous n'avez pas les permissions pour modifier le contenu de la page d'accueil."
       />
     );
   }
@@ -405,7 +403,7 @@ export function BannersModule({ canEdit }: BannersModuleProps) {
   if (errorMessage) {
     return (
       <RetryPanel
-        title="Homepage editor unavailable"
+        title="Éditeur de la page d'accueil indisponible"
         description={errorMessage}
         onRetry={() => {
           void Promise.all([
@@ -422,18 +420,18 @@ export function BannersModule({ canEdit }: BannersModuleProps) {
   if (isLoading) {
     return (
       <div className="grid gap-4 xl:grid-cols-2">
-        <div className={cn(adminCardClass, adminCardPadding, "space-y-3")}>
+        <Surface className="space-y-3 p-4 md:p-5">
           <ShimmerBlock className="h-6 w-36" />
           <ShimmerBlock className="h-10 w-full" />
           <ShimmerBlock className="h-24 w-full" />
           <ShimmerBlock className="h-10 w-full" />
-        </div>
-        <div className={cn(adminCardClass, adminCardPadding, "space-y-3")}>
+        </Surface>
+        <Surface className="space-y-3 p-4 md:p-5">
           <ShimmerBlock className="h-6 w-36" />
           <ShimmerBlock className="h-10 w-full" />
           <ShimmerBlock className="h-10 w-full" />
           <ShimmerBlock className="h-24 w-full" />
-        </div>
+        </Surface>
       </div>
     );
   }
@@ -441,16 +439,10 @@ export function BannersModule({ canEdit }: BannersModuleProps) {
   return (
     <div className={adminSpacingScale.section}>
       <div className="grid gap-4 xl:grid-cols-2">
-        <div
-          className={cn(
-            adminCardClass,
-            adminCardPadding,
-            adminSpacingScale.stack
-          )}
-        >
-          <h3 className="text-sm font-semibold">Hero content</h3>
+        <Surface className={cn("p-4 md:p-5", adminSpacingScale.stack)}>
+          <Heading level={3}>Contenu hero</Heading>
           <div className="space-y-2">
-            <Label>Hero title</Label>
+            <Label>Titre du hero</Label>
             <Input
               value={heroForm.title}
               onChange={e =>
@@ -459,7 +451,7 @@ export function BannersModule({ canEdit }: BannersModuleProps) {
             />
           </div>
           <div className="space-y-2">
-            <Label>Hero subtitle</Label>
+            <Label>Sous-titre du hero</Label>
             <Textarea
               rows={3}
               value={heroForm.subtitle}
@@ -469,7 +461,7 @@ export function BannersModule({ canEdit }: BannersModuleProps) {
             />
           </div>
           <div className="space-y-2">
-            <Label>Background image URL</Label>
+            <Label>URL de l'image de fond</Label>
             <Input
               value={heroForm.backgroundImage}
               onChange={e =>
@@ -481,23 +473,17 @@ export function BannersModule({ canEdit }: BannersModuleProps) {
             />
           </div>
           <div className="space-y-2">
-            <Label>Upload background</Label>
+            <Label>Importer une image de fond</Label>
             <ImageUpload
               onImageUploaded={url =>
                 setHeroForm(prev => ({ ...prev, backgroundImage: url }))
               }
             />
           </div>
-        </div>
+        </Surface>
 
-        <div
-          className={cn(
-            adminCardClass,
-            adminCardPadding,
-            adminSpacingScale.stack
-          )}
-        >
-          <h3 className="text-sm font-semibold">Promotion strip</h3>
+        <Surface className={cn("p-4 md:p-5", adminSpacingScale.stack)}>
+          <Heading level={3}>Bandeau promo</Heading>
           <div className="flex items-center gap-2">
             <Checkbox
               checked={promoForm.active}
@@ -505,21 +491,21 @@ export function BannersModule({ canEdit }: BannersModuleProps) {
                 setPromoForm(prev => ({ ...prev, active: Boolean(checked) }))
               }
             />
-            <Label>Show promo on homepage</Label>
+            <Label>Afficher la promo sur la page d'accueil</Label>
           </div>
           <Input
             value={promoForm.kicker}
             onChange={e =>
               setPromoForm(prev => ({ ...prev, kicker: e.target.value }))
             }
-            placeholder="Kicker"
+            placeholder="Accroche"
           />
           <Input
             value={promoForm.title}
             onChange={e =>
               setPromoForm(prev => ({ ...prev, title: e.target.value }))
             }
-            placeholder="Title"
+            placeholder="Titre"
           />
           <Textarea
             rows={3}
@@ -527,37 +513,31 @@ export function BannersModule({ canEdit }: BannersModuleProps) {
             onChange={e =>
               setPromoForm(prev => ({ ...prev, subtitle: e.target.value }))
             }
-            placeholder="Subtitle"
+            placeholder="Sous-titre"
           />
           <Input
             value={promoForm.linkLabel}
             onChange={e =>
               setPromoForm(prev => ({ ...prev, linkLabel: e.target.value }))
             }
-            placeholder="Link label"
+            placeholder="Libellé du lien"
           />
           <Input
             value={promoForm.linkHref}
             onChange={e =>
               setPromoForm(prev => ({ ...prev, linkHref: e.target.value }))
             }
-            placeholder="Link URL"
+            placeholder="URL du lien"
           />
-        </div>
+        </Surface>
       </div>
 
-      <div
-        className={cn(
-          adminCardClass,
-          adminCardPadding,
-          adminSpacingScale.stack
-        )}
-      >
-        <h3 className="text-sm font-semibold">Featured categories</h3>
+      <Surface className={cn("p-4 md:p-5", adminSpacingScale.stack)}>
+        <Heading level={3}>Catégories mises en avant</Heading>
         {categoryRows.length === 0 ? (
           <EmptyState
-            title="No categories"
-            description="Create categories before featuring them."
+            title="Aucune catégorie"
+            description="Créez des catégories avant de les mettre en avant."
           />
         ) : (
           <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-4">
@@ -570,8 +550,8 @@ export function BannersModule({ canEdit }: BannersModuleProps) {
                   className={cn(
                     "rounded-xl border p-3",
                     enabled
-                      ? "border-[#c9a59a] bg-[#fff7f3]"
-                      : "border-border bg-white/80"
+                      ? "border-[var(--admin-accent)] bg-[var(--admin-surface-tint)]"
+                      : "border-[var(--admin-border)] bg-[var(--admin-surface)]"
                   )}
                 >
                   <div className="flex items-center justify-between gap-2">
@@ -604,7 +584,7 @@ export function BannersModule({ canEdit }: BannersModuleProps) {
                         onClick={() => moveFeaturedCategory(category.id, -1)}
                         disabled={index <= 0}
                       >
-                        Up
+                        Monter
                       </Button>
                       <Button
                         type="button"
@@ -616,7 +596,7 @@ export function BannersModule({ canEdit }: BannersModuleProps) {
                           index < 0 || index >= featuredCategoryIds.length - 1
                         }
                       >
-                        Down
+                        Descendre
                       </Button>
                     </div>
                   ) : null}
@@ -625,20 +605,21 @@ export function BannersModule({ canEdit }: BannersModuleProps) {
             })}
           </div>
         )}
-      </div>
+      </Surface>
 
       <div className="flex justify-end">
         <Button
           type="button"
           onClick={() => void saveHomepageContent()}
           disabled={!canEdit || saving}
+          className="bg-[var(--admin-accent)] text-white hover:bg-[var(--admin-accent-hover)]"
         >
           {saving ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : (
             <Save className="mr-2 h-4 w-4" />
           )}
-          Save changes
+          Enregistrer les modifications
         </Button>
       </div>
     </div>
