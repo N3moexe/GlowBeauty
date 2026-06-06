@@ -1,0 +1,1 @@
+ALTER TABLE `chat_settings` MODIFY COLUMN `businessName` varchar(160) NOT NULL DEFAULT 'GlowBeauty';
