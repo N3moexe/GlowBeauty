@@ -88,6 +88,16 @@ const sections = [
 
 type SettingsSection = (typeof sections)[number];
 
+const sectionLabels: Record<SettingsSection, string> = {
+  overview: "Aperçu",
+  store: "Boutique",
+  payments: "Paiements",
+  chatbot: "Chatbot",
+  shipping: "Livraison",
+  users: "Utilisateurs",
+  "audit-logs": "Journaux d'audit",
+};
+
 function parseSection(section: string | undefined): SettingsSection {
   if (section && sections.includes(section as SettingsSection))
     return section as SettingsSection;
@@ -140,6 +150,12 @@ function roleBadge(role: AdminUserRole) {
   return "bg-slate-200 text-slate-800";
 }
 
+const roleLabels: Record<AdminUserRole, string> = {
+  admin: "Administrateur",
+  manager: "Gestionnaire",
+  editor: "Éditeur",
+};
+
 function SectionLoading() {
   return (
     <div className="rounded-xl border bg-card p-4 space-y-3">
@@ -163,7 +179,7 @@ function SectionError({
       <p className="text-sm text-red-500">{message}</p>
       <Button variant="outline" size="sm" onClick={onRetry}>
         <RefreshCw className="h-4 w-4 mr-2" />
-        Retry
+        Réessayer
       </Button>
     </div>
   );
@@ -323,7 +339,7 @@ export default function AdminSettings() {
   const saveStoreMutation = useMutation({
     mutationFn: () => updateAdminStoreSettings(storeForm),
     onSuccess: async () => {
-      toast.success("Store settings saved");
+      toast.success("Paramètres de la boutique enregistrés");
       await queryClient.invalidateQueries({
         queryKey: ["admin-settings", "store"],
       });
@@ -336,7 +352,7 @@ export default function AdminSettings() {
   const savePaymentsMutation = useMutation({
     mutationFn: () => updateAdminPaymentSettings(paymentsForm),
     onSuccess: async () => {
-      toast.success("Payment settings saved");
+      toast.success("Paramètres de paiement enregistrés");
       await queryClient.invalidateQueries({
         queryKey: ["admin-settings", "payments"],
       });
@@ -349,7 +365,7 @@ export default function AdminSettings() {
   const saveChatbotMutation = useMutation({
     mutationFn: () => updateAdminChatbotSettings(chatbotForm),
     onSuccess: async () => {
-      toast.success("Chatbot settings saved");
+      toast.success("Paramètres du chatbot enregistrés");
       await queryClient.invalidateQueries({
         queryKey: ["admin-settings", "chatbot"],
       });
@@ -360,7 +376,7 @@ export default function AdminSettings() {
   const createZoneMutation = useMutation({
     mutationFn: createShippingZone,
     onSuccess: async () => {
-      toast.success("Shipping zone created");
+      toast.success("Zone de livraison créée");
       setZoneDialogOpen(false);
       await queryClient.invalidateQueries({
         queryKey: ["admin-settings", "shipping"],
@@ -379,7 +395,7 @@ export default function AdminSettings() {
       payload: Parameters<typeof updateShippingZone>[1];
     }) => updateShippingZone(id, payload),
     onSuccess: async () => {
-      toast.success("Shipping zone updated");
+      toast.success("Zone de livraison mise à jour");
       setZoneDialogOpen(false);
       await queryClient.invalidateQueries({
         queryKey: ["admin-settings", "shipping"],
@@ -392,7 +408,7 @@ export default function AdminSettings() {
   const deleteZoneMutation = useMutation({
     mutationFn: deleteShippingZone,
     onSuccess: async () => {
-      toast.success("Shipping zone deleted");
+      toast.success("Zone de livraison supprimée");
       await queryClient.invalidateQueries({
         queryKey: ["admin-settings", "shipping"],
       });
@@ -404,7 +420,7 @@ export default function AdminSettings() {
   const createRateMutation = useMutation({
     mutationFn: createShippingRate,
     onSuccess: async () => {
-      toast.success("Shipping rate created");
+      toast.success("Tarif de livraison créé");
       setRateDialogOpen(false);
       await queryClient.invalidateQueries({
         queryKey: ["admin-settings", "shipping"],
@@ -423,7 +439,7 @@ export default function AdminSettings() {
       payload: Parameters<typeof updateShippingRate>[1];
     }) => updateShippingRate(id, payload),
     onSuccess: async () => {
-      toast.success("Shipping rate updated");
+      toast.success("Tarif de livraison mis à jour");
       setRateDialogOpen(false);
       await queryClient.invalidateQueries({
         queryKey: ["admin-settings", "shipping"],
@@ -436,7 +452,7 @@ export default function AdminSettings() {
   const deleteRateMutation = useMutation({
     mutationFn: deleteShippingRate,
     onSuccess: async () => {
-      toast.success("Shipping rate deleted");
+      toast.success("Tarif de livraison supprimé");
       await queryClient.invalidateQueries({
         queryKey: ["admin-settings", "shipping"],
       });
@@ -449,11 +465,11 @@ export default function AdminSettings() {
     mutationFn: createAdminUser,
     onSuccess: async result => {
       if (result.inviteCreated && result.tempPassword) {
-        toast.success("Invite created", {
-          description: `Temporary password: ${result.tempPassword}`,
+        toast.success("Invitation créée", {
+          description: `Mot de passe temporaire : ${result.tempPassword}`,
         });
       } else {
-        toast.success("User created");
+        toast.success("Utilisateur créé");
       }
       setCreateUserDialogOpen(false);
       setCreateUserForm({
@@ -482,7 +498,7 @@ export default function AdminSettings() {
       payload: Parameters<typeof updateAdminUser>[1];
     }) => updateAdminUser(id, payload),
     onSuccess: async () => {
-      toast.success("User updated");
+      toast.success("Utilisateur mis à jour");
       await queryClient.invalidateQueries({
         queryKey: ["admin-settings", "users"],
       });
@@ -493,8 +509,8 @@ export default function AdminSettings() {
   const resetPasswordMutation = useMutation({
     mutationFn: ({ id }: { id: number }) => resetAdminUserPassword(id),
     onSuccess: async result => {
-      toast.success("Password reset", {
-        description: `Temporary password: ${result.tempPassword}`,
+      toast.success("Mot de passe réinitialisé", {
+        description: `Mot de passe temporaire : ${result.tempPassword}`,
       });
       await queryClient.invalidateQueries({
         queryKey: ["admin-settings", "users"],
@@ -560,7 +576,7 @@ export default function AdminSettings() {
 
   const submitZone = () => {
     if (!zoneForm.name.trim()) {
-      toast.error("Zone name is required");
+      toast.error("Le nom de la zone est requis");
       return;
     }
     if (editingZone) {
@@ -591,7 +607,7 @@ export default function AdminSettings() {
 
   const openCreateRateDialog = () => {
     if (!selectedZone) {
-      toast.error("Select a zone first");
+      toast.error("Sélectionnez d'abord une zone");
       return;
     }
     setEditingRate(null);
@@ -625,13 +641,15 @@ export default function AdminSettings() {
 
   const submitRate = () => {
     if (!rateForm.label.trim()) {
-      toast.error("Rate label is required");
+      toast.error("Le libellé du tarif est requis");
       return;
     }
     const maxAmount =
       rateForm.maxAmountCfa === "" ? null : Number(rateForm.maxAmountCfa);
     if (maxAmount != null && maxAmount < Number(rateForm.minAmountCfa)) {
-      toast.error("Max amount must be greater than or equal to min amount");
+      toast.error(
+        "Le montant maximum doit être supérieur ou égal au montant minimum"
+      );
       return;
     }
     if (editingRate) {
@@ -682,7 +700,7 @@ export default function AdminSettings() {
               : ""
           }
         >
-          {section === "overview" ? "Overview" : section}
+          {sectionLabels[section]}
         </Button>
       ))}
     </div>
@@ -713,15 +731,15 @@ export default function AdminSettings() {
     >
       <div className="space-y-4">
         <PageHeader
-          title="Settings"
-          description="Store, payments, shipping zones/rates, users and audit logs."
-          breadcrumbs={[{ label: "Admin" }, { label: "Settings" }]}
+          title="Paramètres"
+          description="Boutique, paiements, zones/tarifs de livraison, utilisateurs et journaux d'audit."
+          breadcrumbs={[{ label: "Admin" }, { label: "Paramètres" }]}
           actions={
             activeSection !== "overview" ? (
               <Link href="/admin/settings">
                 <Button variant="outline">
                   <ArrowLeft className="h-4 w-4 mr-2" />
-                  Overview
+                  Aperçu
                 </Button>
               </Link>
             ) : undefined
@@ -734,33 +752,33 @@ export default function AdminSettings() {
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
             {[
               {
-                title: "Store",
-                desc: "Brand name, contacts, currency",
+                title: "Boutique",
+                desc: "Nom de la marque, contacts, devise",
                 href: "/admin/settings/store",
               },
               {
-                title: "Payments",
-                desc: "Wave, Orange Money, Card",
+                title: "Paiements",
+                desc: "Wave, Orange Money, Carte",
                 href: "/admin/settings/payments",
               },
               {
                 title: "Chatbot",
-                desc: "Concierge greeting, tone, WhatsApp, policies",
+                desc: "Message d'accueil du concierge, ton, WhatsApp, politiques",
                 href: "/admin/settings/chatbot",
               },
               {
-                title: "Shipping",
-                desc: "Zones and dynamic rates",
+                title: "Livraison",
+                desc: "Zones et tarifs dynamiques",
                 href: "/admin/settings/shipping",
               },
               {
-                title: "Users",
-                desc: "Roles, active status, reset password",
+                title: "Utilisateurs",
+                desc: "Rôles, statut actif, réinitialisation du mot de passe",
                 href: "/admin/settings/users",
               },
               {
-                title: "Audit logs",
-                desc: "Admin activity timeline",
+                title: "Journaux d'audit",
+                desc: "Historique d'activité de l'administration",
                 href: "/admin/settings/audit-logs",
               },
             ].map(item => (
@@ -792,7 +810,7 @@ export default function AdminSettings() {
               <>
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-1.5">
-                    <Label>Store name</Label>
+                    <Label>Nom de la boutique</Label>
                     <Input
                       value={storeForm.name}
                       onChange={event =>
@@ -848,7 +866,7 @@ export default function AdminSettings() {
                 </div>
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-1.5">
-                    <Label>Phone</Label>
+                    <Label>Téléphone</Label>
                     <Input
                       value={storeForm.phone}
                       onChange={event =>
@@ -860,7 +878,7 @@ export default function AdminSettings() {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Email</Label>
+                    <Label>E-mail</Label>
                     <Input
                       value={storeForm.email}
                       onChange={event =>
@@ -874,7 +892,7 @@ export default function AdminSettings() {
                 </div>
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-1.5">
-                    <Label>Address</Label>
+                    <Label>Adresse</Label>
                     <Input
                       value={storeForm.address}
                       onChange={event =>
@@ -886,7 +904,7 @@ export default function AdminSettings() {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Currency</Label>
+                    <Label>Devise</Label>
                     <Input
                       value={storeForm.currency}
                       onChange={event =>
@@ -904,7 +922,7 @@ export default function AdminSettings() {
                   onClick={() => saveStoreMutation.mutate()}
                 >
                   <Save className="h-4 w-4 mr-2" />
-                  Save store settings
+                  Enregistrer les paramètres de la boutique
                 </Button>
               </>
             )}
@@ -945,7 +963,7 @@ export default function AdminSettings() {
                     />
                   </label>
                   <label className="rounded-lg border p-3 flex items-center justify-between">
-                    <span className="text-sm">Card</span>
+                    <span className="text-sm">Carte</span>
                     <Switch
                       checked={paymentsForm.cardEnabled}
                       onCheckedChange={value =>
@@ -959,7 +977,7 @@ export default function AdminSettings() {
                 </div>
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-1.5">
-                    <Label>Wave key</Label>
+                    <Label>Clé Wave</Label>
                     <Input
                       value={paymentsForm.waveKey}
                       onChange={event =>
@@ -971,7 +989,7 @@ export default function AdminSettings() {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Orange Money key</Label>
+                    <Label>Clé Orange Money</Label>
                     <Input
                       value={paymentsForm.omKey}
                       onChange={event =>
@@ -985,7 +1003,7 @@ export default function AdminSettings() {
                 </div>
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-1.5">
-                    <Label>Card public key</Label>
+                    <Label>Clé publique de carte</Label>
                     <Input
                       value={paymentsForm.cardPublicKey}
                       onChange={event =>
@@ -997,7 +1015,7 @@ export default function AdminSettings() {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Card secret key</Label>
+                    <Label>Clé secrète de carte</Label>
                     <Input
                       value={paymentsForm.cardSecretKey}
                       onChange={event =>
@@ -1015,7 +1033,7 @@ export default function AdminSettings() {
                   onClick={() => savePaymentsMutation.mutate()}
                 >
                   <Save className="h-4 w-4 mr-2" />
-                  Save payment settings
+                  Enregistrer les paramètres de paiement
                 </Button>
               </>
             )}
@@ -1034,7 +1052,7 @@ export default function AdminSettings() {
             ) : (
               <>
                 <div className="space-y-1.5">
-                  <Label>Greeting</Label>
+                  <Label>Message d'accueil</Label>
                   <Textarea
                     rows={3}
                     value={chatbotForm.greeting || ""}
@@ -1049,7 +1067,7 @@ export default function AdminSettings() {
 
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-1.5">
-                    <Label>Tone</Label>
+                    <Label>Ton</Label>
                     <Select
                       value={chatbotForm.tone || "Luxury skincare"}
                       onValueChange={(
@@ -1066,17 +1084,17 @@ export default function AdminSettings() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="Luxury skincare">
-                          Luxury skincare
+                          Skincare de luxe
                         </SelectItem>
-                        <SelectItem value="Friendly">Friendly</SelectItem>
+                        <SelectItem value="Friendly">Convivial</SelectItem>
                         <SelectItem value="Professional">
-                          Professional
+                          Professionnel
                         </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-1.5">
-                    <Label>WhatsApp number</Label>
+                    <Label>Numéro WhatsApp</Label>
                     <Input
                       value={chatbotForm.whatsappNumber || ""}
                       onChange={event =>
@@ -1091,7 +1109,7 @@ export default function AdminSettings() {
 
                 <div className="grid gap-4 md:grid-cols-3">
                   <div className="space-y-1.5">
-                    <Label>Return policy</Label>
+                    <Label>Politique de retour</Label>
                     <Textarea
                       rows={4}
                       value={chatbotForm.policies?.return || ""}
@@ -1108,7 +1126,7 @@ export default function AdminSettings() {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Delivery policy</Label>
+                    <Label>Politique de livraison</Label>
                     <Textarea
                       rows={4}
                       value={chatbotForm.policies?.delivery || ""}
@@ -1125,7 +1143,7 @@ export default function AdminSettings() {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Payment policy</Label>
+                    <Label>Politique de paiement</Label>
                     <Textarea
                       rows={4}
                       value={chatbotForm.policies?.payment || ""}
@@ -1149,7 +1167,7 @@ export default function AdminSettings() {
                   onClick={() => saveChatbotMutation.mutate()}
                 >
                   <Save className="h-4 w-4 mr-2" />
-                  Save chatbot settings
+                  Enregistrer les paramètres du chatbot
                 </Button>
               </>
             )}
@@ -1169,20 +1187,20 @@ export default function AdminSettings() {
               <>
                 <div className="rounded-xl border bg-card p-4 space-y-3">
                   <div className="flex items-center justify-between">
-                    <p className="font-semibold">Shipping zones</p>
+                    <p className="font-semibold">Zones de livraison</p>
                     <Button
                       size="sm"
                       onClick={openCreateZoneDialog}
                       disabled={readOnly}
                     >
                       <Plus className="h-4 w-4 mr-2" />
-                      Add zone
+                      Ajouter une zone
                     </Button>
                   </div>
                   {!shippingQuery.data?.length ? (
                     <EmptyState
-                      title="No zones yet"
-                      description="Create your first delivery zone."
+                      title="Aucune zone pour le moment"
+                      description="Créez votre première zone de livraison."
                     />
                   ) : (
                     <div className="overflow-x-auto rounded-lg border">
@@ -1191,9 +1209,11 @@ export default function AdminSettings() {
                           <tr>
                             <th className="px-3 py-2 text-left">Zone</th>
                             <th className="px-3 py-2 text-left">Slug</th>
-                            <th className="px-3 py-2 text-right">Base fee</th>
-                            <th className="px-3 py-2 text-right">Days</th>
-                            <th className="px-3 py-2 text-left">Status</th>
+                            <th className="px-3 py-2 text-right">
+                              Frais de base
+                            </th>
+                            <th className="px-3 py-2 text-right">Jours</th>
+                            <th className="px-3 py-2 text-left">Statut</th>
                             <th className="px-3 py-2 text-right">Actions</th>
                           </tr>
                         </thead>
@@ -1252,7 +1272,7 @@ export default function AdminSettings() {
                                     onClick={() => {
                                       if (
                                         !window.confirm(
-                                          `Delete zone "${zone.name}"?`
+                                          `Supprimer la zone « ${zone.name} » ?`
                                         )
                                       )
                                         return;
@@ -1274,7 +1294,7 @@ export default function AdminSettings() {
                 <div className="rounded-xl border bg-card p-4 space-y-3">
                   <div className="flex items-center justify-between">
                     <p className="font-semibold">
-                      Rates {selectedZone ? `- ${selectedZone.name}` : ""}
+                      Tarifs {selectedZone ? `- ${selectedZone.name}` : ""}
                     </p>
                     <Button
                       size="sm"
@@ -1283,31 +1303,31 @@ export default function AdminSettings() {
                       disabled={readOnly || !selectedZone}
                     >
                       <Plus className="h-4 w-4 mr-2" />
-                      Add rate
+                      Ajouter un tarif
                     </Button>
                   </div>
                   {!selectedZone ? (
                     <EmptyState
-                      title="No zone selected"
-                      description="Choose a zone to manage rates."
+                      title="Aucune zone sélectionnée"
+                      description="Choisissez une zone pour gérer les tarifs."
                     />
                   ) : !selectedZone.rates.length ? (
                     <EmptyState
-                      title="No rates yet"
-                      description="Create at least one rate for this zone."
+                      title="Aucun tarif pour le moment"
+                      description="Créez au moins un tarif pour cette zone."
                     />
                   ) : (
                     <div className="overflow-x-auto rounded-lg border">
                       <table className="w-full text-sm">
                         <thead className="bg-muted/40 text-muted-foreground">
                           <tr>
-                            <th className="px-3 py-2 text-left">Label</th>
+                            <th className="px-3 py-2 text-left">Libellé</th>
                             <th className="px-3 py-2 text-right">
-                              Range (CFA)
+                              Plage (CFA)
                             </th>
-                            <th className="px-3 py-2 text-right">Fee</th>
-                            <th className="px-3 py-2 text-right">ETA (h)</th>
-                            <th className="px-3 py-2 text-left">Status</th>
+                            <th className="px-3 py-2 text-right">Frais</th>
+                            <th className="px-3 py-2 text-right">Délai (h)</th>
+                            <th className="px-3 py-2 text-left">Statut</th>
                             <th className="px-3 py-2 text-right">Actions</th>
                           </tr>
                         </thead>
@@ -1320,7 +1340,7 @@ export default function AdminSettings() {
                               <td className="px-3 py-2 text-right">
                                 {rate.minAmountCfa} -{" "}
                                 {rate.maxAmountCfa == null
-                                  ? "INF"
+                                  ? "∞"
                                   : rate.maxAmountCfa}
                               </td>
                               <td className="px-3 py-2 text-right">
@@ -1360,7 +1380,7 @@ export default function AdminSettings() {
                                     onClick={() => {
                                       if (
                                         !window.confirm(
-                                          `Delete rate "${rate.label}"?`
+                                          `Supprimer le tarif « ${rate.label} » ?`
                                         )
                                       )
                                         return;
@@ -1386,14 +1406,14 @@ export default function AdminSettings() {
         {activeSection === "users" && (
           <div className="rounded-xl border bg-card p-4 space-y-3">
             <div className="flex items-center justify-between">
-              <p className="font-semibold">Users and roles</p>
+              <p className="font-semibold">Utilisateurs et rôles</p>
               <Button
                 size="sm"
                 onClick={() => setCreateUserDialogOpen(true)}
                 disabled={readOnly}
               >
                 <Plus className="h-4 w-4 mr-2" />
-                Add user
+                Ajouter un utilisateur
               </Button>
             </div>
             {usersQuery.isLoading ? (
@@ -1405,19 +1425,21 @@ export default function AdminSettings() {
               />
             ) : !usersQuery.data?.length ? (
               <EmptyState
-                title="No users found"
-                description="Create your first admin user."
+                title="Aucun utilisateur trouvé"
+                description="Créez votre premier utilisateur administrateur."
               />
             ) : (
               <div className="overflow-x-auto rounded-lg border">
                 <table className="w-full text-sm">
                   <thead className="bg-muted/40 text-muted-foreground">
                     <tr>
-                      <th className="px-3 py-2 text-left">User</th>
-                      <th className="px-3 py-2 text-left">Email</th>
-                      <th className="px-3 py-2 text-left">Role</th>
-                      <th className="px-3 py-2 text-left">Active</th>
-                      <th className="px-3 py-2 text-left">Last login</th>
+                      <th className="px-3 py-2 text-left">Utilisateur</th>
+                      <th className="px-3 py-2 text-left">E-mail</th>
+                      <th className="px-3 py-2 text-left">Rôle</th>
+                      <th className="px-3 py-2 text-left">Actif</th>
+                      <th className="px-3 py-2 text-left">
+                        Dernière connexion
+                      </th>
                       <th className="px-3 py-2 text-right">Actions</th>
                     </tr>
                   </thead>
@@ -1436,7 +1458,9 @@ export default function AdminSettings() {
                         }
                         onResetPassword={() => {
                           if (
-                            !window.confirm(`Reset password for ${item.name}?`)
+                            !window.confirm(
+                              `Réinitialiser le mot de passe de ${item.name} ?`
+                            )
                           )
                             return;
                           resetPasswordMutation.mutate({ id: item.id });
@@ -1462,7 +1486,7 @@ export default function AdminSettings() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label>Entity</Label>
+                <Label>Entité</Label>
                 <Input
                   value={auditEntityFilter}
                   onChange={event => setAuditEntityFilter(event.target.value)}
@@ -1470,7 +1494,7 @@ export default function AdminSettings() {
                 />
               </div>
               <Button variant="outline" onClick={applyAuditFilters}>
-                Apply filters
+                Appliquer les filtres
               </Button>
             </div>
             {auditQuery.isLoading ? (
@@ -1482,8 +1506,8 @@ export default function AdminSettings() {
               />
             ) : !auditQuery.data?.items.length ? (
               <EmptyState
-                title="No audit logs yet"
-                description="Admin actions will appear here."
+                title="Aucun journal d'audit pour le moment"
+                description="Les actions d'administration apparaîtront ici."
               />
             ) : (
               <>
@@ -1491,11 +1515,11 @@ export default function AdminSettings() {
                   <table className="w-full text-sm">
                     <thead className="bg-muted/40 text-muted-foreground">
                       <tr>
-                        <th className="px-3 py-2 text-left">When</th>
-                        <th className="px-3 py-2 text-left">Actor</th>
+                        <th className="px-3 py-2 text-left">Date</th>
+                        <th className="px-3 py-2 text-left">Auteur</th>
                         <th className="px-3 py-2 text-left">Action</th>
-                        <th className="px-3 py-2 text-left">Entity</th>
-                        <th className="px-3 py-2 text-right">Details</th>
+                        <th className="px-3 py-2 text-left">Entité</th>
+                        <th className="px-3 py-2 text-right">Détails</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1505,7 +1529,8 @@ export default function AdminSettings() {
                             {formatDate(log.createdAt)}
                           </td>
                           <td className="px-3 py-2">
-                            {log.actorName || `User #${log.actorUserId || "-"}`}
+                            {log.actorName ||
+                              `Utilisateur #${log.actorUserId || "-"}`}
                           </td>
                           <td className="px-3 py-2 font-medium">
                             {log.action}
@@ -1520,7 +1545,7 @@ export default function AdminSettings() {
                               variant="outline"
                               onClick={() => setAuditDetails(log)}
                             >
-                              Open
+                              Ouvrir
                             </Button>
                           </td>
                         </tr>
@@ -1542,7 +1567,7 @@ export default function AdminSettings() {
                       });
                     }}
                   >
-                    Previous
+                    Précédent
                   </Button>
                   <Button
                     variant="outline"
@@ -1556,7 +1581,7 @@ export default function AdminSettings() {
                       setAuditCursor(auditQuery.data.nextCursor || undefined);
                     }}
                   >
-                    Next
+                    Suivant
                   </Button>
                 </div>
               </>
@@ -1568,16 +1593,19 @@ export default function AdminSettings() {
           <DialogContent className="sm:max-w-2xl">
             <DialogHeader>
               <DialogTitle>
-                {editingZone ? "Edit shipping zone" : "Create shipping zone"}
+                {editingZone
+                  ? "Modifier la zone de livraison"
+                  : "Créer une zone de livraison"}
               </DialogTitle>
               <DialogDescription>
-                Manage delivery zone details and default base pricing.
+                Gérez les détails de la zone de livraison et la tarification de
+                base par défaut.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-3">
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-1.5">
-                  <Label>Name</Label>
+                  <Label>Nom</Label>
                   <Input
                     value={zoneForm.name}
                     onChange={event =>
@@ -1616,7 +1644,7 @@ export default function AdminSettings() {
               </div>
               <div className="grid gap-4 md:grid-cols-3">
                 <div className="space-y-1.5">
-                  <Label>Base fee (CFA)</Label>
+                  <Label>Frais de base (CFA)</Label>
                   <Input
                     type="number"
                     value={zoneForm.deliveryFee}
@@ -1629,7 +1657,7 @@ export default function AdminSettings() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Delivery days</Label>
+                  <Label>Jours de livraison</Label>
                   <Input
                     type="number"
                     value={zoneForm.deliveryDays}
@@ -1642,7 +1670,7 @@ export default function AdminSettings() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Display order</Label>
+                  <Label>Ordre d'affichage</Label>
                   <Input
                     type="number"
                     value={zoneForm.displayOrder}
@@ -1656,7 +1684,7 @@ export default function AdminSettings() {
                 </div>
               </div>
               <label className="rounded-lg border p-3 flex items-center justify-between">
-                <span className="text-sm">Active</span>
+                <span className="text-sm">Actif</span>
                 <Switch
                   checked={zoneForm.isActive}
                   onCheckedChange={value =>
@@ -1674,7 +1702,7 @@ export default function AdminSettings() {
                 onClick={submitZone}
               >
                 <Save className="h-4 w-4 mr-2" />
-                Save zone
+                Enregistrer la zone
               </Button>
             </div>
           </DialogContent>
@@ -1684,10 +1712,13 @@ export default function AdminSettings() {
           <DialogContent className="sm:max-w-2xl">
             <DialogHeader>
               <DialogTitle>
-                {editingRate ? "Edit shipping rate" : "Create shipping rate"}
+                {editingRate
+                  ? "Modifier le tarif de livraison"
+                  : "Créer un tarif de livraison"}
               </DialogTitle>
               <DialogDescription>
-                Define cart value ranges, delivery fees and ETA windows.
+                Définissez les plages de valeur du panier, les frais de
+                livraison et les fenêtres de délai.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-3">
@@ -1715,7 +1746,7 @@ export default function AdminSettings() {
                   </Select>
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Label</Label>
+                  <Label>Libellé</Label>
                   <Input
                     value={rateForm.label}
                     onChange={event =>
@@ -1729,7 +1760,7 @@ export default function AdminSettings() {
               </div>
               <div className="grid gap-4 md:grid-cols-3">
                 <div className="space-y-1.5">
-                  <Label>Min amount (CFA)</Label>
+                  <Label>Montant minimum (CFA)</Label>
                   <Input
                     type="number"
                     value={rateForm.minAmountCfa}
@@ -1742,7 +1773,7 @@ export default function AdminSettings() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Max amount (CFA)</Label>
+                  <Label>Montant maximum (CFA)</Label>
                   <Input
                     value={rateForm.maxAmountCfa}
                     onChange={event =>
@@ -1751,11 +1782,11 @@ export default function AdminSettings() {
                         maxAmountCfa: event.target.value,
                       }))
                     }
-                    placeholder="Leave empty for no max"
+                    placeholder="Laissez vide pour aucun maximum"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Fee (CFA)</Label>
+                  <Label>Frais (CFA)</Label>
                   <Input
                     type="number"
                     value={rateForm.feeCfa}
@@ -1770,7 +1801,7 @@ export default function AdminSettings() {
               </div>
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-1.5">
-                  <Label>ETA min (hours)</Label>
+                  <Label>Délai min (heures)</Label>
                   <Input
                     type="number"
                     value={rateForm.etaMinHours}
@@ -1783,7 +1814,7 @@ export default function AdminSettings() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>ETA max (hours)</Label>
+                  <Label>Délai max (heures)</Label>
                   <Input
                     type="number"
                     value={rateForm.etaMaxHours}
@@ -1797,7 +1828,7 @@ export default function AdminSettings() {
                 </div>
               </div>
               <label className="rounded-lg border p-3 flex items-center justify-between">
-                <span className="text-sm">Active</span>
+                <span className="text-sm">Actif</span>
                 <Switch
                   checked={rateForm.isActive}
                   onCheckedChange={value =>
@@ -1815,7 +1846,7 @@ export default function AdminSettings() {
                 onClick={submitRate}
               >
                 <Save className="h-4 w-4 mr-2" />
-                Save rate
+                Enregistrer le tarif
               </Button>
             </div>
           </DialogContent>
@@ -1827,15 +1858,16 @@ export default function AdminSettings() {
         >
           <DialogContent className="sm:max-w-xl">
             <DialogHeader>
-              <DialogTitle>Create admin user</DialogTitle>
+              <DialogTitle>Créer un utilisateur administrateur</DialogTitle>
               <DialogDescription>
-                Assign credentials and role for dashboard access.
+                Attribuez des identifiants et un rôle pour accéder au tableau de
+                bord.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-3">
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-1.5">
-                  <Label>Name</Label>
+                  <Label>Nom</Label>
                   <Input
                     value={createUserForm.name}
                     onChange={event =>
@@ -1847,7 +1879,7 @@ export default function AdminSettings() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Email</Label>
+                  <Label>E-mail</Label>
                   <Input
                     value={createUserForm.email}
                     onChange={event =>
@@ -1861,7 +1893,7 @@ export default function AdminSettings() {
               </div>
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-1.5">
-                  <Label>Phone</Label>
+                  <Label>Téléphone</Label>
                   <Input
                     value={createUserForm.phone || ""}
                     onChange={event =>
@@ -1873,7 +1905,7 @@ export default function AdminSettings() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Role</Label>
+                  <Label>Rôle</Label>
                   <Select
                     value={createUserForm.role}
                     onValueChange={(value: AdminUserRole) =>
@@ -1884,16 +1916,16 @@ export default function AdminSettings() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="admin">admin</SelectItem>
-                      <SelectItem value="manager">manager</SelectItem>
-                      <SelectItem value="editor">editor</SelectItem>
+                      <SelectItem value="admin">Administrateur</SelectItem>
+                      <SelectItem value="manager">Gestionnaire</SelectItem>
+                      <SelectItem value="editor">Éditeur</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-1.5">
-                  <Label>Username</Label>
+                  <Label>Nom d'utilisateur</Label>
                   <Input
                     value={createUserForm.username}
                     onChange={event =>
@@ -1906,7 +1938,8 @@ export default function AdminSettings() {
                 </div>
                 <div className="space-y-1.5">
                   <Label>
-                    Password {createUserForm.inviteOnly ? "(optional)" : ""}
+                    Mot de passe{" "}
+                    {createUserForm.inviteOnly ? "(facultatif)" : ""}
                   </Label>
                   <Input
                     type="password"
@@ -1919,7 +1952,7 @@ export default function AdminSettings() {
                     }
                     placeholder={
                       createUserForm.inviteOnly
-                        ? "Leave blank to auto-generate"
+                        ? "Laissez vide pour générer automatiquement"
                         : ""
                     }
                   />
@@ -1927,7 +1960,8 @@ export default function AdminSettings() {
               </div>
               <label className="rounded-lg border p-3 flex items-center justify-between">
                 <span className="text-sm">
-                  Invite mode (auto-generate temporary password)
+                  Mode invitation (générer automatiquement un mot de passe
+                  temporaire)
                 </span>
                 <Switch
                   checked={Boolean(createUserForm.inviteOnly)}
@@ -1937,7 +1971,7 @@ export default function AdminSettings() {
                 />
               </label>
               <label className="rounded-lg border p-3 flex items-center justify-between">
-                <span className="text-sm">Active</span>
+                <span className="text-sm">Actif</span>
                 <Switch
                   checked={createUserForm.isActive}
                   onCheckedChange={value =>
@@ -1954,7 +1988,7 @@ export default function AdminSettings() {
                     !(createUserForm.password || "").trim()
                   ) {
                     toast.error(
-                      "Password is required unless invite mode is enabled"
+                      "Le mot de passe est requis sauf si le mode invitation est activé"
                     );
                     return;
                   }
@@ -1962,7 +1996,7 @@ export default function AdminSettings() {
                 }}
               >
                 <Save className="h-4 w-4 mr-2" />
-                Create user
+                Créer l'utilisateur
               </Button>
             </div>
           </DialogContent>
@@ -1976,7 +2010,7 @@ export default function AdminSettings() {
         >
           <DialogContent className="sm:max-w-4xl">
             <DialogHeader>
-              <DialogTitle>Audit details</DialogTitle>
+              <DialogTitle>Détails de l'audit</DialogTitle>
               <DialogDescription>
                 {auditDetails
                   ? `${auditDetails.action} - ${auditDetails.entityType}`
@@ -1986,13 +2020,13 @@ export default function AdminSettings() {
             {auditDetails && (
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <p className="text-sm font-semibold">Before</p>
+                  <p className="text-sm font-semibold">Avant</p>
                   <pre className="rounded-lg border bg-muted/30 p-3 text-xs overflow-auto max-h-[320px]">
                     {JSON.stringify(auditDetails.beforeJson, null, 2) || "null"}
                   </pre>
                 </div>
                 <div className="space-y-2">
-                  <p className="text-sm font-semibold">After</p>
+                  <p className="text-sm font-semibold">Après</p>
                   <pre className="rounded-lg border bg-muted/30 p-3 text-xs overflow-auto max-h-[320px]">
                     {JSON.stringify(auditDetails.afterJson, null, 2) || "null"}
                   </pre>
@@ -2032,13 +2066,13 @@ function UserRoleRow({
       <td className="px-3 py-2">
         <div className="font-medium">{item.name}</div>
         <div className="text-xs text-muted-foreground">
-          @{item.username || "n/a"}
+          @{item.username || "n/d"}
         </div>
       </td>
       <td className="px-3 py-2 text-muted-foreground">{item.email || "-"}</td>
       <td className="px-3 py-2">
         <div className="flex items-center gap-2">
-          <Badge className={roleBadge(role)}>{role}</Badge>
+          <Badge className={roleBadge(role)}>{roleLabels[role]}</Badge>
           <Select
             value={role}
             onValueChange={(value: AdminUserRole) => setRole(value)}
@@ -2048,9 +2082,9 @@ function UserRoleRow({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="admin">admin</SelectItem>
-              <SelectItem value="manager">manager</SelectItem>
-              <SelectItem value="editor">editor</SelectItem>
+              <SelectItem value="admin">Administrateur</SelectItem>
+              <SelectItem value="manager">Gestionnaire</SelectItem>
+              <SelectItem value="editor">Éditeur</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -2071,7 +2105,7 @@ function UserRoleRow({
             disabled={saving || readOnly}
             onClick={() => onSave({ role, isActive })}
           >
-            Save
+            Enregistrer
           </Button>
           <Button
             size="sm"
@@ -2080,7 +2114,7 @@ function UserRoleRow({
             onClick={onResetPassword}
           >
             <KeyRound className="h-4 w-4 mr-1" />
-            Reset
+            Réinitialiser
           </Button>
         </div>
       </td>

@@ -58,13 +58,13 @@ export default function AdminCategories() {
       const payload = await response.json().catch(() => null);
 
       if (!response.ok) {
-        throw new Error((payload as any)?.error || "Impossible de charger les categories.");
+        throw new Error((payload as any)?.error || "Impossible de charger les catégories.");
       }
 
       const list = normalizeCategoriesPayload(payload).sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
       setCategories(list);
     } catch (error: any) {
-      toast.error(error?.message || "Impossible de charger les categories.");
+      toast.error(error?.message || "Impossible de charger les catégories.");
     } finally {
       setLoadingCategories(false);
     }
@@ -82,7 +82,7 @@ export default function AdminCategories() {
 
   const onUploadClick = (categoryId: number) => {
     if (!canUpload) {
-      toast.error("Vous etes en mode lecture seule.");
+      toast.error("Vous êtes en mode lecture seule.");
       return;
     }
     fileInputRefs.current[categoryId]?.click();
@@ -92,7 +92,7 @@ export default function AdminCategories() {
     if (!file) return;
 
     if (!allowedImageTypes.has(file.type)) {
-      toast.error("Format non supporte. Utilisez JPG, PNG ou WebP.");
+      toast.error("Format non supporté. Utilisez JPG, PNG ou WebP.");
       return;
     }
 
@@ -114,19 +114,19 @@ export default function AdminCategories() {
 
       const payload = await response.json().catch(() => null);
       if (!response.ok) {
-        throw new Error((payload as any)?.error || "Echec de l'upload de l'image.");
+        throw new Error((payload as any)?.error || "Échec du téléversement de l'image.");
       }
 
-      toast.success(`Image mise a jour pour ${category.name}.`);
+      toast.success(`Image mise à jour pour ${category.name}.`);
       await loadCategories();
     } catch (error: any) {
-      toast.error(error?.message || "Echec de l'upload de l'image.");
+      toast.error(error?.message || "Échec du téléversement de l'image.");
     } finally {
       setUploadingId(null);
     }
   };
 
-  const categoriesCountLabel = useMemo(() => `${categories.length} categorie${categories.length > 1 ? "s" : ""}`, [categories.length]);
+  const categoriesCountLabel = useMemo(() => `${categories.length} catégorie${categories.length > 1 ? "s" : ""}`, [categories.length]);
 
   if (loading || permissionsLoading) {
     return (
@@ -158,25 +158,25 @@ export default function AdminCategories() {
     >
       <div className="space-y-4">
         <PageHeader
-          title="Categories"
+          title="Catégories"
           description="Importez des visuels pour les cartes univers de la page d'accueil."
-          breadcrumbs={[{ label: "Admin" }, { label: "Categories" }]}
+          breadcrumbs={[{ label: "Admin" }, { label: "Catégories" }]}
           actions={(
             <Button variant="outline" onClick={() => loadCategories()} disabled={loadingCategories}>
               {loadingCategories ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-              Rafraichir
+              Rafraîchir
             </Button>
           )}
         />
 
         <div className="rounded-xl border bg-card p-3 text-xs text-muted-foreground">
-          {categoriesCountLabel} chargees. Formats acceptes: JPG, PNG, WebP (max 5MB). Les images sont optimisees automatiquement en WebP (1600x1000) pour un rendu net et uniforme.
+          {categoriesCountLabel} chargée{categories.length > 1 ? "s" : ""}. Formats acceptés : JPG, PNG, WebP (max 5 Mo). Les images sont optimisées automatiquement en WebP (1600x1000) pour un rendu net et uniforme.
         </div>
 
         {loadingCategories ? (
-          <div className="rounded-xl border bg-card p-6 text-sm text-muted-foreground">Chargement des categories...</div>
+          <div className="rounded-xl border bg-card p-6 text-sm text-muted-foreground">Chargement des catégories...</div>
         ) : categories.length === 0 ? (
-          <EmptyState title="Aucune categorie" description="Les categories apparaitront ici apres creation." />
+          <EmptyState title="Aucune catégorie" description="Les catégories apparaîtront ici après leur création." />
         ) : (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {categories.map((category) => {
@@ -232,7 +232,7 @@ export default function AdminCategories() {
                       onClick={() => onUploadClick(category.id)}
                     >
                       {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
-                      {isUploading ? "Upload..." : "Uploader image"}
+                      {isUploading ? "Téléversement..." : "Téléverser une image"}
                     </Button>
                     {previewUrl ? (
                       <a
@@ -241,7 +241,7 @@ export default function AdminCategories() {
                         rel="noreferrer"
                         className="text-xs text-muted-foreground underline underline-offset-4"
                       >
-                        Apercu
+                        Aperçu
                       </a>
                     ) : null}
                   </div>

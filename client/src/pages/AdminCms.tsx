@@ -289,10 +289,10 @@ export default function AdminCms() {
         }),
       ]);
       notifyHomeHeroUpdated();
-      toast.success("Hero homepage mis a jour.");
+      toast.success("Hero de la page d'accueil mis à jour.");
     },
     onError: (error: any) => {
-      toast.error(error?.message || "Impossible de sauvegarder le hero.");
+      toast.error(error?.message || "Impossible d'enregistrer le hero.");
     },
   });
 
@@ -322,11 +322,11 @@ export default function AdminCms() {
         }),
       ]);
       notifyEditorialHeroUpdated();
-      toast.success("Editorial hero mis a jour.");
+      toast.success("Editorial Hero mis à jour.");
     },
     onError: (error: any) => {
       toast.error(
-        error?.message || "Impossible de sauvegarder l'editorial hero."
+        error?.message || "Impossible d'enregistrer l'Editorial Hero."
       );
     },
   });
@@ -339,11 +339,11 @@ export default function AdminCms() {
         backgroundImageUrl: url,
       }));
       setEditorialHeroImagePreview(url);
-      toast.success("Image editorial hero uploadee.");
+      toast.success("Image de l'Editorial Hero importée.");
     },
     onError: (error: any) => {
       toast.error(
-        error?.message || "Echec de l'upload de l'image editorial hero."
+        error?.message || "Échec de l'import de l'image de l'Editorial Hero."
       );
     },
   });
@@ -353,10 +353,10 @@ export default function AdminCms() {
     onSuccess: url => {
       setHeroForm(previous => ({ ...previous, imageUrl: url }));
       setHeroImagePreview(url);
-      toast.success("Image hero uploadee.");
+      toast.success("Image du hero importée.");
     },
     onError: (error: any) => {
-      toast.error(error?.message || "Echec de l'upload de l'image hero.");
+      toast.error(error?.message || "Échec de l'import de l'image du hero.");
     },
   });
 
@@ -396,12 +396,12 @@ export default function AdminCms() {
         }),
       ]);
       notifyResultsSectionUpdated();
-      toast.success("Section editorial results mise a jour.");
+      toast.success("Section Editorial Results mise à jour.");
     },
     onError: (error: any) => {
       toast.error(
         error?.message ||
-          "Impossible de sauvegarder la section editorial results."
+          "Impossible d'enregistrer la section Editorial Results."
       );
     },
   });
@@ -427,18 +427,19 @@ export default function AdminCms() {
         setAfterImagePreview(url);
         setAfterImageName(fileName);
       }
-      toast.success("Image editorial results uploadee.");
+      toast.success("Image de l'Editorial Results importée.");
     },
     onError: (error: any) => {
       toast.error(
-        error?.message || "Echec de l'upload de l'image editorial results."
+        error?.message ||
+          "Échec de l'import de l'image de l'Editorial Results."
       );
     },
   });
 
   const createCms = trpc.cms.create.useMutation({
     onSuccess: result => {
-      toast.success("Page CMS creee");
+      toast.success("Page CMS créée");
       utils.cms.list.invalidate();
       setLocation(`/admin/cms/${result.id}`);
     },
@@ -447,7 +448,7 @@ export default function AdminCms() {
 
   const updateCms = trpc.cms.update.useMutation({
     onSuccess: () => {
-      toast.success("Page CMS mise a jour");
+      toast.success("Page CMS mise à jour");
       utils.cms.list.invalidate();
       if (cmsId) utils.cms.byId.invalidate({ id: cmsId });
     },
@@ -456,7 +457,7 @@ export default function AdminCms() {
 
   const setCmsStatus = trpc.cms.setStatus.useMutation({
     onSuccess: () => {
-      toast.success("Statut mis a jour");
+      toast.success("Statut mis à jour");
       utils.cms.list.invalidate();
       if (cmsId) utils.cms.byId.invalidate({ id: cmsId });
     },
@@ -465,7 +466,7 @@ export default function AdminCms() {
 
   const deleteCms = trpc.cms.delete.useMutation({
     onSuccess: () => {
-      toast.success("Page supprimee");
+      toast.success("Page supprimée");
       utils.cms.list.invalidate();
       setLocation("/admin/cms");
     },
@@ -650,7 +651,7 @@ export default function AdminCms() {
     const file = event.target.files?.[0];
     if (!file) return;
     if (!file.type.match(/^image\/(jpeg|png|webp)$/i)) {
-      toast.error("Formats autorises: jpg, png, webp");
+      toast.error("Formats autorisés : jpg, png, webp");
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
@@ -667,7 +668,7 @@ export default function AdminCms() {
     const file = event.target.files?.[0];
     if (!file) return;
     if (!file.type.match(/^image\/(jpeg|png|webp)$/i)) {
-      toast.error("Formats autorises: jpg, png, webp");
+      toast.error("Formats autorisés : jpg, png, webp");
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
@@ -687,7 +688,7 @@ export default function AdminCms() {
     const file = event.target.files?.[0];
     if (!file) return;
     if (!file.type.match(/^image\/(jpeg|png|webp)$/i)) {
-      toast.error("Formats autorises: jpg, png, webp");
+      toast.error("Formats autorisés : jpg, png, webp");
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
@@ -711,11 +712,11 @@ export default function AdminCms() {
     () => [
       {
         accessorKey: "title",
-        header: "Title",
+        header: "Titre",
         cell: ({ row }) => (
           <div className="space-y-0.5">
             <p className="font-medium">{row.original.title}</p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-[var(--admin-muted)]">
               /{row.original.slug}
             </p>
           </div>
@@ -723,17 +724,17 @@ export default function AdminCms() {
       },
       {
         accessorKey: "status",
-        header: "Status",
+        header: "Statut",
         cell: ({ row }) => (
           <StatusBadge
             status={row.original.status}
-            label={row.original.status === "published" ? "Published" : "Draft"}
+            label={row.original.status === "published" ? "Publiée" : "Brouillon"}
           />
         ),
       },
       {
         accessorKey: "updatedAt",
-        header: "Updated",
+        header: "Mise à jour",
         cell: ({ row }) =>
           new Date(row.original.updatedAt).toLocaleString("fr-FR"),
       },
@@ -745,7 +746,7 @@ export default function AdminCms() {
           <div className="flex items-center gap-2">
             <Link href={`/admin/cms/${row.original.id}`}>
               <Button size="sm" variant="outline">
-                Open
+                Ouvrir
               </Button>
             </Link>
             {canWrite && (
@@ -763,7 +764,7 @@ export default function AdminCms() {
                   });
                 }}
               >
-                {row.original.status === "published" ? "Unpublish" : "Publish"}
+                {row.original.status === "published" ? "Dépublier" : "Publier"}
               </Button>
             )}
           </div>
@@ -828,7 +829,7 @@ export default function AdminCms() {
         <div className="space-y-4">
           <PageHeader
             title="CMS"
-            description="Gerez les pages statiques et leur SEO."
+            description="Gérez les pages statiques et leur SEO."
             breadcrumbs={[{ label: "Admin" }, { label: "CMS" }]}
             actions={
               canWrite ? (
@@ -849,16 +850,16 @@ export default function AdminCms() {
             <div className="rounded-xl border bg-card p-4 space-y-4">
               <div>
                 <p className="text-sm font-semibold">Editorial Hero</p>
-                <p className="text-xs text-muted-foreground">
-                  Grande section editoriale avec image plein cadre et carte
+                <p className="text-xs text-[var(--admin-muted)]">
+                  Grande section éditoriale avec image plein cadre et carte
                   glass.
                 </p>
               </div>
 
               {editorialHeroAdminQuery.isLoading ? (
-                <div className="rounded-lg border p-4 text-sm text-muted-foreground flex items-center gap-2">
+                <div className="rounded-lg border p-4 text-sm text-[var(--admin-muted)] flex items-center gap-2">
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Chargement de l'editorial hero...
+                  Chargement de l'Editorial Hero...
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -878,15 +879,15 @@ export default function AdminCms() {
                       />
                       Section active
                     </label>
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-xs text-[var(--admin-muted)]">
                       {editorialHeroForm.isActive
-                        ? "Visible sur la homepage"
-                        : "Masquee sur la homepage"}
+                        ? "Visible sur la page d'accueil"
+                        : "Masquée sur la page d'accueil"}
                     </span>
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label>Badge text</Label>
+                    <Label>Texte du badge</Label>
                     <Input
                       value={editorialHeroForm.badgeText}
                       onChange={event =>
@@ -900,7 +901,7 @@ export default function AdminCms() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label>Title</Label>
+                    <Label>Titre</Label>
                     <Textarea
                       rows={3}
                       value={editorialHeroForm.title}
@@ -915,7 +916,7 @@ export default function AdminCms() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label>Subtitle</Label>
+                    <Label>Sous-titre</Label>
                     <Textarea
                       rows={3}
                       value={editorialHeroForm.subtitle}
@@ -931,7 +932,7 @@ export default function AdminCms() {
 
                   <div className="grid gap-3 md:grid-cols-2">
                     <div className="space-y-1.5">
-                      <Label>CTA text</Label>
+                      <Label>Texte du bouton</Label>
                       <Input
                         value={editorialHeroForm.ctaText}
                         onChange={event =>
@@ -944,7 +945,7 @@ export default function AdminCms() {
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <Label>CTA link</Label>
+                      <Label>Lien du bouton</Label>
                       <Input
                         value={editorialHeroForm.ctaLink}
                         onChange={event =>
@@ -960,7 +961,7 @@ export default function AdminCms() {
 
                   <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
                     <div className="space-y-1.5">
-                      <Label>Background image URL</Label>
+                      <Label>URL de l'image de fond</Label>
                       <Input
                         value={editorialHeroForm.backgroundImageUrl}
                         onChange={event =>
@@ -974,7 +975,7 @@ export default function AdminCms() {
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <Label>Upload background image</Label>
+                      <Label>Importer une image de fond</Label>
                       <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm">
                         {uploadEditorialHeroImage.isPending ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
@@ -982,7 +983,7 @@ export default function AdminCms() {
                           <UploadCloud className="h-4 w-4" />
                         )}
                         {uploadEditorialHeroImage.isPending
-                          ? "Upload..."
+                          ? "Import..."
                           : "Choisir"}
                         <input
                           type="file"
@@ -999,8 +1000,8 @@ export default function AdminCms() {
 
                   <div className="space-y-2 rounded-lg border p-3">
                     <div className="flex items-center justify-between">
-                      <Label>Overlay opacity</Label>
-                      <span className="text-xs text-muted-foreground">
+                      <Label>Opacité du voile</Label>
+                      <span className="text-xs text-[var(--admin-muted)]">
                         {editorialHeroForm.overlayOpacity}%
                       </span>
                     </div>
@@ -1022,7 +1023,7 @@ export default function AdminCms() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label>Card position</Label>
+                    <Label>Position de la carte</Label>
                     <Select
                       value={editorialHeroForm.cardPosition}
                       onValueChange={(value: CmsEditorialHeroCardPosition) =>
@@ -1037,17 +1038,17 @@ export default function AdminCms() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="left">Left</SelectItem>
-                        <SelectItem value="center">Center</SelectItem>
-                        <SelectItem value="right">Right</SelectItem>
+                        <SelectItem value="left">Gauche</SelectItem>
+                        <SelectItem value="center">Centre</SelectItem>
+                        <SelectItem value="right">Droite</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
                   <div className="flex items-center justify-between">
                     {editorialHeroImageName ? (
-                      <p className="text-xs text-muted-foreground">
-                        File: {editorialHeroImageName}
+                      <p className="text-xs text-[var(--admin-muted)]">
+                        Fichier : {editorialHeroImageName}
                       </p>
                     ) : (
                       <span />
@@ -1063,7 +1064,7 @@ export default function AdminCms() {
                       ) : (
                         <Save className="h-4 w-4 mr-2" />
                       )}
-                      Save Editorial Hero
+                      Enregistrer l'Editorial Hero
                     </Button>
                   </div>
                 </div>
@@ -1072,9 +1073,10 @@ export default function AdminCms() {
 
             <div className="rounded-xl border bg-card p-4 space-y-3">
               <div>
-                <p className="text-sm font-semibold">Editorial hero preview</p>
-                <p className="text-xs text-muted-foreground">
-                  Meme composant que la homepage, avec mise a jour instantanee.
+                <p className="text-sm font-semibold">Aperçu de l'Editorial Hero</p>
+                <p className="text-xs text-[var(--admin-muted)]">
+                  Même composant que la page d'accueil, avec mise à jour
+                  instantanée.
                 </p>
               </div>
               {editorialHeroPreview.isActive ? (
@@ -1082,8 +1084,9 @@ export default function AdminCms() {
                   <EditorialHero hero={editorialHeroPreview} />
                 </div>
               ) : (
-                <div className="rounded-xl border border-dashed p-6 text-sm text-muted-foreground">
-                  Section desactivee. Elle ne sera pas affichee sur la homepage.
+                <div className="rounded-xl border border-dashed p-6 text-sm text-[var(--admin-muted)]">
+                  Section désactivée. Elle ne sera pas affichée sur la page
+                  d'accueil.
                 </div>
               )}
             </div>
@@ -1093,20 +1096,20 @@ export default function AdminCms() {
             <div className="rounded-xl border bg-card p-4 space-y-4">
               <div>
                 <p className="text-sm font-semibold">Homepage Hero</p>
-                <p className="text-xs text-muted-foreground">
-                  Editez le hero de la page d'accueil et publiez en direct.
+                <p className="text-xs text-[var(--admin-muted)]">
+                  Éditez le hero de la page d'accueil et publiez en direct.
                 </p>
               </div>
 
               {homeHeroAdminQuery.isLoading ? (
-                <div className="rounded-lg border p-4 text-sm text-muted-foreground flex items-center gap-2">
+                <div className="rounded-lg border p-4 text-sm text-[var(--admin-muted)] flex items-center gap-2">
                   <Loader2 className="h-4 w-4 animate-spin" />
                   Chargement du hero...
                 </div>
               ) : (
                 <div className="space-y-3">
                   <div className="space-y-1.5">
-                    <Label>Title</Label>
+                    <Label>Titre</Label>
                     <Input
                       value={heroForm.title}
                       onChange={event =>
@@ -1119,7 +1122,7 @@ export default function AdminCms() {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Subtitle</Label>
+                    <Label>Sous-titre</Label>
                     <Textarea
                       rows={3}
                       value={heroForm.subtitle}
@@ -1133,7 +1136,7 @@ export default function AdminCms() {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Badge text</Label>
+                    <Label>Texte du badge</Label>
                     <Input
                       value={heroForm.badgeText}
                       onChange={event =>
@@ -1147,7 +1150,7 @@ export default function AdminCms() {
                   </div>
                   <div className="grid gap-3 md:grid-cols-2">
                     <div className="space-y-1.5">
-                      <Label>Primary CTA text</Label>
+                      <Label>Texte du bouton principal</Label>
                       <Input
                         value={heroForm.ctaText}
                         onChange={event =>
@@ -1160,7 +1163,7 @@ export default function AdminCms() {
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <Label>Primary CTA link</Label>
+                      <Label>Lien du bouton principal</Label>
                       <Input
                         value={heroForm.ctaLink}
                         onChange={event =>
@@ -1175,7 +1178,7 @@ export default function AdminCms() {
                   </div>
                   <div className="grid gap-3 md:grid-cols-2">
                     <div className="space-y-1.5">
-                      <Label>Secondary CTA text</Label>
+                      <Label>Texte du bouton secondaire</Label>
                       <Input
                         value={heroForm.secondaryCtaText}
                         onChange={event =>
@@ -1188,7 +1191,7 @@ export default function AdminCms() {
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <Label>Secondary CTA link</Label>
+                      <Label>Lien du bouton secondaire</Label>
                       <Input
                         value={heroForm.secondaryCtaLink}
                         onChange={event =>
@@ -1204,7 +1207,7 @@ export default function AdminCms() {
 
                   <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
                     <div className="space-y-1.5">
-                      <Label>Image URL</Label>
+                      <Label>URL de l'image</Label>
                       <Input
                         value={heroForm.imageUrl}
                         onChange={event =>
@@ -1218,7 +1221,7 @@ export default function AdminCms() {
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <Label>Upload image</Label>
+                      <Label>Importer une image</Label>
                       <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm">
                         {uploadHomeHeroImage.isPending ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
@@ -1226,7 +1229,7 @@ export default function AdminCms() {
                           <UploadCloud className="h-4 w-4" />
                         )}
                         {uploadHomeHeroImage.isPending
-                          ? "Upload..."
+                          ? "Import..."
                           : "Choisir"}
                         <input
                           type="file"
@@ -1256,7 +1259,7 @@ export default function AdminCms() {
                       Hero actif
                     </label>
                     {heroImageName ? (
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-xs text-[var(--admin-muted)]">
                         {heroImageName}
                       </span>
                     ) : null}
@@ -1274,7 +1277,7 @@ export default function AdminCms() {
                       ) : (
                         <Save className="h-4 w-4 mr-2" />
                       )}
-                      Save Hero
+                      Enregistrer le Hero
                     </Button>
                   </div>
                 </div>
@@ -1283,9 +1286,9 @@ export default function AdminCms() {
 
             <div className="rounded-xl border bg-card p-4 space-y-3">
               <div>
-                <p className="text-sm font-semibold">Live preview</p>
-                <p className="text-xs text-muted-foreground">
-                  Meme composant que la homepage, mise a jour instantanee.
+                <p className="text-sm font-semibold">Aperçu en direct</p>
+                <p className="text-xs text-[var(--admin-muted)]">
+                  Même composant que la page d'accueil, mise à jour instantanée.
                 </p>
               </div>
               <div className="overflow-hidden rounded-xl border bg-background">
@@ -1303,13 +1306,13 @@ export default function AdminCms() {
                 <p className="text-sm font-semibold">
                   Homepage Editorial Results
                 </p>
-                <p className="text-xs text-muted-foreground">
-                  Editez AVANT/APRES, metriques et note de confiance.
+                <p className="text-xs text-[var(--admin-muted)]">
+                  Éditez AVANT/APRÈS, les métriques et la note de confiance.
                 </p>
               </div>
 
               {resultsSectionAdminQuery.isLoading ? (
-                <div className="rounded-lg border p-4 text-sm text-muted-foreground flex items-center gap-2">
+                <div className="rounded-lg border p-4 text-sm text-[var(--admin-muted)] flex items-center gap-2">
                   <Loader2 className="h-4 w-4 animate-spin" />
                   Chargement de la section...
                 </div>
@@ -1331,15 +1334,15 @@ export default function AdminCms() {
                       />
                       Section active
                     </label>
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-xs text-[var(--admin-muted)]">
                       {resultsForm.enabled
-                        ? "Visible sur la homepage"
-                        : "Masquee sur la homepage"}
+                        ? "Visible sur la page d'accueil"
+                        : "Masquée sur la page d'accueil"}
                     </span>
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label>Title</Label>
+                    <Label>Titre</Label>
                     <Input
                       value={resultsForm.title}
                       onChange={event =>
@@ -1352,7 +1355,7 @@ export default function AdminCms() {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Subtitle</Label>
+                    <Label>Sous-titre</Label>
                     <Textarea
                       rows={3}
                       value={resultsForm.subtitle}
@@ -1368,7 +1371,7 @@ export default function AdminCms() {
 
                   <div className="grid gap-3 md:grid-cols-2">
                     <div className="space-y-1.5">
-                      <Label>Before label</Label>
+                      <Label>Étiquette avant</Label>
                       <Input
                         value={resultsForm.beforeLabel}
                         onChange={event =>
@@ -1381,7 +1384,7 @@ export default function AdminCms() {
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <Label>After label</Label>
+                      <Label>Étiquette après</Label>
                       <Input
                         value={resultsForm.afterLabel}
                         onChange={event =>
@@ -1396,12 +1399,12 @@ export default function AdminCms() {
                   </div>
 
                   <div className="rounded-lg border p-3 space-y-3">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                      Images avant / apres
+                    <p className="text-xs font-semibold uppercase tracking-wide text-[var(--admin-muted)]">
+                      Images avant / après
                     </p>
                     <div className="grid gap-3 md:grid-cols-2">
                       <div className="space-y-2">
-                        <Label>Before image URL</Label>
+                        <Label>URL de l'image avant</Label>
                         <Input
                           value={resultsForm.beforeImageUrl}
                           onChange={event =>
@@ -1420,7 +1423,7 @@ export default function AdminCms() {
                             <UploadCloud className="h-4 w-4" />
                           )}
                           {uploadResultsImage.isPending
-                            ? "Upload..."
+                            ? "Import..."
                             : "Choisir"}
                           <input
                             type="file"
@@ -1433,13 +1436,13 @@ export default function AdminCms() {
                           />
                         </label>
                         {beforeImageName ? (
-                          <p className="text-xs text-muted-foreground">
-                            File: {beforeImageName}
+                          <p className="text-xs text-[var(--admin-muted)]">
+                            Fichier : {beforeImageName}
                           </p>
                         ) : null}
                       </div>
                       <div className="space-y-2">
-                        <Label>After image URL</Label>
+                        <Label>URL de l'image après</Label>
                         <Input
                           value={resultsForm.afterImageUrl}
                           onChange={event =>
@@ -1458,7 +1461,7 @@ export default function AdminCms() {
                             <UploadCloud className="h-4 w-4" />
                           )}
                           {uploadResultsImage.isPending
-                            ? "Upload..."
+                            ? "Import..."
                             : "Choisir"}
                           <input
                             type="file"
@@ -1471,8 +1474,8 @@ export default function AdminCms() {
                           />
                         </label>
                         {afterImageName ? (
-                          <p className="text-xs text-muted-foreground">
-                            File: {afterImageName}
+                          <p className="text-xs text-[var(--admin-muted)]">
+                            Fichier : {afterImageName}
                           </p>
                         ) : null}
                       </div>
@@ -1480,8 +1483,8 @@ export default function AdminCms() {
                   </div>
 
                   <div className="rounded-lg border p-3 space-y-3">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                      Stat card 1
+                    <p className="text-xs font-semibold uppercase tracking-wide text-[var(--admin-muted)]">
+                      Statistique 1
                     </p>
                     <div className="grid gap-3 md:grid-cols-2">
                       <Input
@@ -1493,7 +1496,7 @@ export default function AdminCms() {
                           }))
                         }
                         disabled={!canWrite}
-                        placeholder="Value"
+                        placeholder="Valeur"
                       />
                       <Input
                         value={resultsForm.stat1Title}
@@ -1504,7 +1507,7 @@ export default function AdminCms() {
                           }))
                         }
                         disabled={!canWrite}
-                        placeholder="Title"
+                        placeholder="Titre"
                       />
                     </div>
                     <Textarea
@@ -1522,8 +1525,8 @@ export default function AdminCms() {
                   </div>
 
                   <div className="rounded-lg border p-3 space-y-3">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                      Stat card 2
+                    <p className="text-xs font-semibold uppercase tracking-wide text-[var(--admin-muted)]">
+                      Statistique 2
                     </p>
                     <div className="grid gap-3 md:grid-cols-2">
                       <Input
@@ -1535,7 +1538,7 @@ export default function AdminCms() {
                           }))
                         }
                         disabled={!canWrite}
-                        placeholder="Value"
+                        placeholder="Valeur"
                       />
                       <Input
                         value={resultsForm.stat2Title}
@@ -1546,7 +1549,7 @@ export default function AdminCms() {
                           }))
                         }
                         disabled={!canWrite}
-                        placeholder="Title"
+                        placeholder="Titre"
                       />
                     </div>
                     <Textarea
@@ -1564,8 +1567,8 @@ export default function AdminCms() {
                   </div>
 
                   <div className="rounded-lg border p-3 space-y-3">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                      Stat card 3
+                    <p className="text-xs font-semibold uppercase tracking-wide text-[var(--admin-muted)]">
+                      Statistique 3
                     </p>
                     <div className="grid gap-3 md:grid-cols-2">
                       <Input
@@ -1577,7 +1580,7 @@ export default function AdminCms() {
                           }))
                         }
                         disabled={!canWrite}
-                        placeholder="Value"
+                        placeholder="Valeur"
                       />
                       <Input
                         value={resultsForm.stat3Title}
@@ -1588,7 +1591,7 @@ export default function AdminCms() {
                           }))
                         }
                         disabled={!canWrite}
-                        placeholder="Title"
+                        placeholder="Titre"
                       />
                     </div>
                     <Textarea
@@ -1606,7 +1609,7 @@ export default function AdminCms() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label>Footer note</Label>
+                    <Label>Note de bas de section</Label>
                     <Textarea
                       rows={3}
                       value={resultsForm.footerNote}
@@ -1632,7 +1635,7 @@ export default function AdminCms() {
                       ) : (
                         <Save className="h-4 w-4 mr-2" />
                       )}
-                      Save Editorial Results
+                      Enregistrer l'Editorial Results
                     </Button>
                   </div>
                 </div>
@@ -1642,11 +1645,11 @@ export default function AdminCms() {
             <div className="rounded-xl border bg-card p-4 space-y-3">
               <div>
                 <p className="text-sm font-semibold">
-                  Editorial results preview
+                  Aperçu de l'Editorial Results
                 </p>
-                <p className="text-xs text-muted-foreground">
-                  Meme composant que la homepage, avec placeholders si images
-                  manquantes.
+                <p className="text-xs text-[var(--admin-muted)]">
+                  Même composant que la page d'accueil, avec des images de
+                  remplacement si elles manquent.
                 </p>
               </div>
               {resultsSectionPreview.enabled ? (
@@ -1654,8 +1657,9 @@ export default function AdminCms() {
                   <EditorialResultsSection section={resultsSectionPreview} />
                 </div>
               ) : (
-                <div className="rounded-xl border border-dashed p-6 text-sm text-muted-foreground">
-                  Section desactivee. Elle ne sera pas affichee sur la homepage.
+                <div className="rounded-xl border border-dashed p-6 text-sm text-[var(--admin-muted)]">
+                  Section désactivée. Elle ne sera pas affichée sur la page
+                  d'accueil.
                 </div>
               )}
             </div>
@@ -1667,7 +1671,7 @@ export default function AdminCms() {
             isLoading={cmsListQuery.isLoading}
             searchValue={search}
             onSearchValueChange={setSearch}
-            searchPlaceholder="Search title, slug, content..."
+            searchPlaceholder="Rechercher par titre, slug, contenu..."
             filters={
               <Select
                 value={statusFilter}
@@ -1679,15 +1683,15 @@ export default function AdminCms() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All status</SelectItem>
-                  <SelectItem value="draft">Draft</SelectItem>
-                  <SelectItem value="published">Published</SelectItem>
+                  <SelectItem value="all">Tous les statuts</SelectItem>
+                  <SelectItem value="draft">Brouillon</SelectItem>
+                  <SelectItem value="published">Publiée</SelectItem>
                 </SelectContent>
               </Select>
             }
-            emptyTitle="No CMS pages"
-            emptyDescription="Create your first page to start publishing content."
-            emptyCtaLabel={canWrite ? "Create page" : undefined}
+            emptyTitle="Aucune page CMS"
+            emptyDescription="Créez votre première page pour commencer à publier du contenu."
+            emptyCtaLabel={canWrite ? "Créer une page" : undefined}
             onEmptyCtaClick={
               canWrite ? () => setLocation("/admin/cms/new") : undefined
             }
@@ -1699,12 +1703,12 @@ export default function AdminCms() {
       ) : (
         <div className="space-y-4">
           <PageHeader
-            title={isCreate ? "New CMS page" : "Edit CMS page"}
-            description="Configure title, content and SEO metadata."
+            title={isCreate ? "Nouvelle page CMS" : "Modifier la page CMS"}
+            description="Configurez le titre, le contenu et les métadonnées SEO."
             breadcrumbs={[
               { label: "Admin" },
               { label: "CMS", href: "/admin/cms" },
-              { label: isCreate ? "New" : "Edit" },
+              { label: isCreate ? "Nouvelle" : "Modifier" },
             ]}
             actions={
               <Button
@@ -1712,26 +1716,26 @@ export default function AdminCms() {
                 onClick={() => setLocation("/admin/cms")}
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                Back
+                Retour
               </Button>
             }
           />
 
           {!isCreate && cmsDetailQuery.isLoading ? (
-            <div className="rounded-xl border p-6 text-sm text-muted-foreground">
-              Loading page...
+            <div className="rounded-xl border p-6 text-sm text-[var(--admin-muted)]">
+              Chargement de la page...
             </div>
           ) : !isCreate && !cmsDetailQuery.data ? (
             <EmptyState
-              title="Page not found"
-              description="This CMS page does not exist."
+              title="Page introuvable"
+              description="Cette page CMS n'existe pas."
             />
           ) : (
             <form
               className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_280px]"
               onSubmit={handleSubmit(values => {
                 if (!canWrite) {
-                  toast.error("Not allowed");
+                  toast.error("Action non autorisée");
                   return;
                 }
                 const payload = {
@@ -1747,7 +1751,7 @@ export default function AdminCms() {
             >
               <div className="space-y-4 rounded-xl border bg-card p-4">
                 <div className="space-y-1.5">
-                  <Label>Title *</Label>
+                  <Label>Titre *</Label>
                   <Input
                     {...register("title")}
                     onBlur={event => {
@@ -1777,7 +1781,7 @@ export default function AdminCms() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label>Status</Label>
+                  <Label>Statut</Label>
                   <Select
                     value={watch("status")}
                     onValueChange={(value: "draft" | "published") =>
@@ -1789,14 +1793,14 @@ export default function AdminCms() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="draft">Draft</SelectItem>
-                      <SelectItem value="published">Published</SelectItem>
+                      <SelectItem value="draft">Brouillon</SelectItem>
+                      <SelectItem value="published">Publiée</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label>Content *</Label>
+                  <Label>Contenu *</Label>
                   <Textarea
                     {...register("content")}
                     rows={14}
@@ -1811,11 +1815,11 @@ export default function AdminCms() {
 
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-1.5">
-                    <Label>SEO title</Label>
+                    <Label>Titre SEO</Label>
                     <Input {...register("seoTitle")} disabled={!canWrite} />
                   </div>
                   <div className="space-y-1.5">
-                    <Label>SEO description</Label>
+                    <Label>Description SEO</Label>
                     <Textarea
                       {...register("seoDescription")}
                       rows={3}
@@ -1837,7 +1841,7 @@ export default function AdminCms() {
                       {saving && (
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                       )}
-                      Save
+                      Enregistrer
                     </Button>
                     {!isCreate && cmsId && canWrite && (
                       <Button
@@ -1855,8 +1859,8 @@ export default function AdminCms() {
                         }
                       >
                         {watch("status") === "published"
-                          ? "Unpublish"
-                          : "Publish"}
+                          ? "Dépublier"
+                          : "Publier"}
                       </Button>
                     )}
                     {!isCreate &&
@@ -1875,7 +1879,7 @@ export default function AdminCms() {
                               variant="outline"
                               className="w-full text-destructive"
                             >
-                              Delete
+                              Supprimer
                             </Button>
                           }
                         />
