@@ -113,3 +113,9 @@ client/public/uploads/
 # Dev-only artifacts
 .dev-emails/
 .manus-logs/
+
+# Stray local artifacts — not part of the storefront, must never deploy
+# ML model weights (e.g. mobile_sam.pt from the product-photo tooling)
+*.pt
+# separate project that lives outside this repo
+invoice-bot/
