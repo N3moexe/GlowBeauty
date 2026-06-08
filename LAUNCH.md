@@ -4,6 +4,25 @@ Follow this checklist before flipping DNS to production. Items are ordered by
 failure-cost — a miss on step 1 breaks the whole store; a miss on step 6
 degrades error monitoring but nothing ships broken.
 
+## Recommended host: Render
+
+This app is a persistent Node server + MySQL, configured via `render.yaml`.
+
+1. **Database:** Render has no managed MySQL — create one at
+   [PlanetScale](https://planetscale.com), [Aiven](https://aiven.io), or
+   [Railway](https://railway.app) and use its connection string as `DATABASE_URL`.
+2. **Service:** render.com → sign in with GitHub → **New → Blueprint** → import
+   `N3moexe/GlowBeauty` → it reads `render.yaml` (build `pnpm install && pnpm build`,
+   start `pnpm start`, Node 22, health check `/`). Set the env vars from §2.
+3. **Admin login:** simplest is to set `LOCAL_ADMIN_USERNAME` + `LOCAL_ADMIN_PASSWORD`
+   and log in at `/admin`; or run `pnpm setup:admin` against the prod DB (§3) for a
+   full account with 2FA.
+4. **Free plan sleeps** after ~15 min idle (~30–60s cold start) — use Render
+   **Starter ($7/mo)** for real selling.
+
+Vercel is **not** a fit (serverless, no always-on process) without splitting the
+frontend out as static and rewriting the API as serverless functions.
+
 ## 1. Database migration (required)
 
 Sprint 1 added columns to the `newsletter_subscribers` table and a new
