@@ -1,0 +1,8 @@
+# Exclude dev-only / non-app artifacts from release archives (git archive).
+# These are not part of the deployable website.
+.design-audit export-ignore
+.design-audit/** export-ignore
+.claude export-ignore
+.claude/** export-ignore
+everything-claude-code export-ignore
+shannon export-ignore
