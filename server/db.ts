@@ -2420,6 +2420,16 @@ export type AdminAnalyticsOverview = {
   customers: number;
   aov: number;
   conversionRate: number | null;
+  /**
+   * Totals for the immediately preceding window of the same length, used for
+   * true period-over-period deltas on the dashboard KPI tiles.
+   */
+  previous: {
+    revenue: number;
+    orders: number;
+    customers: number;
+    aov: number;
+  };
   bestSellers: Array<{
     productId: number;
     name: string;
@@ -2721,6 +2731,26 @@ export async function getAdminAnalyticsOverview(
       .sort((left, right) => right.totalSpent - left.totalSpent)
       .slice(0, 5);
 
+    // Previous window of equal length, for period-over-period deltas.
+    const prevStart = new Date(
+      since.getTime() - safeDays * 24 * 60 * 60 * 1000
+    );
+    const prevOrders = demoOrders.filter(order => {
+      const created = new Date(order.createdAt);
+      return created >= prevStart && created < since;
+    });
+    const prevPaidOrders = prevOrders.filter(
+      order => order.paymentStatus !== "failed"
+    );
+    const prevRevenue = prevPaidOrders.reduce(
+      (sum, order) => sum + Number(order.totalAmount || 0),
+      0
+    );
+    const prevOrderCount = prevOrders.length;
+    const prevCustomers = new Set(
+      prevOrders.map(order => String(order.customerPhone || "")).filter(Boolean)
+    ).size;
+
     return {
       rangeDays: safeDays,
       revenue: Number(revenue || 0),
@@ -2728,6 +2758,12 @@ export async function getAdminAnalyticsOverview(
       customers: Number(customers || 0),
       aov: orderCount > 0 ? Number(revenue || 0) / orderCount : 0,
       conversionRate,
+      previous: {
+        revenue: prevRevenue,
+        orders: prevOrderCount,
+        customers: prevCustomers,
+        aov: prevOrderCount > 0 ? prevRevenue / prevOrderCount : 0,
+      },
       bestSellers: Array.from(bestSellersMap.values())
         .sort((left, right) => right.soldQty - left.soldQty)
         .slice(0, 5),
@@ -2752,6 +2788,7 @@ export async function getAdminAnalyticsOverview(
   }
 
   const revenueSeriesMap = buildRangeSeries(safeDays);
+  const prevStart = new Date(since.getTime() - safeDays * 24 * 60 * 60 * 1000);
   const summaryQuery = db
     .select({
       orders: count(),
@@ -2760,6 +2797,15 @@ export async function getAdminAnalyticsOverview(
     })
     .from(orders)
     .where(gte(orders.createdAt, since));
+
+  const previousSummaryQuery = db
+    .select({
+      orders: count(),
+      revenue: sql<number>`COALESCE(SUM(CASE WHEN ${orders.paymentStatus} != 'failed' THEN ${orders.totalAmount} ELSE 0 END), 0)`,
+      customers: sql<number>`COUNT(DISTINCT ${orders.customerPhone})`,
+    })
+    .from(orders)
+    .where(and(gte(orders.createdAt, prevStart), lt(orders.createdAt, since)));
 
   const ordersByStatusQuery = db
     .select({
@@ -2859,6 +2905,7 @@ export async function getAdminAnalyticsOverview(
 
   const [
     summaryRows,
+    previousSummaryRows,
     ordersByStatusRows,
     revenueSeriesRows,
     bestSellersRows,
@@ -2869,6 +2916,7 @@ export async function getAdminAnalyticsOverview(
     conversionRate,
   ] = await Promise.all([
     summaryQuery,
+    previousSummaryQuery,
     ordersByStatusQuery,
     revenueSeriesQuery,
     bestSellersQuery,
@@ -2903,6 +2951,14 @@ export async function getAdminAnalyticsOverview(
   const revenue = Number(summary.revenue || 0);
   const orderCount = Number(summary.orders || 0);
 
+  const prevSummary = previousSummaryRows[0] || {
+    orders: 0,
+    revenue: 0,
+    customers: 0,
+  };
+  const prevRevenue = Number(prevSummary.revenue || 0);
+  const prevOrderCount = Number(prevSummary.orders || 0);
+
   return {
     rangeDays: safeDays,
     revenue,
@@ -2910,6 +2966,12 @@ export async function getAdminAnalyticsOverview(
     customers: Number(summary.customers || 0),
     aov: orderCount > 0 ? revenue / orderCount : 0,
     conversionRate,
+    previous: {
+      revenue: prevRevenue,
+      orders: prevOrderCount,
+      customers: Number(prevSummary.customers || 0),
+      aov: prevOrderCount > 0 ? prevRevenue / prevOrderCount : 0,
+    },
     bestSellers: bestSellersRows.map(row => ({
       productId: Number(row.productId),
       name: row.name,

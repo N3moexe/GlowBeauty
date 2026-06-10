@@ -228,11 +228,23 @@ export function AnalyticsModule() {
   const lowStock = data?.lowStock ?? [];
   const recentOrders = data?.recentOrders ?? [];
 
-  // Intra-period momentum: compare the first half of the selected range to the
-  // second half. Derived entirely from revenueSeries (already returned by the
-  // API) so no extra request or backend change is needed. Null when the series
-  // is too short to split meaningfully.
-  const momentum = useMemo(() => {
+  // Period-over-period deltas. Prefer the backend's `previous` block (true
+  // prior window of equal length). Fall back to intra-period momentum derived
+  // from revenueSeries when the API doesn't supply previous totals.
+  const pct = (prev: number, curr: number) => {
+    if (prev <= 0) return curr > 0 ? 100 : 0;
+    return ((curr - prev) / prev) * 100;
+  };
+  const deltas = useMemo(() => {
+    if (data?.previous) {
+      const p = data.previous;
+      return {
+        revenue: pct(Number(p.revenue || 0), Number(data.revenue || 0)),
+        orders: pct(Number(p.orders || 0), Number(data.orders || 0)),
+        customers: pct(Number(p.customers || 0), Number(data.customers || 0)),
+        aov: pct(Number(p.aov || 0), Number(data.aov || 0)),
+      };
+    }
     if (lineData.length < 4) return null;
     const mid = Math.floor(lineData.length / 2);
     const first = lineData.slice(0, mid);
@@ -241,17 +253,15 @@ export function AnalyticsModule() {
       rows: Array<{ revenue: number; orders: number }>,
       key: "revenue" | "orders"
     ) => rows.reduce((acc, r) => acc + (Number(r[key]) || 0), 0);
-    const pct = (prev: number, curr: number) => {
-      if (prev <= 0) return curr > 0 ? 100 : 0;
-      return ((curr - prev) / prev) * 100;
-    };
     return {
       revenue: pct(sum(first, "revenue"), sum(second, "revenue")),
       orders: pct(sum(first, "orders"), sum(second, "orders")),
+      customers: null as number | null,
+      aov: null as number | null,
     };
-  }, [lineData]);
+  }, [data, lineData]);
 
-  const momentumLabel = "vs début de période";
+  const deltaLabel = "vs période précédente";
 
   if (overviewQuery.error && !data) {
     return (
@@ -313,30 +323,34 @@ export function AnalyticsModule() {
             label={`Revenus (${data?.rangeDays ?? rangeDays}j)`}
             value={formatCFA(Number(data?.revenue ?? 0))}
             delta={
-              momentum
-                ? { pct: momentum.revenue, label: momentumLabel }
-                : null
+              deltas ? { pct: deltas.revenue, label: deltaLabel } : null
             }
             icon={<TrendingUp className="h-5 w-5" />}
           />
           <StatTile
             label="Commandes"
             value={String(data?.orders ?? 0)}
-            delta={
-              momentum
-                ? { pct: momentum.orders, label: momentumLabel }
-                : null
-            }
+            delta={deltas ? { pct: deltas.orders, label: deltaLabel } : null}
             icon={<ShoppingCart className="h-5 w-5" />}
           />
           <StatTile
             label="Clients"
             value={String(data?.customers ?? 0)}
+            delta={
+              deltas && deltas.customers != null
+                ? { pct: deltas.customers, label: deltaLabel }
+                : null
+            }
             icon={<Users className="h-5 w-5" />}
           />
           <StatTile
             label="Panier moyen"
             value={formatCFA(Number(data?.aov ?? 0))}
+            delta={
+              deltas && deltas.aov != null
+                ? { pct: deltas.aov, label: deltaLabel }
+                : null
+            }
             icon={<CreditCard className="h-5 w-5" />}
           />
           <StatTile

@@ -56,6 +56,7 @@ export function registerAnalyticsApiRoutes(app: Express) {
         customers: overview.customers,
         aov: overview.aov,
         conversionRate: overview.conversionRate,
+        previous: overview.previous,
         bestSellers: overview.bestSellers,
         ordersByStatus: overview.ordersByStatus,
         revenueSeries: overview.revenueSeries,

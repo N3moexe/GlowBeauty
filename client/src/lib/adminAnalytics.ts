@@ -5,6 +5,12 @@ export type AdminAnalyticsOverviewPayload = {
   customers: number;
   aov: number;
   conversionRate: number | null;
+  previous?: {
+    revenue: number;
+    orders: number;
+    customers: number;
+    aov: number;
+  };
   bestSellers: Array<{
     productId: number;
     name: string;
