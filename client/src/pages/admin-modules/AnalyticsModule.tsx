@@ -228,6 +228,31 @@ export function AnalyticsModule() {
   const lowStock = data?.lowStock ?? [];
   const recentOrders = data?.recentOrders ?? [];
 
+  // Intra-period momentum: compare the first half of the selected range to the
+  // second half. Derived entirely from revenueSeries (already returned by the
+  // API) so no extra request or backend change is needed. Null when the series
+  // is too short to split meaningfully.
+  const momentum = useMemo(() => {
+    if (lineData.length < 4) return null;
+    const mid = Math.floor(lineData.length / 2);
+    const first = lineData.slice(0, mid);
+    const second = lineData.slice(mid);
+    const sum = (
+      rows: Array<{ revenue: number; orders: number }>,
+      key: "revenue" | "orders"
+    ) => rows.reduce((acc, r) => acc + (Number(r[key]) || 0), 0);
+    const pct = (prev: number, curr: number) => {
+      if (prev <= 0) return curr > 0 ? 100 : 0;
+      return ((curr - prev) / prev) * 100;
+    };
+    return {
+      revenue: pct(sum(first, "revenue"), sum(second, "revenue")),
+      orders: pct(sum(first, "orders"), sum(second, "orders")),
+    };
+  }, [lineData]);
+
+  const momentumLabel = "vs début de période";
+
   if (overviewQuery.error && !data) {
     return (
       <RetryPanel
@@ -287,11 +312,21 @@ export function AnalyticsModule() {
           <StatTile
             label={`Revenus (${data?.rangeDays ?? rangeDays}j)`}
             value={formatCFA(Number(data?.revenue ?? 0))}
+            delta={
+              momentum
+                ? { pct: momentum.revenue, label: momentumLabel }
+                : null
+            }
             icon={<TrendingUp className="h-5 w-5" />}
           />
           <StatTile
             label="Commandes"
             value={String(data?.orders ?? 0)}
+            delta={
+              momentum
+                ? { pct: momentum.orders, label: momentumLabel }
+                : null
+            }
             icon={<ShoppingCart className="h-5 w-5" />}
           />
           <StatTile
