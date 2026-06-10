@@ -48,6 +48,18 @@ function upsertCanonicalLink(url: string) {
   link.setAttribute("href", url);
 }
 
+function removeMetaByProperty(property: string) {
+  document.head
+    .querySelectorAll(`meta[property="${property}"]`)
+    .forEach(node => node.remove());
+}
+
+function removeMetaByName(name: string) {
+  document.head
+    .querySelectorAll(`meta[name="${name}"]`)
+    .forEach(node => node.remove());
+}
+
 export default function SeoHead({
   title,
   description,
@@ -89,6 +101,11 @@ export default function SeoHead({
     if (image) {
       upsertMetaByProperty("og:image", image);
       upsertMetaByName("twitter:image", image);
+    } else {
+      // Clear any stale image left over from a previously-rendered page so
+      // social/link previews don't show the wrong artwork.
+      removeMetaByProperty("og:image");
+      removeMetaByName("twitter:image");
     }
 
     upsertCanonicalLink(canonicalUrl);
