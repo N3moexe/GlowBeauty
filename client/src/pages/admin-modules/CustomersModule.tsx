@@ -180,6 +180,25 @@ export function CustomersModule() {
             emptyDescription="Les clients apparaissent ici après leur première commande."
             onRowClick={row => setSelectedId(row.id)}
             getRowId={row => String(row.id)}
+            csvExport={{
+              filenameBase: "clients",
+              columns: [
+                { header: "Nom", value: r => r.name },
+                { header: "Téléphone", value: r => r.phone },
+                { header: "E-mail", value: r => r.email ?? "" },
+                { header: "Ville", value: r => r.city ?? "" },
+                { header: "Adresse", value: r => r.address ?? "" },
+                { header: "Commandes", value: r => r.totalOrders },
+                { header: "Total dépensé (CFA)", value: r => r.totalSpent },
+                {
+                  header: "Dernière commande",
+                  value: r =>
+                    r.lastOrderDate
+                      ? new Date(r.lastOrderDate).toLocaleDateString("fr-FR")
+                      : "",
+                },
+              ],
+            }}
           />
 
           {totalPages > 1 ? (

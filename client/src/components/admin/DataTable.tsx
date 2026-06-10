@@ -34,6 +34,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
+import type { CsvColumn } from "@/lib/csvExport";
 
 export type DataTableBulkContext<TData> = {
   rows: TData[];
@@ -57,6 +58,10 @@ type DataTableProps<TData> = {
   onRowClick?: (row: TData) => void;
   getRowId?: (originalRow: TData, index: number, parent?: Row<TData>) => string;
   getColumnLabel?: (columnId: string) => string;
+  csvExport?: {
+    columns: CsvColumn<TData>[];
+    filenameBase: string;
+  };
   initialSorting?: SortingState;
   initialPageSize?: number;
   className?: string;
@@ -80,6 +85,7 @@ export default function DataTable<TData>({
   onRowClick,
   getRowId,
   getColumnLabel,
+  csvExport,
   initialSorting = [],
   initialPageSize = 10,
   className,
@@ -117,6 +123,9 @@ export default function DataTable<TData>({
   const selectedRows = table
     .getFilteredSelectedRowModel()
     .rows.map(row => row.original);
+  const filteredRows = table
+    .getFilteredRowModel()
+    .rows.map(row => row.original);
   const clearSelection = () => setRowSelection({});
 
   if (isLoading) {
@@ -148,6 +157,16 @@ export default function DataTable<TData>({
             rows: selectedRows,
             clearSelection,
           })}
+          csvExport={
+            csvExport
+              ? {
+                  columns: csvExport.columns,
+                  filenameBase: csvExport.filenameBase,
+                  rows: selectedRows.length > 0 ? selectedRows : filteredRows,
+                  selectionActive: selectedRows.length > 0,
+                }
+              : undefined
+          }
           getColumnLabel={getColumnLabel}
         />
       </div>

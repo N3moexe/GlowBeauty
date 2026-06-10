@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import type { Column, Table } from "@tanstack/react-table";
-import { Search, Settings2 } from "lucide-react";
+import { Download, Search, Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -12,6 +12,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { downloadCsv, type CsvColumn } from "@/lib/csvExport";
+
+type CsvExportConfig<TData> = {
+  columns: CsvColumn<TData>[];
+  filenameBase: string;
+  rows: TData[];
+  selectionActive: boolean;
+};
 
 type DataTableToolbarProps<TData> = {
   table: Table<TData>;
@@ -21,6 +29,7 @@ type DataTableToolbarProps<TData> = {
   filters?: ReactNode;
   savedViews?: ReactNode;
   bulkActions?: ReactNode;
+  csvExport?: CsvExportConfig<TData>;
   getColumnLabel?: (columnId: string) => string;
   className?: string;
 };
@@ -39,6 +48,7 @@ export default function DataTableToolbar<TData>({
   filters,
   savedViews,
   bulkActions,
+  csvExport,
   getColumnLabel,
   className,
 }: DataTableToolbarProps<TData>) {
@@ -67,6 +77,31 @@ export default function DataTableToolbar<TData>({
 
         <div className="flex flex-wrap items-center justify-end gap-2">
           {bulkActions}
+          {csvExport && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              disabled={csvExport.rows.length === 0}
+              onClick={() =>
+                downloadCsv(
+                  csvExport.rows,
+                  csvExport.columns,
+                  csvExport.filenameBase
+                )
+              }
+              title={
+                csvExport.selectionActive
+                  ? "Exporter la sélection en CSV"
+                  : "Exporter les lignes filtrées en CSV"
+              }
+            >
+              <Download className="h-4 w-4" />
+              Exporter CSV
+              {csvExport.rows.length > 0 ? ` (${csvExport.rows.length})` : ""}
+            </Button>
+          )}
           {columns.length > 0 && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
