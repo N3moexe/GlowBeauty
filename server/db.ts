@@ -312,7 +312,7 @@ const demoProducts: any[] = [
     comparePrice: 21900,
     categoryId: 2,
     imageUrl:
-      "https://images.unsplash.com/photo-1571781565036-d3f759be73e4?w=900&q=80",
+      "https://images.unsplash.com/photo-1617897903246-719242758050?w=900&q=80",
     images: null,
     inStock: true,
     stockQuantity: 55,
@@ -421,7 +421,7 @@ const demoProducts: any[] = [
     comparePrice: 18900,
     categoryId: 3,
     imageUrl:
-      "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=900&q=80",
+      "https://images.unsplash.com/photo-1625772452859-1c03d5bf1137?w=900&q=80",
     images: null,
     inStock: true,
     stockQuantity: 60,
@@ -471,7 +471,7 @@ const demoProducts: any[] = [
     comparePrice: 6900,
     categoryId: 3,
     imageUrl:
-      "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=900&q=80",
+      "https://images.unsplash.com/photo-1599305090598-fe179d501227?w=900&q=80",
     images: null,
     inStock: true,
     stockQuantity: 80,
@@ -492,7 +492,7 @@ const demoProducts: any[] = [
     comparePrice: 13900,
     categoryId: 4,
     imageUrl:
-      "https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?w=900&q=80",
+      "https://images.unsplash.com/photo-1567721913486-6585f069b332?w=900&q=80",
     images: null,
     inStock: true,
     stockQuantity: 38,
@@ -533,7 +533,7 @@ const demoProducts: any[] = [
     comparePrice: 21900,
     categoryId: 5,
     imageUrl:
-      "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=900&q=80",
+      "https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=900&q=80",
     images: null,
     inStock: true,
     stockQuantity: 50,
@@ -624,7 +624,7 @@ const demoProducts: any[] = [
     comparePrice: 49900,
     categoryId: 6,
     imageUrl:
-      "https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=900&q=80",
+      "https://images.unsplash.com/photo-1601049676869-702ea24cfd58?w=900&q=80",
     images: null,
     inStock: true,
     stockQuantity: 22,
@@ -644,7 +644,7 @@ const demoProducts: any[] = [
     comparePrice: 45900,
     categoryId: 6,
     imageUrl:
-      "https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=900&q=80",
+      "https://images.unsplash.com/photo-1612817288484-6f916006741a?w=900&q=80",
     images: null,
     inStock: true,
     stockQuantity: 26,
