@@ -63,7 +63,7 @@ type SeoMeta = {
   canonicalPath: string;
   ogType: "website" | "product" | "article";
   image?: string;
-  jsonLd?: Record<string, unknown>;
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
 };
 
 function firstProductImage(product: {
@@ -111,6 +111,21 @@ function productDescription(product: {
   return `Découvrez ${product.name} sur ${SITE_NAME} avec livraison rapide et paiement sécurisé au Sénégal.`;
 }
 
+function breadcrumbJsonLd(
+  crumbs: Array<{ name: string; path?: string }>
+): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: crumbs.map((crumb, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: crumb.name,
+      ...(crumb.path ? { item: `${baseUrl()}${crumb.path}` } : {}),
+    })),
+  };
+}
+
 async function resolveProductMeta(slug: string): Promise<SeoMeta | null> {
   const product = await getProductBySlug(slug);
   if (!product) return null;
@@ -126,26 +141,33 @@ async function resolveProductMeta(slug: string): Promise<SeoMeta | null> {
     canonicalPath,
     ogType: "product",
     image: image ? absoluteUrl(image) : undefined,
-    jsonLd: {
-      "@context": "https://schema.org",
-      "@type": "Product",
-      name: product.name,
-      description,
-      sku: `${product.id}`,
-      ...(image ? { image: [absoluteUrl(image)] } : {}),
-      url,
-      brand: { "@type": "Brand", name: SITE_NAME },
-      offers: {
-        "@type": "Offer",
+    jsonLd: [
+      {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        name: product.name,
+        description,
+        sku: `${product.id}`,
+        ...(image ? { image: [absoluteUrl(image)] } : {}),
         url,
-        priceCurrency: "XOF",
-        price: `${product.price}`,
-        availability:
-          product.inStock === false
-            ? "https://schema.org/OutOfStock"
-            : "https://schema.org/InStock",
+        brand: { "@type": "Brand", name: SITE_NAME },
+        offers: {
+          "@type": "Offer",
+          url,
+          priceCurrency: "XOF",
+          price: `${product.price}`,
+          availability:
+            product.inStock === false
+              ? "https://schema.org/OutOfStock"
+              : "https://schema.org/InStock",
+        },
       },
-    },
+      breadcrumbJsonLd([
+        { name: "Accueil", path: "/" },
+        { name: "Boutique", path: "/boutique" },
+        { name: product.name },
+      ]),
+    ],
   };
 }
 
@@ -292,12 +314,15 @@ export async function injectSeoMeta(
   }
 
   if (meta.jsonLd) {
-    // JSON inside a <script> must not allow `</script>` breakout.
-    const json = JSON.stringify(meta.jsonLd).replace(/</g, "\\u003c");
-    out = out.replace(
-      /<\/head>/i,
-      `  <script type="application/ld+json">${json}</script>\n  </head>`
-    );
+    const payloads = Array.isArray(meta.jsonLd) ? meta.jsonLd : [meta.jsonLd];
+    for (const payload of payloads) {
+      // JSON inside a <script> must not allow `</script>` breakout.
+      const json = JSON.stringify(payload).replace(/</g, "\\u003c");
+      out = out.replace(
+        /<\/head>/i,
+        `  <script type="application/ld+json">${json}</script>\n  </head>`
+      );
+    }
   }
 
   return out;
