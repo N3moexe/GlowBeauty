@@ -124,7 +124,9 @@ async function startServer() {
       "max-age=31536000; includeSubDomains"
     );
     res.setHeader("X-Content-Type-Options", "nosniff");
-    res.setHeader("X-Frame-Options", "DENY");
+    // SAMEORIGIN (not DENY) so the admin storefront editor can live-preview
+    // the shop in an iframe; cross-origin framing stays blocked.
+    res.setHeader("X-Frame-Options", "SAMEORIGIN");
     res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
     res.setHeader(
       "Permissions-Policy",
@@ -139,7 +141,9 @@ async function startServer() {
         "font-src 'self' https://fonts.gstatic.com",
         "img-src 'self' data: blob: https:",
         "connect-src 'self' https://*.ingest.sentry.io",
-        "frame-src 'none'",
+        // 'self' (not 'none') so the admin live preview can frame the shop.
+        "frame-src 'self'",
+        "frame-ancestors 'self'",
         "object-src 'none'",
         "base-uri 'self'",
       ].join("; ")

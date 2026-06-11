@@ -533,7 +533,7 @@ const demoProducts: any[] = [
     comparePrice: 21900,
     categoryId: 5,
     imageUrl:
-      "https://images.unsplash.com/photo-1556228841-a3c527ebefe5?w=900&q=80",
+      "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=900&q=80",
     images: null,
     inStock: true,
     stockQuantity: 50,
@@ -644,7 +644,7 @@ const demoProducts: any[] = [
     comparePrice: 45900,
     categoryId: 6,
     imageUrl:
-      "https://images.unsplash.com/photo-1601049413041-e7a6a76a65f6?w=900&q=80",
+      "https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=900&q=80",
     images: null,
     inStock: true,
     stockQuantity: 26,

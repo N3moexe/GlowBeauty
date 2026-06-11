@@ -22,7 +22,9 @@ async function run() {
   const csp =
     home.headers.get("content-security-policy") ||
     home.headers.get("content-security-policy-report-only");
-  assert(xFrame === "DENY", "Missing/invalid X-Frame-Options header");
+  // SAMEORIGIN (not DENY): the admin storefront editor live-previews the shop
+  // in a same-origin iframe. Cross-origin framing remains blocked.
+  assert(xFrame === "SAMEORIGIN", "Missing/invalid X-Frame-Options header");
   assert(xContentType === "nosniff", "Missing/invalid X-Content-Type-Options header");
   assert(Boolean(csp), "Missing CSP header (enforced or report-only)");
   console.log("[security-smoke] headers check: ok");
