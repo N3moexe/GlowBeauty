@@ -41,9 +41,13 @@ export async function setupVite(app: Express, server: Server) {
       );
       let page = await vite.transformIndexHtml(url, template);
       // Server-side SEO: rewrite head meta for product/CMS routes so
-      // crawlers and link-preview bots see route-specific tags.
-      page = await injectSeoMeta(page, url);
-      res.status(200).set({ "Content-Type": "text/html" }).end(page);
+      // crawlers and link-preview bots see route-specific tags. Status is
+      // 404 for slugs that no longer exist (avoids soft-404 indexing).
+      const seo = await injectSeoMeta(page, url);
+      res
+        .status(seo.status)
+        .set({ "Content-Type": "text/html" })
+        .end(seo.html);
     } catch (e) {
       vite.ssrFixStacktrace(e as Error);
       next(e);
@@ -69,11 +73,11 @@ export function serveStatic(app: Express) {
   app.use("*", async (req, res) => {
     try {
       const template = await fs.promises.readFile(indexPath, "utf-8");
-      const page = await injectSeoMeta(template, req.originalUrl || req.url);
+      const seo = await injectSeoMeta(template, req.originalUrl || req.url);
       res
-        .status(200)
+        .status(seo.status)
         .set({ "Content-Type": "text/html", "Cache-Control": "no-cache" })
-        .end(page);
+        .end(seo.html);
     } catch {
       res.sendFile(indexPath);
     }

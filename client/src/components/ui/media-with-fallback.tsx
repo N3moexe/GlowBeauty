@@ -29,6 +29,15 @@ export function MediaWithFallback({
 }: MediaWithFallbackProps) {
   const [failed, setFailed] = useState(false);
   const resolvedSrc = (src || "").trim();
+  // Reset the failure flag whenever the source changes (derived-state
+  // pattern). Without this, one bad image permanently sticks the component
+  // on the fallback even after the parent switches to a valid src — e.g.
+  // clicking through gallery thumbnails on the product page.
+  const [prevSrc, setPrevSrc] = useState(resolvedSrc);
+  if (prevSrc !== resolvedSrc) {
+    setPrevSrc(resolvedSrc);
+    setFailed(false);
+  }
   const canRenderImage = resolvedSrc.length > 0 && !failed;
 
   if (!canRenderImage) {

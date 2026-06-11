@@ -55,6 +55,35 @@ export function fetchAdminStoreSettings() {
   return apiRequest<SettingsStore>("/api/admin/settings/store", { method: "GET" });
 }
 
+export type StorefrontTextsUpdate = {
+  storeTagline?: string;
+  deliveryText?: string;
+  paymentMethodsText?: string;
+};
+
+/**
+ * Updates storefront display texts via the legacy mapped-settings endpoint
+ * (keys store.tagline / store.deliveryText / store.paymentMethodsText).
+ * That endpoint returns { ok, updatedCount, settings } rather than
+ * { ok, data }, so it gets its own thin wrapper.
+ */
+export async function updateStorefrontTexts(input: StorefrontTextsUpdate) {
+  const response = await fetch("/api/admin/settings", {
+    method: "PUT",
+    credentials: "include",
+    cache: "no-store",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  const payload = (await response.json().catch(() => null)) as
+    | { ok?: boolean; error?: string }
+    | null;
+  if (!response.ok || !payload || payload.ok === false) {
+    throw new Error(parseError(payload, "Request failed"));
+  }
+  return payload;
+}
+
 export function updateAdminStoreSettings(input: SettingsStoreUpdate) {
   return apiRequest<SettingsStore>("/api/admin/settings/store", {
     method: "PUT",

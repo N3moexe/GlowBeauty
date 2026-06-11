@@ -47,7 +47,9 @@ function stripHtml(value: string): string {
 
 function truncate(value: string, max = 160): string {
   if (value.length <= max) return value;
-  const cut = value.slice(0, max - 1);
+  // Slice on code points (not UTF-16 units) so we never split an emoji /
+  // surrogate pair in half and emit mojibake into the meta description.
+  const cut = Array.from(value).slice(0, max - 1).join("");
   const lastSpace = cut.lastIndexOf(" ");
   return `${cut.slice(0, lastSpace > 80 ? lastSpace : max - 1).trimEnd()}…`;
 }
@@ -191,8 +193,12 @@ function resolveCmsPageMeta(slug: string): SeoMeta | null {
 /**
  * Resolve per-URL SEO meta. Returns null for routes that should keep the
  * default index.html head (homepage, shop, admin, unknown slugs, ...).
+ * Returns "not-found" when the URL matches a product/CMS route pattern but
+ * the entity doesn't exist — callers should serve HTTP 404 (soft-404 fix).
  */
-export async function resolveSeoMeta(url: string): Promise<SeoMeta | null> {
+export async function resolveSeoMeta(
+  url: string
+): Promise<SeoMeta | "not-found" | null> {
   let pathname: string;
   try {
     pathname = new URL(url, baseUrl()).pathname;
@@ -203,7 +209,10 @@ export async function resolveSeoMeta(url: string): Promise<SeoMeta | null> {
   const productMatch = pathname.match(/^\/(?:p|produit)\/([^/]+)\/?$/);
   if (productMatch) {
     try {
-      return await resolveProductMeta(decodeURIComponent(productMatch[1]));
+      const meta = await resolveProductMeta(
+        decodeURIComponent(productMatch[1])
+      );
+      return meta ?? "not-found";
     } catch (error) {
       console.error("[seo] product meta lookup failed:", error);
       return null;
@@ -213,7 +222,8 @@ export async function resolveSeoMeta(url: string): Promise<SeoMeta | null> {
   const pageMatch = pathname.match(/^\/page\/([^/]+)\/?$/);
   if (pageMatch) {
     try {
-      return resolveCmsPageMeta(decodeURIComponent(pageMatch[1]));
+      const meta = resolveCmsPageMeta(decodeURIComponent(pageMatch[1]));
+      return meta ?? "not-found";
     } catch (error) {
       console.error("[seo] cms page meta lookup failed:", error);
       return null;
@@ -228,20 +238,34 @@ function replaceOrAppendHead(
   pattern: RegExp,
   replacement: string
 ): string {
-  if (pattern.test(html)) return html.replace(pattern, replacement);
-  return html.replace(/<\/head>/i, `    ${replacement}\n  </head>`);
+  // Function replacements insert the string literally — a plain string here
+  // would let `$&`, `$'` etc. inside product/CMS text act as substitution
+  // patterns and corrupt the document (markup injection).
+  if (pattern.test(html)) return html.replace(pattern, () => replacement);
+  return html.replace(/<\/head>/i, match => `    ${replacement}\n  ${match}`);
 }
 
 /**
  * Rewrite the head of the index.html template with route-specific meta.
  * Leaves the template untouched when the route has no specific meta.
+ * Returns the HTML plus the HTTP status the caller should respond with —
+ * 404 for product/CMS URLs whose entity no longer exists, so crawlers
+ * don't index dead URLs as soft-404 duplicates of the homepage.
  */
 export async function injectSeoMeta(
   html: string,
   url: string
-): Promise<string> {
+): Promise<{ html: string; status: number }> {
   const meta = await resolveSeoMeta(url);
-  if (!meta) return html;
+  if (meta === "not-found") {
+    // Keep default head but mark non-indexable and answer 404.
+    const noindexHtml = html.replace(
+      /<\/head>/i,
+      match => `  <meta name="robots" content="noindex" />\n  ${match}`
+    );
+    return { html: noindexHtml, status: 404 };
+  }
+  if (!meta) return { html, status: 200 };
 
   const title = escapeHtml(meta.title);
   const description = escapeHtml(meta.description);
@@ -320,10 +344,11 @@ export async function injectSeoMeta(
       const json = JSON.stringify(payload).replace(/</g, "\\u003c");
       out = out.replace(
         /<\/head>/i,
-        `  <script type="application/ld+json">${json}</script>\n  </head>`
+        match =>
+          `  <script type="application/ld+json">${json}</script>\n  ${match}`
       );
     }
   }
 
-  return out;
+  return { html: out, status: 200 };
 }

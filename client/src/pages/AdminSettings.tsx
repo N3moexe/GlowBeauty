@@ -46,6 +46,7 @@ import {
   updateAdminUser,
   updateShippingRate,
   updateShippingZone,
+  updateStorefrontTexts,
 } from "@/lib/adminSettings";
 import { ImageUpload } from "@/components/ImageUpload";
 import AdminLayout from "@/components/admin/AdminLayout";
@@ -258,6 +259,14 @@ export default function AdminSettings() {
   });
 
   const [storeForm, setStoreForm] = useState<SettingsStore>(defaultStoreForm);
+  const [textsForm, setTextsForm] = useState({
+    storeTagline: "",
+    deliveryText: "",
+    paymentMethodsText: "",
+  });
+  const storefrontTextsQuery = trpc.settings.storefront.useQuery(undefined, {
+    enabled: canAccessSettings && activeSection === "store",
+  });
   const [paymentsForm, setPaymentsForm] =
     useState<SettingsPayments>(defaultPaymentsForm);
   const [chatbotForm, setChatbotForm] =
@@ -305,6 +314,15 @@ export default function AdminSettings() {
   }, [storeQuery.data]);
 
   useEffect(() => {
+    if (!storefrontTextsQuery.data) return;
+    setTextsForm({
+      storeTagline: storefrontTextsQuery.data.storeTagline || "",
+      deliveryText: storefrontTextsQuery.data.deliveryText || "",
+      paymentMethodsText: storefrontTextsQuery.data.paymentMethodsText || "",
+    });
+  }, [storefrontTextsQuery.data]);
+
+  useEffect(() => {
     if (paymentsQuery.data) setPaymentsForm(paymentsQuery.data);
   }, [paymentsQuery.data]);
 
@@ -337,7 +355,22 @@ export default function AdminSettings() {
   }, [shippingQuery.data, selectedZoneId]);
 
   const saveStoreMutation = useMutation({
-    mutationFn: () => updateAdminStoreSettings(storeForm),
+    mutationFn: async () => {
+      await updateAdminStoreSettings(storeForm);
+      // Storefront display texts live in the key/value settings store and are
+      // saved through the legacy mapped endpoint. Empty strings are skipped so
+      // we never wipe a value with a blank (the API requires min length).
+      const texts: Record<string, string> = {};
+      if (textsForm.storeTagline.trim())
+        texts.storeTagline = textsForm.storeTagline.trim();
+      if (textsForm.deliveryText.trim())
+        texts.deliveryText = textsForm.deliveryText.trim();
+      if (textsForm.paymentMethodsText.trim())
+        texts.paymentMethodsText = textsForm.paymentMethodsText.trim();
+      if (Object.keys(texts).length > 0) {
+        await updateStorefrontTexts(texts);
+      }
+    },
     onSuccess: async () => {
       toast.success("Paramètres de la boutique enregistrés");
       await queryClient.invalidateQueries({
@@ -915,6 +948,47 @@ export default function AdminSettings() {
                       }
                     />
                   </div>
+                </div>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <Label>Slogan (sous le nom, en-tête du site)</Label>
+                    <Input
+                      value={textsForm.storeTagline}
+                      onChange={event =>
+                        setTextsForm(prev => ({
+                          ...prev,
+                          storeTagline: event.target.value,
+                        }))
+                      }
+                      placeholder="Premium deals et essentials"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>Texte livraison (bandeau haut + pied de page)</Label>
+                    <Input
+                      value={textsForm.deliveryText}
+                      onChange={event =>
+                        setTextsForm(prev => ({
+                          ...prev,
+                          deliveryText: event.target.value,
+                        }))
+                      }
+                      placeholder="Expedition a Dakar et regions en 24h/72h."
+                    />
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Moyens de paiement affichés (pied de page)</Label>
+                  <Input
+                    value={textsForm.paymentMethodsText}
+                    onChange={event =>
+                      setTextsForm(prev => ({
+                        ...prev,
+                        paymentMethodsText: event.target.value,
+                      }))
+                    }
+                    placeholder="Wave, Orange Money, Free Money, Visa, Mastercard"
+                  />
                 </div>
                 <Button
                   className="bg-crimson text-white hover:bg-crimson-light"

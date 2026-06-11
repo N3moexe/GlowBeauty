@@ -4305,6 +4305,7 @@ export async function listStoreSettings(prefix?: string) {
 export type StorefrontSettings = {
   storeName: string;
   storeLogo: string;
+  storeTagline: string;
   storeContact: string;
   storeCurrency: string;
   supportEmail: string;
@@ -4327,6 +4328,7 @@ export async function getStorefrontSettings(): Promise<StorefrontSettings> {
   const defaults: StorefrontSettings = {
     storeName: "GlowBeauty",
     storeLogo: "",
+    storeTagline: "Premium deals et essentials",
     storeContact: "+221 78 891 10 10",
     storeCurrency: "CFA",
     supportEmail: "contact@glowbeauty.com",
@@ -4370,6 +4372,7 @@ export async function getStorefrontSettings(): Promise<StorefrontSettings> {
   return {
     storeName: map.get("store.name") || defaults.storeName,
     storeLogo: map.get("store.logo") || defaults.storeLogo,
+    storeTagline: map.get("store.tagline") || defaults.storeTagline,
     storeContact: map.get("store.contact") || defaults.storeContact,
     storeCurrency: map.get("store.currency") || defaults.storeCurrency,
     supportEmail: map.get("store.email") || defaults.supportEmail,

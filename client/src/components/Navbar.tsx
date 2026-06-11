@@ -223,7 +223,7 @@ export default function Navbar() {
           <div className="flex items-center gap-4 text-muted-foreground">
             <span className="inline-flex items-center gap-1.5">
               <Truck className="h-3.5 w-3.5 text-crimson" />
-              Livraison 24h/72h
+              {settings.deliveryText || "Livraison 24h/72h"}
             </span>
             <span className="inline-flex items-center gap-1.5">
               <ShieldCheck className="h-3.5 w-3.5 text-green-accent" />
@@ -306,7 +306,7 @@ export default function Navbar() {
                 {storeName}
               </p>
               <p className="text-xs tracking-wide text-muted-foreground">
-                Premium deals et essentials
+                {settings.storeTagline || "Premium deals et essentials"}
               </p>
             </div>
           </Link>

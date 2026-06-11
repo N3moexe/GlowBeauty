@@ -8,7 +8,10 @@ const STATIC_ROUTES: ReadonlyArray<{
   priority: string;
 }> = [
   { path: "/", changefreq: "daily", priority: "1.0" },
-  { path: "/shop", changefreq: "daily", priority: "0.9" },
+  // Must match the canonical URLs the pages declare (SeoHead uses
+  // /boutique and /produit/:slug), otherwise Search Console reports
+  // every sitemap entry as "submitted URL not selected as canonical".
+  { path: "/boutique", changefreq: "daily", priority: "0.9" },
 ];
 
 function escapeXml(value: string): string {
@@ -64,7 +67,7 @@ export function registerSitemapRoutes(app: Express) {
         if (!p.slug) continue;
         entries.push(
           urlEntry(
-            `${baseUrl}/p/${p.slug}`,
+            `${baseUrl}/produit/${encodeURIComponent(p.slug)}`,
             isoDate(p.updatedAt),
             "weekly",
             "0.8"
@@ -73,6 +76,11 @@ export function registerSitemapRoutes(app: Express) {
       }
     } catch (error) {
       console.error("[sitemap] product query failed:", error);
+      // Don't serve (and let intermediaries cache) a near-empty sitemap that
+      // makes crawlers think the catalog disappeared. Fail loud and retryable.
+      res.setHeader("Retry-After", "120");
+      res.status(503).send("Sitemap temporarily unavailable");
+      return;
     }
 
     try {
@@ -80,7 +88,7 @@ export function registerSitemapRoutes(app: Express) {
       for (const page of pages) {
         entries.push(
           urlEntry(
-            `${baseUrl}/page/${page.slug}`,
+            `${baseUrl}/page/${encodeURIComponent(page.slug)}`,
             isoDate(page.updatedAt),
             "monthly",
             "0.5"

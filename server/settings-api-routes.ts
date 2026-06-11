@@ -29,6 +29,7 @@ type AdminRequest = Request & {
 const legacyUpdateSettingsSchema = z
   .object({
     storeName: z.string().min(1).max(120).optional(),
+    storeTagline: z.string().max(160).optional(),
     storeContact: z.string().min(1).max(120).optional(),
     supportEmail: z.string().email().max(320).optional(),
     footerAddress: z.string().min(1).max(255).optional(),
@@ -143,6 +144,8 @@ async function persistLegacyMappedSettings(
 
   if (input.storeName !== undefined)
     updates.push({ key: "store.name", value: input.storeName });
+  if (input.storeTagline !== undefined)
+    updates.push({ key: "store.tagline", value: input.storeTagline });
   if (input.storeContact !== undefined)
     updates.push({ key: "store.contact", value: input.storeContact });
   if (input.supportEmail !== undefined)

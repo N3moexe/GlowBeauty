@@ -3,6 +3,7 @@ import { trpc } from "@/lib/trpc";
 const defaults = {
   storeName: "GlowBeauty",
   storeLogo: "",
+  storeTagline: "Premium deals et essentials",
   storeContact: "+221 78 891 10 10",
   storeCurrency: "CFA",
   supportEmail: "contact@glowbeauty.com",
