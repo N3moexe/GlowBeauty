@@ -184,7 +184,7 @@ export default function Cart() {
                           <img
                             src={item.imageUrl}
                             alt={item.name}
-                            className="h-full w-full object-cover"
+                            className="h-full w-full object-contain bg-brand-muted/10"
                             width={96}
                             height={96}
                             loading="lazy"
@@ -354,7 +354,7 @@ export default function Cart() {
                             <img
                               src={product.imageUrl}
                               alt={product.name}
-                              className="h-full w-full object-cover"
+                              className="h-full w-full object-contain bg-brand-muted/10"
                               loading="lazy"
                               decoding="async"
                               width={320}

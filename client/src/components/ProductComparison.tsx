@@ -46,7 +46,7 @@ export default function ProductComparison({
               <td key={p.id} className="px-4 py-3 text-center">
                 <div className="w-32 h-32 rounded-lg overflow-hidden bg-muted mx-auto mb-2">
                   {p.imageUrl ? (
-                    <img src={p.imageUrl} alt={p.name} className="w-full h-full object-cover" />
+                    <img src={p.imageUrl} alt={p.name} className="w-full h-full object-contain bg-brand-muted/10" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-muted-foreground">
                       N/A

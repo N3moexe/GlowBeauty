@@ -444,7 +444,8 @@ export default function ProductDetail() {
                     <MediaWithFallback
                       src={image}
                       alt=""
-                      className="h-full w-full object-cover"
+                      fit="contain"
+                      className="h-full w-full"
                       width={80}
                       height={80}
                       loading="lazy"

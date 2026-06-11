@@ -223,7 +223,7 @@ function MediaTile({
         <img
           src={asset.url}
           alt={asset.name}
-          className="h-full w-full object-cover"
+          className="h-full w-full object-contain bg-white"
           loading="lazy"
         />
       </div>

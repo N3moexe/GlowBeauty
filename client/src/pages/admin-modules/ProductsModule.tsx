@@ -733,7 +733,7 @@ export function ProductsModule({
                             <img
                               src={product.imageUrl}
                               alt=""
-                              className="h-10 w-10 rounded-md border border-[var(--admin-border)] object-cover"
+                              className="h-10 w-10 rounded-md border border-[var(--admin-border)] bg-white object-contain"
                               loading="lazy"
                             />
                           ) : (
@@ -1472,7 +1472,7 @@ export function ProductsModule({
                   <img
                     src={productForm.imageUrl}
                     alt="aperçu"
-                    className="h-44 w-full rounded-xl border border-[var(--admin-border)] object-cover"
+                    className="h-44 w-full rounded-xl border border-[var(--admin-border)] bg-white object-contain"
                   />
                 ) : null}
               </div>

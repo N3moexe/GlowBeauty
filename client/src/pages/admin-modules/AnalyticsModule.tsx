@@ -111,7 +111,7 @@ function BestSellersTable({
             <img
               src={item.imageUrl}
               alt=""
-              className="h-8 w-8 shrink-0 rounded-lg object-cover"
+              className="h-8 w-8 shrink-0 rounded-lg bg-white object-contain"
             />
           ) : (
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--admin-accent-soft)]">

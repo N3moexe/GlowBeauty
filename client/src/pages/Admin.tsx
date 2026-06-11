@@ -3157,7 +3157,7 @@ export default function Admin() {
                 <img
                   src={productForm.imageUrl}
                   alt="preview"
-                  className="h-44 w-full rounded-xl object-cover"
+                  className="h-44 w-full rounded-xl bg-white object-contain"
                 />
               ) : null}
             </div>

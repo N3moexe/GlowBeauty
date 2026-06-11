@@ -253,7 +253,7 @@ export default function OrderTracking() {
                             <img
                               src={item.productImage}
                               alt=""
-                              className="w-full h-full object-cover"
+                              className="w-full h-full object-contain bg-brand-muted/10"
                             />
                           )}
                         </div>

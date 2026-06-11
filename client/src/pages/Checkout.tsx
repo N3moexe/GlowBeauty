@@ -1195,7 +1195,7 @@ export default function Checkout() {
                                 <img
                                   src={product.imageUrl}
                                   alt={product.name}
-                                  className="h-full w-full object-cover"
+                                  className="h-full w-full object-contain bg-brand-muted/10"
                                   loading="lazy"
                                   decoding="async"
                                   width={56}

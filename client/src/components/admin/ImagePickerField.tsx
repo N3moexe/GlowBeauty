@@ -130,7 +130,7 @@ export default function ImagePickerField({
             <img
               src={value}
               alt="Aperçu"
-              className="h-full w-full object-cover"
+              className="h-full w-full object-contain bg-white"
               onError={(e) => {
                 (e.target as HTMLImageElement).style.opacity = "0.35";
               }}
@@ -257,7 +257,7 @@ function LibraryPickerDialog({
                 <img
                   src={asset.url}
                   alt={asset.name}
-                  className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                  className="h-full w-full object-contain bg-white transition-transform group-hover:scale-105"
                   loading="lazy"
                 />
               </button>

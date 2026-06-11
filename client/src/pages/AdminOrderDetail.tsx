@@ -193,7 +193,7 @@ export default function AdminOrderDetail() {
                         <img
                           src={item.productImage}
                           alt={item.productName}
-                          className="h-full w-full object-cover"
+                          className="h-full w-full object-contain bg-white"
                           loading="lazy"
                         />
                       ) : null}

@@ -479,7 +479,7 @@ export default function Navbar() {
                                   <img
                                     src={item.imageUrl}
                                     alt={item.name}
-                                    className="h-full w-full object-cover"
+                                    className="h-full w-full object-contain bg-white"
                                     width={96}
                                     height={96}
                                     loading="lazy"
