@@ -306,7 +306,19 @@ export const appRouter = router({
         // is required — the JWT cookie is issued in verifyTwoFactor instead.
         if (!adminCred.twoFactorEnabled) {
           try {
-            const user = await db.getUserById(adminCred.userId);
+            let user = await db.getUserById(adminCred.userId);
+            if (!user) {
+              // Fresh production DBs have admin credentials but no user row
+              // (setup-admin falls back to userId=1). Self-heal by creating
+              // the user so the JWT bridge — and thus the dashboard — works.
+              const fallbackOpenId = `admin:${input.username}`;
+              await db.upsertUser({
+                openId: fallbackOpenId,
+                name: input.username,
+                role: "admin",
+              });
+              user = await db.getUserByOpenId(fallbackOpenId);
+            }
             if (user) {
               const jwt = await sdk.signSession({
                 openId: user.openId,
