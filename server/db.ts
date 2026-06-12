@@ -1452,12 +1452,24 @@ export async function getDb() {
       // Cloud-hosted MySQL (TiDB, PlanetScale, RDS, etc.) requires SSL.
       // Auto-enable for non-local hosts so users don't need to URL-encode
       // `?ssl={"rejectUnauthorized":true}` themselves.
+      // Private-network hosts (Railway/Fly internal DNS) terminate inside
+      // the datacenter and don't offer CA-signed certs — skip SSL there.
+      // DATABASE_SSL=false|no-verify|true overrides the auto-detection.
       const isLocal =
         /^[a-z]+:\/\/[^@]+@(localhost|127\.0\.0\.1)(:|\/|$)/i.test(url);
+      const isPrivateNetwork = /@[^/?]*\.(railway|flycast)?\.?internal(:|\/|$)/i.test(
+        url
+      );
+      const sslMode = (process.env.DATABASE_SSL || "").trim().toLowerCase();
       const mysql = await import("mysql2");
-      const pool = isLocal
-        ? mysql.createPool(url)
-        : mysql.createPool({ uri: url, ssl: { rejectUnauthorized: true } });
+      let pool;
+      if (sslMode === "false" || isLocal || (isPrivateNetwork && !sslMode)) {
+        pool = mysql.createPool(url);
+      } else if (sslMode === "no-verify") {
+        pool = mysql.createPool({ uri: url, ssl: { rejectUnauthorized: false } });
+      } else {
+        pool = mysql.createPool({ uri: url, ssl: { rejectUnauthorized: true } });
+      }
       _db = drizzle(pool);
     } catch (error) {
       console.warn("[Database] Failed to connect:", error);
